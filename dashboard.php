@@ -72,6 +72,7 @@ $page = 'dashboard'; // para el leftbar
       flex-grow: 1;
       padding: 2rem;
       min-height: calc(100vh - 56px);
+      margin-left: 20px;
     }
     
     .card-stat {
