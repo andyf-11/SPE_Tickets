@@ -220,7 +220,7 @@ body {
         top: 70px;
         left: 0;
         height: calc(100vh - 70px);
-        width: 230px;
+        width: 220px;
         z-index: 1030;
         transition: all 0.3s ease;
     }
