@@ -103,100 +103,210 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Registro - SPE</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/style.css" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #1ac7b34f;
+      --primary-dark: #0fa294;
+      --light-bg: #f8f9fa;
+    }
+    
     body {
-      background-color: #1ac7b2c2;
+      background-color: var(--light-bg);
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      background-image: url('assets/img/bg-pattern.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
     }
-
-    .login-container {
-      max-width: 600px;
-      margin: 40px auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    
+    .register-card {
+      max-width: 650px;
+      margin: 0 auto;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border: none;
     }
-
-    .login-logo img {
-      display: block;
-      margin: 0 auto 20px;
+    
+    .register-header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    
+    .register-body {
+      padding: 2.5rem;
+      background-color: white;
+    }
+    
+    .form-control, .form-select {
+      padding: 12px 15px;
+      border-radius: 10px;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(26, 199, 178, 0.25);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s;
+      color: black;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    .password-strength {
+      height: 5px;
+      margin-top: 5px;
+      border-radius: 5px;
+      transition: all 0.3s;
+    }
+    
+    .password-hint {
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+    
+    .login-link {
+      color: var(--primary-dark);
+      font-weight: 500;
+      text-decoration: none;
+    }
+    
+    .login-link:hover {
+      text-decoration: underline;
+    }
+    
+    .logo {
       max-width: 180px;
+      margin-bottom: 1rem;
+    }
+    
+    .input-group-text {
+      background-color: #f8f9fa;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <div class="login-container">
-      <div class="login-logo">
-        <img src="assets/img/Logo-Gobierno-en-Vertical.png" alt="Logo SPE">
+  <div class="container py-4">
+    <div class="register-card">
+      <div class="register-header">
+        <img src="assets/img/Logo-Gobierno-en-Vertical.png" alt="Logo SPE" class="logo">
+        <h2 class="mb-0">Crear una cuenta</h2>
       </div>
+      
+      <div class="register-body">
+        <p class="text-center mb-4">¿Ya tienes una cuenta? <a href="login1.php" class="login-link">Inicia sesión aquí</a></p>
 
-      <h3 class="text-center mb-3">Crear una Cuenta</h3>
-      <p class="text-center text-muted">¿Ya tienes una cuenta? <a href="login1.php">Inicia sesión</a></p>
+        <!-- Mostrar mensajes -->
+        <?php if (!empty($messages)): ?>
+          <?php foreach ($messages as $msg): ?>
+            <div class="alert <?php echo $success ? 'alert-success' : 'alert-danger'; ?> alert-dismissible fade show" role="alert">
+              <?php echo $msg; ?>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
 
-      <!-- Mostrar mensajes -->
-      <?php if (!empty($messages)): ?>
-        <?php foreach ($messages as $msg): ?>
-          <div class="alert <?php echo $success ? 'alert-success' : 'alert-danger'; ?> fade show" role="alert">
-            <?php echo $msg; ?>
+        <!-- Formulario de registro -->
+        <form method="POST" action="" onsubmit="return checkpass();">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="name" class="form-label">Nombre completo</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control" id="name" name="name" required autocomplete="name" placeholder="Ingrese su nombre completo">
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="email" class="form-label">Correo institucional</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" class="form-control" id="email" name="email" required autocomplete="email" placeholder="usuario@spe.gob.hn">
+              </div>
+              <small class="text-muted">Solo correos @spe.gob.hn</small>
+            </div>
+
+            <div class="col-md-6">
+              <label for="password" class="form-label">Contraseña</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" class="form-control" id="password" name="password" required autocomplete="new-password" placeholder="Crea una contraseña segura">
+                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              <div class="password-strength mt-2" id="password-strength"></div>
+              <div class="password-hint">
+                <small>Debe contener 8+ caracteres, mayúsculas, minúsculas, números y símbolos</small>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="cpassword" class="form-label">Confirmar contraseña</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" class="form-control" id="cpassword" name="cpassword" required autocomplete="new-password" placeholder="Confirma tu contraseña">
+                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="cpassword">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="phone" class="form-label">Número de contacto</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                <input type="tel" class="form-control" id="phone" name="phone" required autocomplete="tel" placeholder="Ingrese su número telefónico">
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="gender" class="form-label">Género</label>
+              <select class="form-select" id="gender" name="gender" required>
+                <option value="">Seleccione una opción</option>
+                <option value="male">Masculino</option>
+                <option value="female">Femenino</option>
+                <option value="other">Otro</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label for="edificio_id" class="form-label">Edificio</label>
+              <select class="form-select" id="edificio_id" name="edificio_id" required>
+                <option value="">Seleccione un edificio</option>
+                <?php foreach ($edificios as $edificio): ?>
+                  <option value="<?= htmlspecialchars($edificio['id']) ?>"><?= htmlspecialchars($edificio['name']) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+
+            <div class="col-12 mt-4">
+              <button type="submit" class="btn btn-primary w-100 py-3">
+                <i class="bi bi-person-plus me-2"></i> Registrar cuenta
+              </button>
+            </div>
           </div>
-        <?php endforeach; ?>
-      <?php endif; ?>
-
-      <!-- Formulario de registro -->
-      <form method="POST" action="" onsubmit="return checkpass();">
-        <div class="mb-3">
-          <label for="name" class="form-label">Nombre completo</label>
-          <input type="text" class="form-control" id="name" name="name" required autocomplete="name" />
-        </div>
-
-        <div class="mb-3">
-          <label for="email" class="form-label">Correo institucional</label>
-          <input type="email" class="form-control" id="email" name="email" required autocomplete="email" />
-        </div>
-
-        <div class="mb-3">
-          <label for="password" class="form-label">Contraseña</label>
-          <input type="password" class="form-control" id="password" name="password" required autocomplete="new-password" />
-        </div>
-
-        <div class="mb-3">
-          <label for="cpassword" class="form-label">Confirmar contraseña</label>
-          <input type="password" class="form-control" id="cpassword" name="cpassword" required autocomplete="new-password" />
-        </div>
-
-        <div class="mb-3">
-          <label for="phone" class="form-label">Número de contacto</label>
-          <input type="tel" class="form-control" id="phone" name="phone" required autocomplete="tel" />
-        </div>
-
-        <div class="mb-4">
-          <label for="gender" class="form-label">Género</label>
-          <select class="form-select" id="gender" name="gender" required>
-            <option value="">Seleccione una opción</option>
-            <option value="male">Masculino</option>
-            <option value="female">Femenino</option>
-            <option value="other">Otro</option>
-          </select>
-        </div>
-
-        <!-- NUEVO SELECT EDIFICIO -->
-        <div class="mb-4">
-          <label for="edificio_id" class="form-label">Edificio</label>
-          <select class="form-select" id="edificio_id" name="edificio_id" required>
-            <option value="">Seleccione un edificio</option>
-            <?php foreach ($edificios as $edificio): ?>
-              <option value="<?= htmlspecialchars($edificio['id']) ?>"><?= htmlspecialchars($edificio['name']) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-
-        <div class="d-grid">
-          <button type="submit" class="btn btn-primary rounded-pill">Registrar</button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -204,6 +314,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Toggle password visibility
+      document.querySelectorAll('.toggle-password').forEach(button => {
+        button.addEventListener('click', function() {
+          const targetId = this.getAttribute('data-target');
+          const input = document.getElementById(targetId);
+          const icon = this.querySelector('i');
+          
+          if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+          } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+          }
+        });
+      });
+      
+      // Password strength indicator
+      const passwordInput = document.getElementById('password');
+      const strengthBar = document.getElementById('password-strength');
+      
+      passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+        
+        // Check length
+        if (password.length >= 8) strength += 1;
+        if (password.length >= 12) strength += 1;
+        
+        // Check for uppercase, lowercase, numbers, symbols
+        if (/[A-Z]/.test(password)) strength += 1;
+        if (/[a-z]/.test(password)) strength += 1;
+        if (/[0-9]/.test(password)) strength += 1;
+        if (/[\W_]/.test(password)) strength += 1;
+        
+        // Update strength bar
+        let color, width;
+        if (strength <= 2) {
+          color = '#dc3545';
+          width = '30%';
+        } else if (strength <= 4) {
+          color = '#fd7e14';
+          width = '60%';
+        } else {
+          color = '#28a745';
+          width = '100%';
+        }
+        
+        strengthBar.style.backgroundColor = color;
+        strengthBar.style.width = width;
+      });
+    });
+    
     function checkpass() {
       const password = document.getElementById("password").value;
       const confirmPassword = document.getElementById("cpassword").value;
