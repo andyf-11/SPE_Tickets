@@ -1,0 +1,443 @@
+:root {
+  --primary-color: #6240d4;
+  --secondary-color: #6c757d;
+}
+
+.dashboard-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  height: 100%;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+  font-size: 2rem;
+  opacity: 0.8;
+}
+
+.card-value {
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-subtitle {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.chart-container {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.bg-purple {
+  background: linear-gradient(135deg, #6f42c1, #8e63e2);
+}
+
+.bg-blue {
+  background: linear-gradient(135deg, #0d6efd, #3d8bfd);
+}
+
+.bg-green {
+  background: linear-gradient(135deg, #198754, #2ca67a);
+}
+
+.bg-red {
+  background: linear-gradient(135deg, #dc3545, #e35d6a);
+}
+
+.page-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.sidebar {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  width: 250px;
+  height: calc(100vh - 56px);
+  background-color: #f8f9fa;
+  padding-top: 1rem;
+}
+
+.main-content {
+  margin-left: 250px;
+  padding: 1.5rem;
+  margin-top: 56px;
+}
+
+.mt-header {
+  margin-top: 15px;
+}
+
+/* --- Sidebar fijo en escritorio --- */
+@media (min-width: 768px) {
+  #leftbar {
+    position: fixed !important;
+    top: 50px;
+    left: 0;
+    width: 250px;
+    height: calc(100vh - 70px);
+    z-index: 1020;
+    overflow-y: auto;
+    transform: none !important;
+    visibility: visible !important;
+  }
+}
+
+/* Evitar el fondo oscuro del offcanvas en escritorio */
+@media (min-width: 768px) {
+  .offcanvas-backdrop {
+    display: none !important;
+  }
+}
+
+/*leftbar*/
+#leftbar {
+  transition: all 0.3s ease;
+  width: 250px;
+}
+
+.nav-link {
+  transition: all 0.2s ease;
+}
+
+.nav-link:not(.active):hover {
+  background-color: var(--sidebar-hover);
+  transform: translateX(3px);
+}
+
+.nav-link.active {
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(78, 115, 223, 0.2);
+}
+
+.bg-gradient-light {
+  background: linear-gradient(135deg, #f8f9fc 0%, white 100%);
+}
+
+.rounded-circle {
+  transition: transform 0.3s ease;
+}
+
+.rounded-circle:hover {
+  transform: scale(1.05);
+}
+
+/*Manage-Tickets*/
+
+:root {
+  --primary-color: #4e73df;
+  --secondary-color: #f8f9fc;
+  --accent-color: #2e59d9;
+  --text-color: #5a5c69;
+}
+
+body {
+  background-color: #f8f9fc;
+  color: var(--text-color);
+  overflow-x: hidden;
+}
+
+
+
+.main-content {
+  margin-left: 250px;
+  padding: 2rem;
+  margin-top: 56px;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+}
+
+.card {
+  border: none;
+  border-radius: 0.35rem;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1.5rem 0 rgba(58, 59, 69, 0.2);
+}
+
+.card-header {
+  background-color: white;
+  border-bottom: 1px solid #e3e6f0;
+}
+
+.badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+}
+
+.breadcrumb {
+  background-color: transparent;
+  padding: 0;
+}
+
+.filter-card {
+  background-color: white;
+  border-radius: 0.35rem;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.ticket-status-badge {
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  padding: 0.5em 0.75em;
+}
+
+.ticket-details-btn {
+  border-radius: 50px;
+  padding: 0.25rem 0.75rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+}
+
+/*Tech-layout*/
+
+:root {
+  --primary-color: #4e73df;
+  --secondary-color: #f8f9fc;
+  --accent-color: #2e59d9;
+  --text-color: #5a5c69;
+}
+
+body {
+  background-color: #f8f9fc;
+  color: var(--text-color);
+  overflow-x: hidden;
+}
+
+
+.main-content {
+  margin-left: 250px;
+  padding: 2rem;
+  margin-top: 56px;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+}
+
+.card {
+  border: none;
+  border-radius: 0.35rem;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+}
+
+.table-responsive {
+  border-radius: 0.35rem;
+  overflow: hidden;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  border-bottom-width: 1px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  padding: 1rem 1.5rem;
+}
+
+.table tbody td {
+  padding: 1rem 1.5rem;
+  vertical-align: middle;
+}
+
+.badge-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 24px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tech-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 12px;
+  background-color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #757575;
+  font-weight: bold;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/*Ticket-status*/
+:root {
+  --primary-color: #4e73df;
+  --secondary-color: #f8f9fc;
+  --accent-color: #2e59d9;
+  --text-color: #5a5c69;
+}
+
+body {
+  background-color: #f8f9fc;
+  color: var(--text-color);
+  padding-top: 56px;
+}
+
+.main-content {
+  margin-left: 250px;
+  padding: 2rem;
+}
+
+@media (max-width: 767.98px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+}
+
+.card {
+  border: none;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+  border-bottom: none;
+}
+
+.card-header-primary {
+  background-color: #0a73dbbd;
+  color: white;
+}
+
+.card-header-warning {
+  background-color: #f6c23e;
+  color: #1f2d3d;
+}
+
+.card-header-success {
+  background-color: #1cc88a;
+  color: white;
+}
+
+.table-responsive {
+  border-radius: 0 0 0.5rem 0.5rem;
+  overflow: hidden;
+}
+
+.table {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
+
+.table thead th {
+  background-color: #f8f9fc;
+  border-bottom-width: 1px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  padding: 0.75rem 1.5rem;
+}
+
+.table tbody td {
+  padding: 1rem 1.5rem;
+  vertical-align: middle;
+  border-top: 1px solid #f0f2f5;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.badge-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35em 0.65em;
+  border-radius: 0.25rem;
+}
+
+.filter-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: #6c757d;
+}
+
+.empty-state i {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}

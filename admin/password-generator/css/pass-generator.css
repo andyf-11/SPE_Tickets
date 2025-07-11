@@ -1,0 +1,61 @@
+body {
+    background: #ff4b1f;
+    /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #1fddff, #ff4b1f);
+    /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #1fddff, #ff4b1f);
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+}
+
+.go-back {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    font-size: 2rem;
+    color: #121213;
+    z-index: 10;
+    text-decoration: none;
+}
+
+.go-back:hover {
+    color: #ebe6e5;
+}
+
+.card-style {
+    background-color: rgba(0, 0, 0, 0.65);
+    padding: 30px;
+    border-radius: 15px;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.form-control,
+.form-select {
+    background-color: rgba(255, 251, 251, 0.26);
+    color: #0c0c0c;
+    border: 1px solid #ccc;
+}
+
+.form-control:read-only {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #fff;
+}
+
+.btn-primary,
+.btn-success {
+    font-weight: bold;
+}
+
+.alert {
+    font-weight: bold;
+}

@@ -1,0 +1,15 @@
+  .masthead-content {
+      background-color: rgba(0, 0, 0, 0.5); /* semi-transparente para contraste */
+      padding: 2rem;
+      border-radius: 15px;
+    }
+
+    .masthead-heading {
+      font-size: 2.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .masthead-heading {
+        font-size: 3.5rem;
+      }
+    }
