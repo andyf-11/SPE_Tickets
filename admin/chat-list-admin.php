@@ -35,22 +35,14 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
   <title>Solicitudes de Aprobación</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <style>
-    body,
-    html {
-      height: 100%;
+    body {
       background-color: #f8f9fa;
-    }
-
-    #leftbar {
-      height: calc(100vh - 56px);
-      overflow-y: auto;
     }
 
     .chat-card {
@@ -81,7 +73,7 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     .last-message {
       display: -webkit-box;
-      line-clamp: 2;
+      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -116,15 +108,15 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <i class="fas fa-bars"></i>
       </button>
 
-      <!-- Sidebar -->
-      <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse offcanvas-md offcanvas-start sticky-top"
-        id="leftbar" tabindex="-1" aria-labelledby="leftbarLabel">
+      <!-- Sidebar fijo en desktop, offcanvas en móviles -->
+      <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse offcanvas-md offcanvas-start"
+        id="leftbar">
         <?php include("leftbar.php"); ?>
       </nav>
 
       <!-- Contenido principal -->
-      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-4 mt-md-0">
           <h2 class="h4 mb-0"><i class="fas fa-comments me-2 text-primary"></i>Solicitudes de Aprobación</h2>
           <a href="home.php" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i> Volver al Dashboard
@@ -146,7 +138,6 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php else: ?>
           <div class="row g-3">
             <?php foreach ($chats as $chat):
-              // Definir clase según estado
               $statusClass = 'status-' . $chat['status'];
               $badgeClass = '';
               $icon = '';
@@ -174,7 +165,7 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
               $senderLabel = ($chat['last_sender'] === 'tecnico') ? 'Técnico: ' : (($chat['last_sender'] === 'admin') ? 'Admin: ' : '');
               $fecha = $chat['last_message_date'] ? date('d/m/Y H:i', strtotime($chat['last_message_date'])) : 'Sin mensajes';
-              ?>
+            ?>
               <div class="col-12">
                 <a href="chat-tech-admin.php?apply_id=<?= $chat['apply_id'] ?>" class="text-decoration-none">
                   <div class="card chat-card <?= $statusClass ?> mb-0 h-100">
@@ -219,5 +210,4 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

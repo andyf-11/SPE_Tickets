@@ -35,11 +35,11 @@ $totalDias = cal_days_in_month(CAL_GREGORIAN, $mesActual, $anioActual);
 $visitasUnicas = array_fill(1, $totalDias, 0);
 $visitasTotales = array_fill(1, $totalDias, 0);
 
-$stmtVU = $pdo->prepare("SELECT DAY(uc.logindate) AS dia, COUNT(DISTINCT uc.user_id) AS total FROM usercheck uc INNER JOIN user u ON uc.user_id = u.id WHERE u.role = 'usuario' AND MONTH(uc.logindate) = :mes AND YEAR(uc.logindate) = :anio GROUP BY dia");
+$stmtVU = $pdo->prepare("SELECT DAY(uc.logindatetime) AS dia, COUNT(DISTINCT uc.user_id) AS total FROM usercheck uc INNER JOIN user u ON uc.user_id = u.id WHERE u.role = 'usuario' AND MONTH(uc.logindatetime) = :mes AND YEAR(uc.logindatetime) = :anio GROUP BY dia");
 $stmtVU->execute(['mes' => $mesActual, 'anio' => $anioActual]);
 foreach ($stmtVU as $row) $visitasUnicas[(int)$row['dia']] = (int)$row['total'];
 
-$stmtVT = $pdo->prepare("SELECT DAY(uc.logindate) AS dia, COUNT(*) AS total FROM usercheck uc INNER JOIN user u ON uc.user_id = u.id WHERE u.role = 'usuario' AND MONTH(uc.logindate) = :mes AND YEAR(uc.logindate) = :anio GROUP BY dia");
+$stmtVT = $pdo->prepare("SELECT DAY(uc.logindatetime) AS dia, COUNT(*) AS total FROM usercheck uc INNER JOIN user u ON uc.user_id = u.id WHERE u.role = 'usuario' AND MONTH(uc.logindatetime) = :mes AND YEAR(uc.logindatetime) = :anio GROUP BY dia");
 $stmtVT->execute(['mes' => $mesActual, 'anio' => $anioActual]);
 foreach ($stmtVT as $row) $visitasTotales[(int)$row['dia']] = (int)$row['total'];
 

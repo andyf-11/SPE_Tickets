@@ -13,13 +13,11 @@ check_login("admin");
   <title>Admin | Lista de Usuarios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap 5 -->
+  <!-- Bootstrap y FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <link href="../assets/css/style.css" rel="stylesheet" />
-  <link href="../styles/admin.css" rel="stylesheet"/>
 
-  <!-- DataTables CSS -->
+  <!-- DataTables -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
 
@@ -27,106 +25,62 @@ check_login("admin");
     :root {
       --primary-color: #4361ee;
       --secondary-color: #3a0ca3;
-      --light-bg: #f8f9fa;
     }
-    
+
     body {
-      background-color: var(--light-bg);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
     }
-    
-    .sidebar {
-      height: calc(100vh - 56px);
-      overflow-y: auto;
-      background: white;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-    }
-    
-    .main-content {
-      padding: 2rem;
-    }
-    
-    .card-header-custom {
-      background: white;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      padding: 1.25rem 1.5rem;
-    }
-    
+
     .table-card {
       border: none;
+      border-radius: 0.5rem;
       box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-      border-radius: 10px;
       overflow: hidden;
     }
-    
+
     .table thead {
       background-color: var(--primary-color);
       color: white;
     }
-    
-    .table th {
-      font-weight: 500;
-      text-transform: uppercase;
-      font-size: 0.8rem;
-      letter-spacing: 0.5px;
-    }
-    
-    .table-hover tbody tr:hover {
-      background-color: rgba(67, 97, 238, 0.05);
-    }
-    
+
     .badge-role {
-      padding: 0.35rem 0.65rem;
-      font-weight: 500;
       font-size: 0.75rem;
+      font-weight: 500;
       border-radius: 50px;
+      padding: 0.35rem 0.75rem;
       text-transform: capitalize;
     }
-    
+
     .badge-admin {
       background-color: #f72585;
       color: white;
     }
-    
+
     .badge-tech {
       background-color: #4cc9f0;
       color: #111;
     }
-    
+
     .badge-user {
       background-color: #7209b7;
       color: white;
     }
-    
-    .btn-primary-custom {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-      border-radius: 50px;
-      padding: 0.5rem 1.25rem;
+
+    .avatar-sm {
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background-color: #dee2e6;
     }
-    
-    .btn-primary-custom:hover {
-      background-color: var(--secondary-color);
-      border-color: var(--secondary-color);
-    }
-    
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter {
-      margin-bottom: 1rem;
-    }
-    
-    .dataTables_wrapper .dataTables_filter input {
-      border-radius: 50px;
-      padding: 0.25rem 0.75rem;
-      border: 1px solid #dee2e6;
-    }
-    
+
     .breadcrumb {
       background-color: transparent;
-      padding: 0.5rem 0;
-      font-size: 0.9rem;
+      padding-left: 0;
     }
-    
+
     .breadcrumb-item.active {
       color: var(--primary-color);
       font-weight: 500;
@@ -136,16 +90,21 @@ check_login("admin");
 
 <body>
   <?php include("header.php"); ?>
-  
+
   <div class="container-fluid">
     <div class="row">
+      <!-- Botón de menú en móviles -->
+      <button class="btn btn-outline-primary d-md-none m-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#leftbar">
+        <i class="fas fa-bars"></i>
+      </button>
+
       <!-- Sidebar -->
-      <div class="col-md-3 col-lg-2 p-0 sidebar">
+      <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse offcanvas-md offcanvas-start" id="leftbar">
         <?php include("leftbar.php"); ?>
-      </div>
+      </nav>
 
       <!-- Contenido principal -->
-      <main class="col-md-9 col-lg-10 main-content">
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mt-5">
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
@@ -154,7 +113,7 @@ check_login("admin");
           </ol>
         </nav>
 
-        <!-- Header -->
+        <!-- Título y botón -->
         <div class="d-flex justify-content-between align-items-center mb-4">
           <div>
             <h2 class="h4 mb-0"><i class="fas fa-users me-2 text-primary"></i>Lista de Usuarios</h2>
@@ -165,34 +124,25 @@ check_login("admin");
           </a>
         </div>
 
-        <!-- Tarjeta de tabla -->
+        <!-- Tabla de usuarios -->
         <div class="card table-card">
-          <div class="card-header card-header-custom">
-            <div class="d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Todos los usuarios registrados</h5>
-              <div>
-                <span class="badge bg-light text-dark">
-                  <i class="fas fa-database me-1"></i>
-                  <?php 
-                    $count = $pdo->query("SELECT COUNT(*) FROM user")->fetchColumn();
-                    echo $count . ' registros';
-                  ?>
-                </span>
-              </div>
-            </div>
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Todos los usuarios registrados</h5>
+            <span class="badge bg-light text-dark">
+              <i class="fas fa-database me-1"></i>
+              <?php echo $pdo->query("SELECT COUNT(*) FROM user")->fetchColumn(); ?> registros
+            </span>
           </div>
-          
           <div class="card-body">
             <div class="table-responsive">
               <?php
               $cnt = 1;
-              $query = "SELECT u.id, u.name, e.name AS edificio_name, u.email, u.role, u.posting_date 
-                FROM user u
-                LEFT JOIN edificios e ON u.edificio_id = e.id 
-                ORDER BY u.posting_date DESC";
-              $stmt = $pdo->query($query);
+              $stmt = $pdo->query("SELECT u.id, u.name, e.name AS edificio_name, u.email, u.role, u.posting_date 
+                                    FROM user u
+                                    LEFT JOIN edificios e ON u.edificio_id = e.id 
+                                    ORDER BY u.posting_date DESC");
               ?>
-              <table id="usersTable" class="table table-hover align-middle" style="width:100%">
+              <table id="usersTable" class="table table-hover align-middle w-100">
                 <thead>
                   <tr>
                     <th>#</th>
@@ -204,23 +154,17 @@ check_login("admin");
                   </tr>
                 </thead>
                 <tbody>
-                  <?php
-                  while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    // Clase para el badge según el rol
-                    $badgeClass = '';
-                    switch(strtolower($row['role'])) {
-                      case 'admin': $badgeClass = 'badge-admin'; break;
-                      case 'tecnico': $badgeClass = 'badge-tech'; break;
-                      default: $badgeClass = 'badge-user';
-                    }
-                    
+                  <?php while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $badgeClass = match(strtolower($row['role'])) {
+                      'admin' => 'badge-admin',
+                      'tecnico' => 'badge-tech',
+                      default => 'badge-user',
+                    };
                     echo "<tr>
-                            <td class='text-center'>{$cnt}</td>
+                            <td>{$cnt}</td>
                             <td>
                               <div class='d-flex align-items-center'>
-                                <div class='avatar-sm me-2'>
-                                  <i class='fas fa-user-circle fa-lg text-muted'></i>
-                                </div>
+                                <div class='avatar-sm me-2'><i class='fas fa-user-circle text-muted'></i></div>
                                 <div>
                                   <div class='fw-semibold'>" . htmlspecialchars($row['name']) . "</div>
                                   <small class='text-muted'>ID: " . htmlspecialchars($row['id']) . "</small>
@@ -233,8 +177,7 @@ check_login("admin");
                             <td>" . date('d/m/Y', strtotime($row['posting_date'])) . "</td>
                           </tr>";
                     $cnt++;
-                  }
-                  ?>
+                  } ?>
                 </tbody>
               </table>
             </div>
@@ -253,19 +196,19 @@ check_login("admin");
   <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
   <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
   <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
-  
   <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
       $('#usersTable').DataTable({
         language: {
           url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
         },
-        lengthMenu: [10, 25, 50, 100],
-        dom: '<"top"<"row"<"col-md-6"l><"col-md-6"f>>>rt<"bottom"<"row"<"col-md-6"i><"col-md-6"p>>>',
+        responsive: true,
+        pageLength: 25,
+        dom: 'Bfrtip',
         buttons: [
           {
             extend: 'excel',
-            text: '<i class="fas fa-file-excel me-1"></i> Excel',
+            text: '<i class="fas fa-file-excel me-1"></i> Exportar Excel',
             className: 'btn btn-success btn-sm'
           },
           {
@@ -273,13 +216,9 @@ check_login("admin");
             text: '<i class="fas fa-print me-1"></i> Imprimir',
             className: 'btn btn-secondary btn-sm'
           }
-        ],
-        initComplete: function() {
-          $('.dt-buttons').addClass('btn-group');
-        }
+        ]
       });
     });
   </script>
 </body>
-
 </html>
