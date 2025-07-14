@@ -282,8 +282,8 @@ CREATE TABLE `password_request` (
 
 INSERT INTO `edificios`(name) VALUES ('Santa Esmeralda'),
 ('Palmira');
-INSERT INTO `areas`(name) VALUES ('RRHH'),
-('Comunicaciones'), ('Contabilidad'), ('Presupuesto'), ('');
+INSERT INTO `areas`(name) VALUES ('Administración'),
+('Dirección General de Planificación'), ('Información y Prensa'), ('Poder Popular'), ('');
 
 ALTER TABLE `application_approv` MODIFY COLUMN `status` ENUM('pendiente', 'aprobado', 'rechazado', 'resuelto') NOT NULL DEFAULT 'pendiente';
 
