@@ -5,6 +5,14 @@ const mysql = require('mysql2');
 const cors = require('cors');
 require('dotenv').config();
 
+console.log("🔍 ENV cargado:", {
+  DB_HOST: process.env.DB_HOST,
+  DB_USER: process.env.DB_USER,
+  DB_PASS: process.env.DB_PASS,
+  DB_NAME: process.env.DB_NAME
+});
+
+
 const app = express();
 app.use(cors());
 
