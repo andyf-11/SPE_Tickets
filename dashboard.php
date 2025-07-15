@@ -31,7 +31,6 @@ $page = 'dashboard'; // para el leftbar
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -49,181 +48,173 @@ $page = 'dashboard'; // para el leftbar
       --primary-color: #6240d4;
       --secondary-color: #6c757d;
     }
-    
+
     body {
       font-family: 'Poppins', sans-serif;
       background-color: #f8f9fa;
+      overflow-x: hidden;
+      margin: 0;
     }
-    
+
     #clock {
-      font-family: 'Poppins', sans-serif;
       color: var(--primary-color);
       font-weight: 600;
     }
-    
-    .sidebar {
+
+    /* Sidebar fijo debajo del header */
+    #leftbar {
+      position: fixed;
+      top: 43px; /* Altura del header */
+      left: 0;
       width: 250px;
-      background-color: white;
-      min-height: calc(100vh - 56px);
-      box-shadow: 0 0 15px rgba(0,0,0,0.05);
+      height: calc(100vh - 56px);
+      background-color: #fff;
+      overflow-y: auto;
+      border-right: 1px solid #dee2e6;
+      z-index: 1030;
     }
-    
+
+    /* Contenido principal */
     .main-content {
-      flex-grow: 1;
+      margin-left: 250px;
       padding: 2rem;
-      min-height: calc(100vh - 56px);
-      margin-left: 20px;
+      padding-top: 2.5rem;
+      min-height: 100vh;
+      background-color: #f8f9fa;
     }
-    
+
     .card-stat {
       border-radius: 12px;
       border: none;
       box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-      left: 10px;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    
+
     .card-stat:hover {
       transform: translateY(-5px);
       box-shadow: 0 10px 15px rgba(0,0,0,0.1);
     }
-    
+
     .ticket-item {
       transition: background-color 0.2s ease;
       border-left: 3px solid transparent;
     }
-    
+
     .ticket-item:hover {
       background-color: #f8f9fa;
       border-left-color: var(--primary-color);
     }
-    
-    @media (max-width: 768px) {
-      .sidebar {
-        position: fixed;
-        z-index: 1030;
-        height: 100%;
-        left: -250px;
-        top: 56px;
-        transition: left 0.3s ease;
+
+    @media (max-width: 767px) {
+      #leftbar {
+        position: relative;
+        top: 0;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
       }
-      
-      .sidebar.show {
-        left: 0;
-      }
-      
+
       .main-content {
-        padding: 1rem;
+        margin-left: 0;
       }
     }
   </style>
 </head>
-
 <body>
+
   <?php include('header.php'); ?>
+  <?php include('leftbar.php'); ?>
 
-  <div class="d-flex" style="margin-top: 40px;">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <?php include('leftbar.php'); ?>
-    </aside>
+  <main class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-5">
+      <h2 class="mb-0 fw-bold">Panel de Usuario</h2>
+      <div class="d-flex align-items-center">
+        <small class="text-muted me-2"><?= date('d/m/Y') ?></small>
+        <button class="btn btn-sm btn-outline-primary" onclick="location.reload()">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+      </div>
+    </div>
 
-    <!-- Contenido principal -->
-    <main class="main-content mt-4">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0 fw-bold">Panel de Usuario</h2>
-        <div class="d-flex align-items-center">
-          <small class="text-muted me-2"><?= date('d/m/Y') ?></small>
-          <button class="btn btn-sm btn-outline-primary" onclick="location.reload()">
-            <i class="fas fa-sync-alt"></i>
-          </button>
+    <div class="row g-4 mb-4">
+      <!-- Reloj -->
+      <div class="col-12 col-md-4">
+        <div class="card card-stat h-100 text-center">
+          <div class="card-body">
+            <div id="clock" class="display-4 fw-bold mb-2"></div>
+            <small class="text-muted">Hora actual del servidor</small>
+          </div>
         </div>
       </div>
 
-      <div class="row g-4 mb-4">
-        <!-- Reloj -->
-        <div class="col-12 col-md-4">
-          <div class="card card-stat h-100">
-            <div class="card-body text-center">
-              <div id="clock" class="display-4 fw-bold mb-2"></div>
-              <small class="text-muted">Hora actual del servidor</small>
+      <!-- Total Tickets -->
+      <div class="col-12 col-md-4">
+        <div class="card card-stat bg-primary text-white h-100">
+          <div class="card-body d-flex align-items-center">
+            <div class="me-3">
+              <i class="fas fa-ticket-alt fa-2x"></i>
+            </div>
+            <div>
+              <h6 class="card-subtitle mb-1">Total de Tickets</h6>
+              <h3 class="mb-0"><?= $total_tickets ?></h3>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Total Tickets -->
-        <div class="col-12 col-md-4">
-          <div class="card card-stat bg-primary text-white h-100">
-            <div class="card-body">
-              <div class="d-flex align-items-center">
-                <div class="me-3">
-                  <i class="fas fa-ticket-alt fa-2x"></i>
-                </div>
+      <!-- Tickets Abiertos -->
+      <div class="col-12 col-md-4">
+        <div class="card card-stat bg-warning text-dark h-100">
+          <div class="card-body d-flex align-items-center">
+            <div class="me-3">
+              <i class="fas fa-exclamation-circle fa-2x"></i>
+            </div>
+            <div>
+              <h6 class="card-subtitle mb-1">Tickets Abiertos</h6>
+              <h3 class="mb-0"><?= $open_tickets ?></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tickets de hoy -->
+    <div class="card card-stat">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold">Tickets recientes</h5>
+        <a href="view-tickets.php" class="btn btn-sm btn-outline-primary">
+          Ver todos <i class="fas fa-arrow-right ms-1"></i>
+        </a>
+      </div>
+      <div class="card-body p-0">
+        <?php if (count($tickets_today) === 0): ?>
+          <div class="text-center py-4">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No hay tickets creados hoy</p>
+          </div>
+        <?php else: ?>
+          <ul class="list-group list-group-flush">
+            <?php foreach ($tickets_today as $ticket): ?>
+              <li class="list-group-item ticket-item d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 class="card-subtitle mb-1">Total de Tickets</h6>
-                  <h3 class="mb-0"><?= $total_tickets ?></h3>
+                  <h6 class="mb-1"><?= htmlspecialchars($ticket['subject']) ?></h6>
+                  <small class="text-muted">ID: <?= $ticket['id'] ?></small>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tickets Abiertos -->
-        <div class="col-12 col-md-4">
-          <div class="card card-stat bg-warning text-dark h-100">
-            <div class="card-body">
-              <div class="d-flex align-items-center">
-                <div class="me-3">
-                  <i class="fas fa-exclamation-circle fa-2x"></i>
+                <div class="text-end">
+                  <small class="d-block text-muted"><?= date('H:i', strtotime($ticket['posting_date'])) ?></small>
+                  <span class="badge bg-primary">Nuevo</span>
                 </div>
-                <div>
-                  <h6 class="card-subtitle mb-1">Tickets Abiertos</h6>
-                  <h3 class="mb-0"><?= $open_tickets ?></h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+              </li>
+            <?php endforeach; ?>
+          </ul>
+        <?php endif; ?>
       </div>
-
-      <!-- Tickets de hoy -->
-      <div class="card card-stat">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-          <h5 class="mb-0 fw-bold">Tickets recientes</h5>
-          <a href="view-tickets.php" class="btn btn-sm btn-outline-primary">
-            Ver todos <i class="fas fa-arrow-right ms-1"></i>
-          </a>
-        </div>
-        <div class="card-body p-0">
-          <?php if (count($tickets_today) === 0): ?>
-            <div class="text-center py-4">
-              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-              <p class="text-muted">No hay tickets creados hoy</p>
-            </div>
-          <?php else: ?>
-            <ul class="list-group list-group-flush">
-              <?php foreach ($tickets_today as $ticket): ?>
-                <li class="list-group-item ticket-item d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="mb-1"><?= htmlspecialchars($ticket['subject']) ?></h6>
-                    <small class="text-muted">ID: <?= $ticket['id'] ?></small>
-                  </div>
-                  <div class="text-end">
-                    <small class="d-block text-muted"><?= date('H:i', strtotime($ticket['posting_date'])) ?></small>
-                    <span class="badge bg-primary">Nuevo</span>
-                  </div>
-                </li>
-              <?php endforeach; ?>
-            </ul>
-          <?php endif; ?>
-        </div>
-      </div>
-    </main>
-  </div>
+    </div>
+  </main>
 
   <!-- Bootstrap 5 JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
     function updateClock() {
       const clock = document.getElementById('clock');
@@ -238,3 +229,4 @@ $page = 'dashboard'; // para el leftbar
   </script>
 </body>
 </html>
+

@@ -10,9 +10,9 @@ $monthData = array_fill(1, $totalDays, 0);
 
 // Consulta optimizada: visitas del mes actual agrupadas por día
 $stmt = $pdo->prepare("
-    SELECT DAY(logindate) as dia, COUNT(*) as visitas
+    SELECT DAY(logindatetime) as dia, COUNT(*) as visitas
     FROM usercheck
-    WHERE YEAR(logindate) = YEAR(CURDATE()) AND MONTH(logindate) = MONTH(CURDATE())
+    WHERE YEAR(logindatetime) = YEAR(CURDATE()) AND MONTH(logindatetime) = MONTH(CURDATE())
     GROUP BY dia
 ");
 $stmt->execute();
@@ -41,7 +41,7 @@ $stmt->execute();
 $visitantes_general = $stmt->fetchColumn();
 
 // Visitantes hoy
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM usercheck WHERE DATE(logindate) = CURDATE()");
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM usercheck WHERE DATE(logindatetime) = CURDATE()");
 $stmt->execute();
 $visitantes_hoy = $stmt->fetchColumn();
 
@@ -93,9 +93,12 @@ $tickets_pendientes_hoy = $stmt->fetchColumn();
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <script src="https://code.highcharts.com/highcharts.js"></script>
   <link href="../styles/superv.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+  </style>
 </head>
 
-<body class="bg-light" >
+<body class="bg-light">
   <?php include("header.php"); ?>
 
   <!-- Layout principal -->
