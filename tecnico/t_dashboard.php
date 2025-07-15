@@ -6,7 +6,6 @@ check_login("tecnico");
 
 $tecnico_id = $_SESSION['user_id'];
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -17,6 +16,12 @@ $tecnico_id = $_SESSION['user_id'];
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    main {
+      background-color: #f8f9fc;
+      min-height: 100vh;
+    }
+  </style>
 </head>
 
 <body>
@@ -25,13 +30,13 @@ $tecnico_id = $_SESSION['user_id'];
 
   <div class="container-fluid">
     <div class="row">
-      <!-- Sidebar -->
-      <div class="col-md-3 col-lg-2 p-0 bg-white border-end vh-100 position-fixed">
+      <!-- Sidebar (ya no fijo, va debajo del header) -->
+      <div class="col-md-3 col-lg-2 p-0 bg-white border-end">
         <?php include("leftbar.php"); ?>
       </div>
 
       <!-- Contenido principal -->
-      <div class="offset-md-3 offset-lg-2 col-md-9 col-lg-10 ms-auto">
+      <div class="col-md-9 col-lg-10">
         <main class="p-4">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -44,7 +49,7 @@ $tecnico_id = $_SESSION['user_id'];
               </nav>
             </div>
             <div>
-              <button class="btn btn-outline-primary">
+              <button onclick="location.reload()" class="btn btn-outline-primary">
                 <i class="fas fa-sync-alt me-1"></i> Actualizar
               </button>
             </div>
@@ -62,16 +67,18 @@ $tecnico_id = $_SESSION['user_id'];
               return '<span class="badge bg-secondary">' . htmlspecialchars($priority) . '</span>';
             }
           }
+
+          $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM ticket WHERE assigned_to = :id AND status = 'En Proceso'");
+          $stmtCount->execute(['id' => $tecnico_id]);
+          $count = $stmtCount->fetchColumn();
+
+          $stmtCerrados = $pdo->prepare("SELECT COUNT(*) FROM ticket WHERE assigned_to = :id AND status = 'Cerrado' AND DATE(fecha_cierre) = CURDATE()");
+          $stmtCerrados->execute(['id' => $tecnico_id]);
+          $cerradosHoy = $stmtCerrados->fetchColumn();
           ?>
 
           <!-- Tarjetas resumen -->
           <div class="row mb-4">
-            <?php
-            $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM ticket WHERE assigned_to = :id AND status = 'En Proceso'");
-            $stmtCount->execute(['id' => $tecnico_id]);
-            $count = $stmtCount->fetchColumn();
-            ?>
-
             <div class="col-md-4">
               <div class="card bg-primary text-white">
                 <div class="card-body d-flex justify-content-between align-items-center">
@@ -83,7 +90,6 @@ $tecnico_id = $_SESSION['user_id'];
                 </div>
               </div>
             </div>
-
             <div class="col-md-4">
               <div class="card bg-warning text-dark">
                 <div class="card-body d-flex justify-content-between align-items-center">
@@ -95,13 +101,6 @@ $tecnico_id = $_SESSION['user_id'];
                 </div>
               </div>
             </div>
-
-            <?php
-            $stmtCerrados = $pdo->prepare("SELECT COUNT(*) FROM ticket WHERE assigned_to = :id AND status = 'Cerrado' AND DATE(fecha_cierre) = CURDATE()");
-            $stmtCerrados->execute(['id' => $tecnico_id]);
-            $cerradosHoy = $stmtCerrados->fetchColumn();
-            ?>
-
             <div class="col-md-4">
               <div class="card bg-success text-white">
                 <div class="card-body d-flex justify-content-between align-items-center">
@@ -203,5 +202,4 @@ $tecnico_id = $_SESSION['user_id'];
     </div>
   </div>
 </body>
-
 </html>

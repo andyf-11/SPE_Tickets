@@ -11,7 +11,7 @@ $unreadNotifications = $stmt->fetchColumn();
 ?>
 
 <!-- HEADER -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
   <div class="container-fluid">
     <!-- Logo -->
     <a class="navbar-brand fw-bold" href="t_dashboard.php">SPE</a>
