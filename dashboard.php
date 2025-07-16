@@ -67,7 +67,7 @@ $page = 'dashboard'; // para el leftbar
       top: 43px; /* Altura del header */
       left: 0;
       width: 250px;
-      height: calc(100vh - 56px);
+      height: calc(100vh - 43px);
       background-color: #fff;
       overflow-y: auto;
       border-right: 1px solid #dee2e6;

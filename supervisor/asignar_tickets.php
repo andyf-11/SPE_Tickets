@@ -76,96 +76,132 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
   <title>Asignar Ticket</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #4361ee;
+      --primary-hover: #3a56d4;
+    }
+    
     body {
       min-height: 100vh;
+      background-color: #f8fafc;
     }
-
-    .sidebar {
-      height: 100vh;
-      position: fixed;
-      top: 56px;
-      left: 0;
-      width: 250px;
-      background-color: #f8f9fa;
-      padding-top: 1rem;
+    
+    .navbar-brand {
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }
-
+    
     .main-content {
-      margin-left: 250px;
-      padding: 1.5rem;
-      margin-top: 56px;
+      margin-left: 280px;
+      padding: 2rem;
+      margin-top: 60px;
     }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        display: none;
-      }
-
+    
+    @media (max-width: 991.98px) {
       .main-content {
         margin-left: 0;
       }
+    }
+    
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+    
+    .form-select, .form-control {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .form-select:focus, .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+    }
+    
+    .alert-success {
+      background-color: #f0fdf4;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+    
+    .alert-danger {
+      background-color: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+    
+    .page-title {
+      color: #1e293b;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-bottom: 0.75rem;
+    }
+    
+    .page-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background-color: var(--primary-color);
+      border-radius: 2px;
     }
   </style>
 </head>
 
 <body>
-
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-    <div class="container-fluid">
-      <button class="btn btn-outline-light d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#leftbar"
-        aria-controls="leftbar">
+  <!-- Navbar superior -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
+    <div class="container-fluid px-4">
+      <button class="btn btn-outline-light d-lg-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#leftbar" aria-controls="leftbar">
         <i class="fas fa-bars"></i>
       </button>
-      <a class="navbar-brand ms-3" href="#">Sistema de Tickets</a>
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <i class="fas fa-ticket-alt me-2"></i>
+        <span>Sistema de Tickets</span>
+      </a>
     </div>
   </nav>
 
-  <div class="sidebar d-none d-md-block border-end" id="leftbar">
-    <div class="text-center mb-3">
-      <img src="../assets/img/Logo-Gobierno_small.png" alt="Perfil" class="img-fluid"
-        style="width: 80px; height: 80px;">
-      <div class="fw-semibold">Bienvenid@</div>
-      <div class="text-primary fw-bold">Supervisor</div>
-    </div>
-    <ul class="nav flex-column px-3">
-      <li class="nav-item mb-1"><a href="home.php" class="nav-link text-dark"><i
-            class="bi bi-house-door-fill me-2"></i>Dashboard</a></li>
-      <li class="nav-item mb-1"><a href="manage-tickets.php" class="nav-link text-dark"><i
-            class="fas fa-ticket-alt me-2"></i>Gestionar Ticket</a></li>
-      <li class="nav-item mb-1"><a href="asignar_tickets.php" class="nav-link active fw-bold text-primary"><i
-            class="fas fa-users me-2"></i>Asignar Tickets</a></li>
-    </ul>
-  </div>
-
-  <div class="offcanvas offcanvas-start d-md-none bg-light" tabindex="-1" id="leftbar">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title">Menú Supervisor</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
-    </div>
-    <div class="offcanvas-body">
-      <ul class="nav flex-column">
-        <li class="nav-item mb-1"><a href="home.php" class="nav-link text-dark"><i
-              class="bi bi-house-door-fill me-2"></i>Dashboard</a></li>
-        <li class="nav-item mb-1"><a href="manage-tickets.php" class="nav-link text-dark"><i
-              class="fas fa-ticket-alt me-2"></i>Gestionar Ticket</a></li>
-        <li class="nav-item mb-1"><a href="asignar_tickets.php" class="nav-link active fw-bold text-primary"><i
-              class="fas fa-users me-2"></i>Asignar Tickets</a></li>
-      </ul>
-    </div>
-  </div>
-
+  <!-- Contenido principal -->
   <div class="main-content">
-    <div class="container-fluid">
-      <h3 class="mb-4">Asignar Ticket</h3>
+    <div class="container-fluid px-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">Asignar Ticket #<?= htmlspecialchars($ticketId) ?></h1>
+      </div>
 
       <?php if (!empty($error)): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+        <div class="alert alert-danger d-flex align-items-center mb-4">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <div><?= htmlspecialchars($error) ?></div>
+        </div>
       <?php endif; ?>
 
       <?php if (!empty($_SESSION['mensaje_exito'])): ?>
-        <div id="mensajeExito" class="alert alert-success" role="alert">
-          ✅ <?= htmlspecialchars($_SESSION['mensaje_exito']) ?>
+        <div id="mensajeExito" class="alert alert-success d-flex align-items-center mb-4" role="alert">
+          <i class="fas fa-check-circle me-2"></i>
+          <div><?= htmlspecialchars($_SESSION['mensaje_exito']) ?></div>
         </div>
         <script>
           // Redirigir al dashboard después de 2 segundos
@@ -173,27 +209,79 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
             window.location.href = "manage-tickets.php";
           }, 2000);
         </script>
-        <?php unset($_SESSION['mensaje_exito']); // Limpiar el mensaje para no mostrarlo otra vez ?>
+        <?php unset($_SESSION['mensaje_exito']); ?>
       <?php endif; ?>
 
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <form method="post" class="needs-validation" novalidate>
-            <div class="mb-3">
-              <label for="tecnico" class="form-label">Seleccionar Técnico</label>
-              <select class="form-select" id="tecnico" name="tecnico_id" required>
-                <option value="" disabled selected>-- Selecciona un técnico --</option>
-                <?php foreach ($tecnicos as $tecnico): ?>
-                  <option value="<?= htmlspecialchars($tecnico['id']) ?>">
-                    <?= htmlspecialchars($tecnico['name']) ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
-              <div class="invalid-feedback">Por favor selecciona un técnico.</div>
-            </div>
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-body p-4">
+              <h5 class="card-title mb-4 text-primary">
+                <i class="fas fa-user-cog me-2"></i>Seleccionar Técnico
+              </h5>
+              
+              <form method="post" class="needs-validation" novalidate>
+                <div class="mb-4">
+                  <label for="tecnico" class="form-label fw-semibold">Técnico disponible</label>
+                  <select class="form-select" id="tecnico" name="tecnico_id" required>
+                    <option value="" disabled selected>-- Selecciona un técnico --</option>
+                    <?php foreach ($tecnicos as $tecnico): ?>
+                      <option value="<?= htmlspecialchars($tecnico['id']) ?>">
+                        <?= htmlspecialchars($tecnico['name']) ?>
+                      </option>
+                    <?php endforeach; ?>
+                  </select>
+                  <div class="invalid-feedback">Por favor selecciona un técnico.</div>
+                </div>
 
-            <button type="submit" class="btn btn-primary">Asignar Ticket</button>
-          </form>
+                <div class="d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary px-4 py-2">
+                    <i class="fas fa-user-check me-2"></i>Asignar Ticket
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-4 mt-4 mt-lg-0">
+          <div class="card">
+            <div class="card-body p-4">
+              <h5 class="card-title mb-4 text-primary">
+                <i class="fas fa-info-circle me-2"></i>Información
+              </h5>
+              
+              <div class="d-flex align-items-center mb-3">
+                <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
+                  <i class="fas fa-ticket-alt text-primary"></i>
+                </div>
+                <div>
+                  <small class="text-muted">Ticket ID</small>
+                  <div class="fw-semibold">#<?= htmlspecialchars($ticketId) ?></div>
+                </div>
+              </div>
+              
+              <div class="d-flex align-items-center mb-3">
+                <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
+                  <i class="fas fa-calendar-alt text-primary"></i>
+                </div>
+                <div>
+                  <small class="text-muted">Fecha de asignación</small>
+                  <div class="fw-semibold"><?= date('d/m/Y') ?></div>
+                </div>
+              </div>
+              
+              <div class="d-flex align-items-center">
+                <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
+                  <i class="fas fa-exclamation-circle text-primary"></i>
+                </div>
+                <div>
+                  <small class="text-muted">Estado actual</small>
+                  <div class="fw-semibold"><?= $ticketCerrado ? 'Cerrado' : 'Pendiente' ?></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
