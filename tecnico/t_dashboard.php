@@ -16,7 +16,13 @@ $tecnico_id = $_SESSION['user_id'];
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="/styles/tech.css" rel="stylesheet">
   <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+
     main {
       background-color: #f8f9fc;
       min-height: 100vh;
@@ -132,27 +138,57 @@ $tecnico_id = $_SESSION['user_id'];
                 </thead>
                 <tbody>
                   <?php
-                  $stmtNuevo = $pdo->prepare("SELECT id, subject, priority FROM ticket WHERE assigned_to = :id AND status = 'En Proceso'");
+                  $stmtNuevo = $pdo->prepare("
+  SELECT 
+    t.id AS ticket_id,
+    t.subject,
+    t.priority,
+    a.id AS apply_id
+  FROM 
+    ticket t
+  LEFT JOIN 
+    application_approv a ON a.ticket_id = t.id
+  WHERE 
+    t.assigned_to = :id AND t.status = 'En Proceso'
+");
                   $stmtNuevo->execute(['id' => $tecnico_id]);
                   $ticketsNuevo = $stmtNuevo->fetchAll(PDO::FETCH_ASSOC);
 
                   if ($ticketsNuevo) {
                     foreach ($ticketsNuevo as $row) {
+                      $ticketId = $row['ticket_id'];
+                      $applyId = $row['apply_id'];
+
                       echo "<tr>
-                              <td class='fw-bold'>#{$row['id']}</td>
-                              <td>{$row['subject']}</td>
-                              <td>" . prioridadBadge($row['priority']) . "</td>
-                              <td>
-                                <a href='manage-tickets.php?id={$row['id']}' class='btn btn-sm btn-success'>
-                                  <i class='fas fa-reply me-1'></i>Responder
-                                </a>
-                              </td>
-                            </tr>";
+            <td class='fw-bold'>#{$ticketId}</td>
+            <td>{$row['subject']}</td>
+            <td>" . prioridadBadge($row['priority']) . "</td>
+            <td>
+              <a href='manage-tickets.php?id={$ticketId}' class='btn btn-sm btn-success'>
+                <i class='fas fa-reply me-1'></i>Responder
+              </a>
+            </td>
+            <td>";
+
+                      if ($applyId) {
+                        echo "<a href='chat-tech-admin.php?apply_id={$applyId}' class='btn btn-sm btn-info'>
+              <i class='fas fa-check me-1'></i>Aprobación
+            </a>";
+                      } else {
+                        echo "<a href='chat-tech-admin.php?ticket_id={$ticketId}' class='btn btn-sm btn-warning'>
+              <i class='fas fa-plus me-1'></i>Solicitar Aprobación
+            </a>";
+                      }
+
+                      echo "</td>
+          </tr>";
                     }
                   } else {
-                    echo "<tr><td colspan='4' class='text-center text-muted'>No hay tickets nuevos asignados</td></tr>";
+                    echo "<tr><td colspan='5' class='text-center text-muted'>No hay tickets nuevos asignados</td></tr>";
                   }
                   ?>
+
+
                 </tbody>
               </table>
             </div>
@@ -202,4 +238,5 @@ $tecnico_id = $_SESSION['user_id'];
     </div>
   </div>
 </body>
+
 </html>

@@ -128,4 +128,26 @@
   .bg-gradient-light {
     transition: all 0.3s ease;
   }
+  #leftbar {
+    transition: all 0.3s ease;
+  }
+  .offcanvas-md {
+    position: fixed;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    z-index: 1040;
+  }
+  @media (min-width: 768px) {
+    .offcanvas-md {
+      position: sticky;
+      transform: none !important;
+      visibility: visible !important;
+      height: calc(100vh - 56px);
+      top: 6px;
+    }
+    .offcanvas-backdrop {
+      display: none !important;
+    }
+  }
 </style>

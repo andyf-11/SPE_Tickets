@@ -50,8 +50,32 @@ if ($filtro !== 'todos') {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="../assets/css/style.css" rel="stylesheet">
   <link href="../styles/superv.css" rel="stylesheet">
+
+   <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 200;
+    }
+
+    @media (min-width: 768px) {
+      #leftbar {
+        position: fixed;
+        top: 42px;
+        left: 0;
+        height: calc(100vh - 52px);
+        z-index: 1030;
+        font-weight: 300;
+      }
+
+      main {
+        margin-left: 250px;
+        /* Ancho del sidebar */
+      }
+    }
+  </style>
 </head>
 <body>
   <?php include("header.php"); ?>

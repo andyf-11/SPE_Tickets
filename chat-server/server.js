@@ -12,7 +12,6 @@ console.log("🔍 ENV cargado:", {
   DB_NAME: process.env.DB_NAME
 });
 
-
 const app = express();
 app.use(cors());
 
@@ -42,8 +41,8 @@ db.connect(err => {
 io.on('connection', (socket) => {
   console.log('🟢 Usuario conectado');
 
-  socket.on('joinRoom', (chat_id) => {
-    const room = 'chat_' + chat_id;
+  // El frontend ya envía el nombre completo de la sala: apply_15, chat_12, etc.
+  socket.on('joinRoom', (room) => {
     socket.join(room);
     console.log(`🔗 Usuario se unió a la sala ${room}`);
   });
@@ -57,6 +56,7 @@ io.on('connection', (socket) => {
     }
 
     if (tipo_chat === 'admin') {
+      // Chat técnico ↔ admin
       db.query(
         "INSERT INTO messg_tech_admin (apply_id, emisor, message, date) VALUES (?, ?, ?, NOW())",
         [chat_id, sender, mensaje],
@@ -66,7 +66,10 @@ io.on('connection', (socket) => {
             return;
           }
 
-          io.to('apply_' + chat_id).emit('newMessage', {
+          const sala = `apply_${chat_id}`;
+          console.log(`📤 Mensaje técnico/admin a sala ${sala}:`, mensaje);
+
+          io.to(sala).emit('newMessage', {
             chat_id,
             sender,
             mensaje,
@@ -76,6 +79,7 @@ io.on('connection', (socket) => {
         }
       );
     } else if (tipo_chat === 'usuario') {
+      // Chat técnico ↔ usuario
       db.query(
         "INSERT INTO messg_tech_user (chat_id, sender, message, timestamp) VALUES (?, ?, ?, NOW())",
         [chat_id, sender, mensaje],
@@ -85,7 +89,10 @@ io.on('connection', (socket) => {
             return;
           }
 
-          io.to('chat_' + chat_id).emit('newMessage', {
+          const sala = `chat_${chat_id}`;
+          console.log(`📤 Mensaje técnico/usuario a sala ${sala}:`, mensaje);
+
+          io.to(sala).emit('newMessage', {
             chat_id,
             sender,
             mensaje,
