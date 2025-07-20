@@ -37,6 +37,7 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     <title>Chat con Técnico</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link href="../styles/admin.css" rel="stylesheet">
     <style>
         body {
@@ -122,7 +123,7 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <?php include("header.php"); ?>
 
-    <div class="container py-4">
+    <div class="container py-4 mt-5">
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <!-- Encabezado del chat -->
@@ -224,24 +225,24 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
                 <!-- Formulario de mensajes -->
                 <?php if ($solicitud['status'] === 'pendiente'): ?>
-                    <form method="post" action="send-message.php" class="bg-white rounded-3 p-4 shadow-sm">
-                        <input type="hidden" name="apply_id" value="<?= $apply_id ?>">
+                    <form id="formMensaje" class="bg-white rounded-3 p-4 shadow-sm">
+                        <input type="hidden" id="apply_id" value="<?= $apply_id ?>">
 
                         <div class="mb-3">
                             <label for="message" class="form-label fw-bold">Escribe tu mensaje:</label>
-                            <textarea name="message" id="message" rows="3" class="form-control message-input"
+                            <textarea id="message" rows="3" class="form-control message-input"
                                 placeholder="Escribe tu mensaje aquí..." required></textarea>
                         </div>
 
                         <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
                             <div class="d-flex flex-wrap gap-2">
-                                <button type="submit" name="action" value="aprobar" class="btn btn-success action-btn">
+                                <button type="submit" data-action="aprobar" class="btn btn-success action-btn">
                                     <i class="fas fa-check me-1"></i> Aprobar
                                 </button>
-                                <button type="submit" name="action" value="rechazar" class="btn btn-danger action-btn">
+                                <button type="submit" data-action="rechazar" class="btn btn-danger action-btn">
                                     <i class="fas fa-times me-1"></i> Rechazar
                                 </button>
-                                <button type="submit" name="action" value="resuelto" class="btn btn-primary action-btn">
+                                <button type="submit" data-action="resuelto" class="btn btn-primary action-btn">
                                     <i class="fas fa-paper-plane me-1"></i> Enviar
                                 </button>
                             </div>
@@ -250,17 +251,8 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
                             </a>
                         </div>
                     </form>
-                <?php else: ?>
-                    <div class="alert alert-info d-flex align-items-center">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Esta solicitud ya fue finalizada como:  <strong><?= ucfirst($solicitud['status']) ?></strong>.
-                    </div>
-                    <div class="text-center">
-                        <a href="chat-list-admin.php" class="btn btn-primary px-4 action-btn">
-                            <i class="fas fa-arrow-left me-1"></i> Volver a la lista
-                        </a>
-                    </div>
                 <?php endif; ?>
+
             </div>
         </div>
     </div>
@@ -275,6 +267,100 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
             }
         });
     </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const socket = io("http://localhost:3000");
+            const applyId = <?= $apply_id ?>;
+            const chatContainer = document.querySelector('.chat-container');
+            const messageInput = document.getElementById("message");
+            const form = document.getElementById("formMensaje");
+
+            // Unirse a la sala del chat
+            const room = `apply_${applyId}`;
+            socket.emit("joinRoom", room);
+            console.log("✅ Unido a sala:", room);
+
+            // Escuchar nuevos mensajes
+            socket.on("newMessage", (data) => {
+                console.log("📥 Mensaje recibido:", data);
+
+                // Validar que sea para esta sala y tipo admin
+                if (data.tipo_chat !== "admin") {
+                    console.warn("⛔ tipo_chat no es 'admin'");
+                    return;
+                }
+
+                if (parseInt(data.chat_id) !== applyId) {
+                    console.warn("⛔ apply_id no coincide", data.chat_id, applyId);
+                    return;
+                }
+
+                const wrapper = document.createElement("div");
+                wrapper.className = (data.sender === 'admin') ? 'align-self-end' : 'align-self-start';
+
+                wrapper.innerHTML = `
+                <div class="d-flex ${data.sender === 'admin' ? 'flex-row-reverse' : 'flex-row'} align-items-end">
+                    ${data.sender !== 'admin' ? `
+                        <div class="avatar me-2">
+                            <i class="fas fa-user-tie text-muted"></i>
+                        </div>` : ''}
+                    <div>
+                        <div class="${data.sender === 'admin' ? 'message-admin' : 'message-tech'} p-3 shadow-sm">
+                            ${data.mensaje}
+                        </div>
+                        <small class="d-block message-time mt-1 ${data.sender === 'admin' ? 'text-end' : 'text-start'}">
+                            ${new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </small>
+                    </div>
+                </div>
+            `;
+
+                chatContainer.appendChild(wrapper);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+
+            // Envío de mensajes
+            if (form) {
+                form.addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    const mensaje = messageInput.value.trim();
+                    if (!mensaje) return;
+
+                    const action = e.submitter?.dataset.action || "resuelto";
+
+                    socket.emit("sendMessage", {
+                        chat_id: applyId,
+                        tipo_chat: "admin",
+                        sender: "admin",
+                        mensaje: mensaje
+                    });
+
+                    messageInput.value = "";
+                    messageInput.focus();
+
+                    // Enviar actualización de estado (opcional)
+                    if (["aprobar", "rechazar", "resuelto"].includes(action)) {
+                        fetch("update-status.php", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body: `apply_id=${applyId}&action=${action}`
+                        }).then(() => {
+                            location.reload();
+                        });
+                    }
+                });
+            }
+
+            // Scroll inicial
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
+    </script>
+
+
 </body>
 
 </html>

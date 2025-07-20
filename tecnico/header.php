@@ -65,3 +65,4 @@ $unreadNotifications = $stmt->fetchColumn();
   </div>
 </nav>
 <!-- END HEADER -->
+

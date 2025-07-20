@@ -60,83 +60,21 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <title>Lista de Chats - Soporte Técnico</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <link href="../styles/tech.css" rel="stylesheet" />
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-    }
-
-    .fixed-header {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 1030;
-    }
-
-    .layout-wrapper {
-      display: flex;
-      margin-top: 6px; /* Altura del navbar */
-    }
-
-    .sidebar {
-      width: 250px;
-      height: calc(100vh - 56px);
-      position: fixed;
-      top: 56px;
-      left: 0;
-      overflow-y: auto;
-      background-color: #fff;
-      border-right: 1px solid #dee2e6;
-      z-index: 1020;
-    }
-
-    .main-content {
-      margin-left: 250px;
-      padding: 2rem;
-      width: calc(100% - 250px);
-      background-color: #f8f9fc;
-      min-height: calc(100vh - 56px);
-    }
-
-    .chat-card {
-      border-left: 5px solid #0d6efd;
-      transition: box-shadow 0.2s;
-    }
-
-    .chat-card.unread {
-      background-color: #f8f9fa;
-    }
-
-    .chat-card:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .status-aprobado {
-      color: green;
-    }
-
-    .status-pendiente {
-      color: orange;
-    }
-
-    .status-rechazado {
-      color: red;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="../styles/tickets/chat-list.css" rel="stylesheet">
 </head>
 
 <body>
   <!-- HEADER -->
-  <div class="fixed-header">
+  <header>
     <?php include("header.php"); ?>
-  </div>
+  </header>
 
   <div class="layout-wrapper">
     <!-- LEFTBAR -->
-    <div class="sidebar">
+    <aside class="sidebar">
       <?php include("leftbar.php"); ?>
-    </div>
+    </aside>
 
     <!-- CONTENIDO -->
     <main class="main-content">
@@ -171,8 +109,7 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="row">
           <?php foreach ($chats as $chat): ?>
             <div class="col-md-6 col-lg-4 mb-4">
-              <a href="chat-tech-admin.php?apply_id=<?= $chat['apply_id'] ?>&ticket_id=<?= $chat['ticket_id'] ?>"
-                 class="text-decoration-none">
+              <a href="chat-tech-admin.php?apply_id=<?= $chat['apply_id'] ?>&ticket_id=<?= $chat['ticket_id'] ?>" class="text-decoration-none">
                 <div class="card chat-card <?= $chat['last_sender'] == 'admin' ? 'unread' : '' ?>">
                   <div class="card-header d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">Ticket #<?= htmlspecialchars($chat['ticket_id']) ?></h6>
@@ -204,11 +141,7 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="alert alert-info">
           <h5 class="alert-heading">No hay conversaciones</h5>
           <p class="mb-0">
-            <?php if ($filtro != 'todos'): ?>
-              No tienes conversaciones en el periodo seleccionado.
-            <?php else: ?>
-              No tienes conversaciones activas.
-            <?php endif; ?>
+            <?= $filtro != 'todos' ? 'No tienes conversaciones en el periodo seleccionado.' : 'No tienes conversaciones activas.' ?>
           </p>
         </div>
       <?php endif; ?>
@@ -219,3 +152,4 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </body>
 
 </html>
+

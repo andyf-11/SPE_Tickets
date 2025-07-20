@@ -100,6 +100,7 @@ $labelsDias = json_encode(array_map(fn($d) => "Día $d", $dias));
 $valoresUnicas = json_encode(array_values($visitasUnicas));
 $valoresTotales = json_encode(array_values($visitasTotales));
 
+
 $ultimoDiaMes = date("t");
 $hoy = date("j");
 $esFinDeMes = ($hoy == $ultimoDiaMes);

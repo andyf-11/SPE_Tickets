@@ -96,251 +96,165 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <link href="../styles/tech.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f8f9fc;
-    }
-
-    /*.content-wrapper {
-      padding-top: 5px; /* Altura del navbar */
-
-
-    #leftbar-wrapper {
-      position: fixed;
-      top: 56px;
-      left: 0;
-      height: calc(100vh - 56px);
-      width: 240px;
-      overflow-y: auto;
-      background-color: #fff;
-      border-right: 1px solid #dee2e6;
-      z-index: 1020;
-    }
-
-    #main-content {
-      margin-left: 0px;
-      padding: 2rem;
-      min-height: calc(100vh - 56px);
-    }
-
-    @media (max-width: 767.98px) {
-      #leftbar-wrapper {
-        position: static;
-        width: 100%;
-        height: auto;
-        overflow: visible;
-        border-right: none;
-      }
-
-      #main-content {
-        margin-left: 0;
-        padding: 1rem;
-      }
-
-      .content-wrapper {
-        padding-top: 56px;
-      }
-    }
-
-    .card-ticket {
-      margin-bottom: 1.5rem;
-    }
-
-    .badge-status {
-      font-size: 0.75rem;
-    }
-
-    .badge-cerrado {
-      background-color: #28a745;
-      color: #fff;
-    }
-
-    .badge-en-proceso {
-      background-color: #ffc107;
-      color: #000;
-    }
-
-    .user-avatar {
-      width: 45px;
-      height: 45px;
-      object-fit: cover;
-    }
-
-    .ticket-text {
-      white-space: pre-wrap;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="../styles/tickets/manage-tickets.css" rel="stylesheet">
 </head>
 
 <body>
   <!-- Header fijo -->
   <?php include("header.php"); ?>
+  <?php $page = 'manage-tickets'; ?>
+  <?php include("leftbar.php"); ?>
 
-  <div class="container-fluid content-wrapper">
-    <div class="row">
-      <!-- Sidebar fijo -->
-      <div class="col-md-3 col-lg-2 p-0">
-        <div id="leftbar-wrapper">
-          <?php $page = 'manage-tickets'; ?>
-          <?php include("leftbar.php"); ?>
-        </div>
+  <!-- Contenido -->
+  <main class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="t_dashboard.php"><i class="fas fa-home me-1"></i> Inicio</a></li>
+          <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-ticket-alt me-1"></i> Tickets Asignados</li>
+        </ol>
+      </nav>
+      <h3 class="mb-0"><i class="fas fa-ticket me-2"></i>Tickets Asignados</h3>
+    </div>
+
+    <?php if (isset($mensaje_exito)): ?>
+      <div class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i><?= htmlspecialchars($mensaje_exito) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
+    <?php elseif (isset($error)): ?>
+      <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i><?= htmlspecialchars($error) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <?php endif; ?>
 
-      <!-- Contenido -->
-      <div class="col-md-9 col-lg-10">
-        <main id="main-content">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <nav aria-label="breadcrumb">
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="t_dashboard.php"><i class="fas fa-home me-1"></i> Inicio</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-ticket-alt me-1"></i> Tickets Asignados</li>
-              </ol>
-            </nav>
-            <h3 class="mb-0"><i class="fas fa-ticket me-2"></i>Tickets Asignados</h3>
-          </div>
+    <?php
+    try {
+      $stmt = $pdo->prepare("
+        SELECT t.*, e.name AS edificio_nombre
+        FROM ticket t
+        LEFT JOIN edificios e ON t.edificio_id = e.id
+        WHERE t.assigned_to = :tecnico_id 
+          AND t.status IN ('En Proceso', 'Cerrado') 
+        ORDER BY t.id DESC
+      ");
+      $stmt->execute([':tecnico_id' => $tecnico_id]);
 
-          <?php if (isset($mensaje_exito)): ?>
-            <div class="alert alert-success alert-dismissible fade show">
-              <i class="fas fa-check-circle me-2"></i><?= htmlspecialchars($mensaje_exito) ?>
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          <?php elseif (isset($error)): ?>
-            <div class="alert alert-danger alert-dismissible fade show">
-              <i class="fas fa-exclamation-circle me-2"></i><?= htmlspecialchars($error) ?>
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          <?php endif; ?>
+      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $ticketId = htmlspecialchars($row['ticket_id']);
+        $subject = htmlspecialchars($row['subject']);
+        $postingDate = htmlspecialchars($row['posting_date']);
+        $status = htmlspecialchars($row['status']);
+        $ticketText = htmlspecialchars($row['ticket']);
+        $adminRemark = htmlspecialchars($row['admin_remark']);
+        $adminRemarkDate = htmlspecialchars($row['admin_remark_date']);
+        $id = (int) $row['id'];
 
-          <?php
-          try {
-            $stmt = $pdo->prepare("
-              SELECT t.*, e.name AS edificio_nombre
-              FROM ticket t
-              LEFT JOIN edificios e ON t.edificio_id = e.id
-              WHERE t.assigned_to = :tecnico_id 
-                AND t.status IN ('En Proceso', 'Cerrado') 
-              ORDER BY t.id DESC
-            ");
-            $stmt->execute([':tecnico_id' => $tecnico_id]);
+        $stmtChat = $pdo->prepare("SELECT status_chat FROM chat_user_tech WHERE ticket_id = ?");
+        $stmtChat->execute([$id]);
+        $chatInfo = $stmtChat->fetch();
+        $btnText = ($chatInfo && $chatInfo['status_chat'] === 'abierto') ? 'Continuar Consulta' : 'Iniciar Consulta';
+        ?>
 
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-              $ticketId = htmlspecialchars($row['ticket_id']);
-              $subject = htmlspecialchars($row['subject']);
-              $postingDate = htmlspecialchars($row['posting_date']);
-              $status = htmlspecialchars($row['status']);
-              $ticketText = htmlspecialchars($row['ticket']);
-              $adminRemark = htmlspecialchars($row['admin_remark']);
-              $adminRemarkDate = htmlspecialchars($row['admin_remark_date']);
-              $id = (int) $row['id'];
-
-              $stmtChat = $pdo->prepare("SELECT status_chat FROM chat_user_tech WHERE ticket_id = ?");
-              $stmtChat->execute([$id]);
-              $chatInfo = $stmtChat->fetch();
-              $btnText = ($chatInfo && $chatInfo['status_chat'] === 'abierto') ? 'Continuar Consulta' : 'Iniciar Consulta';
-              ?>
-
-              <div class="card card-ticket">
-                <div class="card-header">
-                  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                    <div>
-                      <h5 class="mb-2"><?= $subject ?></h5>
-                      <div class="d-flex flex-wrap align-items-center gap-2">
-                        <span class="text-muted small"><i class="far fa-id-card me-1"></i>Ticket #<?= $ticketId ?></span>
-                        <span class="text-muted small"><i class="far fa-calendar-alt me-1"></i><?= $postingDate ?></span>
-                        <span class="badge badge-status <?= ($status === 'Cerrado') ? 'badge-cerrado' : 'badge-en-proceso'; ?>">
-                          <i class="fas fa-<?= ($status === 'Cerrado') ? 'lock' : 'spinner'; ?> me-1"></i><?= $status ?>
-                        </span>
-                        <?php if (!empty($row['edificio_nombre'])): ?>
-                          <span class="badge badge-edificio badge-status">
-                            <i class="fas fa-building me-1"></i><?= htmlspecialchars($row['edificio_nombre']) ?>
-                          </span>
-                        <?php endif; ?>
-                      </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                      <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#ticketDetails<?= $id ?>" aria-expanded="false" aria-controls="ticketDetails<?= $id ?>">
-                        <i class="fas fa-<?= ($status === 'Cerrado') ? 'eye' : 'edit'; ?> me-1"></i>
-                        <?= ($status === 'Cerrado') ? 'Ver Detalles' : 'Responder' ?>
-                      </button>
-
-                      <?php if ($status === 'Cerrado'): ?>
-                        <button class="btn btn-sm btn-outline-secondary" disabled>
-                          <i class="fa-solid fa-comment-slash me-1"></i> Chat Cerrado
-                        </button>
-                      <?php else: ?>
-                        <a href="open-chat-user.php?ticket_id=<?= $id ?>" class="btn btn-sm btn-success">
-                          <i class="fa-solid fa-comments me-1"></i> <?= $btnText ?>
-                        </a>
-                      <?php endif; ?>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="collapse" id="ticketDetails<?= $id ?>">
-                  <div class="card-body">
-                    <div class="d-flex align-items-start mb-4">
-                      <img src="../assets/img/user.png" alt="Usuario" class="user-avatar me-3 rounded-circle" />
-                      <div class="ticket-text"><?= nl2br($ticketText) ?></div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <?php if ($status === 'Cerrado'): ?>
-                      <div class="mb-4">
-                        <h6 class="d-flex align-items-center gap-2 mb-3">
-                          <i class="fas fa-check-circle text-success"></i> Respuesta enviada
-                        </h6>
-                        <div class="alert alert-light border">
-                          <div class="d-flex align-items-start">
-                            <img src="../assets/img/Logo-Gobierno_small.png" alt="Técnico" class="user-avatar me-3 rounded-circle" style="width: 35px; height: 35px;" />
-                            <div>
-                              <?= nl2br($adminRemark) ?>
-                              <div class="text-muted small mt-2">
-                                <i class="far fa-clock me-1"></i> Enviado el: <?= $adminRemarkDate ?>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    <?php else: ?>
-                      <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-                        <h6 class="d-flex align-items-center gap-2 mb-3">
-                          <i class="fas fa-reply text-primary"></i> Responder al ticket
-                        </h6>
-                        <div class="mb-3">
-                          <textarea class="form-control" id="aremark<?= $id ?>" name="aremark" rows="5"
-                            placeholder="Escribe tu respuesta aquí..." required><?= htmlspecialchars($adminRemark) ?></textarea>
-                          <div class="invalid-feedback">Por favor ingrese un comentario.</div>
-                        </div>
-                        <input type="hidden" name="frm_id" value="<?= $id ?>" />
-                        <div class="d-flex justify-content-end gap-2">
-                          <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse"
-                            data-bs-target="#ticketDetails<?= $id ?>">Cancelar</button>
-                          <button type="submit" name="update" class="btn btn-primary">
-                            <i class="fas fa-paper-plane me-1"></i> Enviar y Cerrar Ticket
-                          </button>
-                        </div>
-                      </form>
-                    <?php endif; ?>
-                  </div>
+        <div class="card card-ticket">
+          <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+              <div>
+                <h5 class="mb-2"><?= $subject ?></h5>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <span class="text-muted small"><i class="far fa-id-card me-1"></i>Ticket #<?= $ticketId ?></span>
+                  <span class="text-muted small"><i class="far fa-calendar-alt me-1"></i><?= $postingDate ?></span>
+                  <span class="badge badge-status <?= ($status === 'Cerrado') ? 'badge-cerrado' : 'badge-en-proceso'; ?>">
+                    <i class="fas fa-<?= ($status === 'Cerrado') ? 'lock' : 'spinner'; ?> me-1"></i><?= $status ?>
+                  </span>
+                  <?php if (!empty($row['edificio_nombre'])): ?>
+                    <span class="badge badge-edificio badge-status">
+                      <i class="fas fa-building me-1"></i><?= htmlspecialchars($row['edificio_nombre']) ?>
+                    </span>
+                  <?php endif; ?>
                 </div>
               </div>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#ticketDetails<?= $id ?>" aria-expanded="false" aria-controls="ticketDetails<?= $id ?>">
+                  <i class="fas fa-<?= ($status === 'Cerrado') ? 'eye' : 'edit'; ?> me-1"></i>
+                  <?= ($status === 'Cerrado') ? 'Ver Detalles' : 'Responder' ?>
+                </button>
 
-              <?php
-            }
-          } catch (PDOException $e) {
-            echo '<div class="alert alert-danger alert-dismissible fade show">
-                    <i class="fas fa-exclamation-triangle me-2"></i>Error al obtener tickets: ' . htmlspecialchars($e->getMessage()) . '
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                  </div>';
-          }
-          ?>
-        </main>
-      </div>
-    </div>
-  </div>
+                <?php if ($status === 'Cerrado'): ?>
+                  <button class="btn btn-sm btn-outline-secondary" disabled>
+                    <i class="fa-solid fa-comment-slash me-1"></i> Chat Cerrado
+                  </button>
+                <?php else: ?>
+                  <a href="open-chat-user.php?ticket_id=<?= $id ?>" class="btn btn-sm btn-success">
+                    <i class="fa-solid fa-comments me-1"></i> <?= $btnText ?>
+                  </a>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+
+          <div class="collapse" id="ticketDetails<?= $id ?>">
+            <div class="card-body">
+              <div class="d-flex align-items-start mb-4">
+                <img src="../assets/img/user.png" alt="Usuario" class="user-avatar me-3 rounded-circle" />
+                <div class="ticket-text"><?= nl2br($ticketText) ?></div>
+              </div>
+              <hr class="my-4">
+
+              <?php if ($status === 'Cerrado'): ?>
+                <div class="mb-4">
+                  <h6 class="d-flex align-items-center gap-2 mb-3">
+                    <i class="fas fa-check-circle text-success"></i> Respuesta enviada
+                  </h6>
+                  <div class="alert alert-light border">
+                    <div class="d-flex align-items-start">
+                      <img src="../assets/img/Logo-Gobierno_small.png" alt="Técnico" class="user-avatar me-3 rounded-circle" style="width: 35px; height: 35px;" />
+                      <div>
+                        <?= nl2br($adminRemark) ?>
+                        <div class="text-muted small mt-2">
+                          <i class="far fa-clock me-1"></i> Enviado el: <?= $adminRemarkDate ?>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <?php else: ?>
+                <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                  <h6 class="d-flex align-items-center gap-2 mb-3">
+                    <i class="fas fa-reply text-primary"></i> Responder al ticket
+                  </h6>
+                  <div class="mb-3">
+                    <textarea class="form-control" id="aremark<?= $id ?>" name="aremark" rows="5"
+                      placeholder="Escribe tu respuesta aquí..." required><?= htmlspecialchars($adminRemark) ?></textarea>
+                    <div class="invalid-feedback">Por favor ingrese un comentario.</div>
+                  </div>
+                  <input type="hidden" name="frm_id" value="<?= $id ?>" />
+                  <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse"
+                      data-bs-target="#ticketDetails<?= $id ?>">Cancelar</button>
+                    <button type="submit" name="update" class="btn btn-primary">
+                      <i class="fas fa-paper-plane me-1"></i> Enviar y Cerrar Ticket
+                    </button>
+                  </div>
+                </form>
+              <?php endif; ?>
+            </div>
+          </div>
+        </div>
+
+        <?php
+      }
+    } catch (PDOException $e) {
+      echo '<div class="alert alert-danger alert-dismissible fade show">
+              <i class="fas fa-exclamation-triangle me-2"></i>Error al obtener tickets: ' . htmlspecialchars($e->getMessage()) . '
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>';
+    }
+    ?>
+  </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
