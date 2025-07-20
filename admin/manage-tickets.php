@@ -23,7 +23,9 @@ if (isset($_POST['update'])) {
   $stmt = $pdo->prepare("UPDATE ticket SET admin_remark = :remark, status = 'Cerrado' WHERE id = :id");
   $stmt->execute(['remark' => $newRemark, 'id' => $fid]);
 
-  echo '<script>alert("Ticket ha sido actualizado correctamente"); location.replace(document.referrer)</script>';
+  $_SESSION['ticket_updated'] = true;
+  header("Location: " . $_SERVER["HTP_REFERER"]);
+  exit;
 }
 ?>
 
@@ -39,6 +41,30 @@ if (isset($_POST['update'])) {
   <link href="../assets/css/style-bootstrap5.css" rel="stylesheet" />
   <link href="../styles/admin.css" rel="stylesheet">
 </head>
+
+<?php if (isset($_SESSION['ticket_updated'])): ?>
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055">
+    <div id="ticketToast" class="toast align-items-center text-white bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          ✅ Ticket actualizado correctamente.
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+      </div>
+    </div>
+  </div>
+  <script>
+    setTimeout(() => {
+      const toastEl = document.getElementById('ticketToast');
+      if (toastEl) {
+        const toast = bootstrap.Toast.getOrCreateInstance(toastEl);
+        toast.hide();
+      }
+    }, 3000);
+  </script>
+  <?php unset($_SESSION['ticket_updated']); ?>
+<?php endif; ?>
+
 
 <body>
   <?php include("header.php"); ?>

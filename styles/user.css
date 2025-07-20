@@ -211,6 +211,7 @@ textarea {
 :root {
     --primary-color: #6240d4;
     --secondary-color: #6c757d;
+    --profile-color: #61d1c2;
 }
 
 .profile-card {

@@ -108,7 +108,7 @@
     <!-- Footer del sidebar mejorado -->
     <div class="p-3 border-top text-center bg-light">
       <div class="d-flex justify-content-center gap-2 mb-2">
-        <a href="#" class="text-muted"><i class="fas fa-question-circle"></i></a>
+        <a href="ayuda/user/reglamento.php" class="text-secondary" data-bs-toggle="modal" data-bs-target="#tutorialModal" title="tutorial de uso"><i class="fas fa-question-circle"></i></a>
         <a href="#" class="text-muted"><i class="fas fa-cog"></i></a>
         <a href="logout.php" class="text-muted"><i class="fas fa-sign-out-alt"></i></a>
       </div>
@@ -118,6 +118,7 @@
   </div>
 </div>
 
+<?php include("ayuda/user/reglamento.php");?>
 <style>
   .hover-bg-light:hover {
     background-color: var(--sidebar-hover) !important;

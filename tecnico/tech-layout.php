@@ -18,21 +18,25 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <title>Lista de Técnicos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="../styles/tech.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="../styles/roles-layouts/tech-layout.css" rel="stylesheet" />
+
 </head>
 
 <body>
-  <?php include("header.php"); ?>
+  <header>
+    <?php include("header.php"); ?>
+  </header>
 
   <div class="sidebar-fixed d-none d-md-block">
     <?php include("leftbar.php"); ?>
   </div>
 
-  <main class="px-4 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
+  <main>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+      <nav aria-label="breadcrumb" class="mb-2 mb-md-0">
+        <ol class="breadcrumb mb-0">
           <li class="breadcrumb-item"><a href="t_dashboard.php"><i class="fas fa-home me-2"></i>Inicio</a></li>
           <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-users-cog me-2"></i>Técnicos</li>
         </ol>
@@ -42,7 +46,7 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </button>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
       <h2 class="mb-0 text-dark">
         <i class="fas fa-users-cog me-2"></i>Lista de Técnicos
       </h2>
@@ -66,7 +70,7 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div class="card card-technician mb-3">
             <div class="card-body">
               <div class="d-flex align-items-start gap-3 mb-3">
-                <img src="../assets/img/Logo-Gobierno_small.png" alt="Técnico" class="technician-avatar">
+                <img src="../assets/img/user.png" alt="Técnico" class="technician-avatar">
                 <div>
                   <h5 class="card-title mb-1"><?= htmlspecialchars($tecnico['name']) ?></h5>
                   <span class="badge bg-primary rounded-pill">
@@ -128,4 +132,5 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
