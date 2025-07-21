@@ -2,6 +2,7 @@
 session_start();
 require_once("dbconnection.php");
 require("checklogin.php");
+require_once 'data/notifications_helper.php'; // Importamos el helper
 check_login("usuario");
 
 $page = 'create-ticket';
@@ -26,14 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $subject = trim($_POST['subject']);
   $priority = $_POST['priority'];
   $ticket = trim($_POST['description']);
-  $edificio_id = $_POST['edificio_id'] ?? null; // ✅ Capturar el edificio
+  $edificio_id = $_POST['edificio_id'] ?? null;
   $st = "Open";
   $pdate = date('Y-m-d H:i:s');
 
   if (!$subject || !$priority || !$ticket || !$edificio_id) {
     $error = "Por favor completa todos los campos.";
   } else {
-    // ✅ Insertar ticket con edificio_id
     $stmt = $pdo->prepare("
       INSERT INTO ticket(ticket_id, email_id, subject, priority, ticket, status, posting_date, edificio_id) 
       VALUES(:tid, :email, :subject, :priority, :ticket, :status, :pdate, :edificio_id)
@@ -51,24 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':edificio_id' => $edificio_id
       ])
     ) {
-      // Notificar supervisores y admins
-      $stmt_sup = $pdo->prepare("SELECT id FROM user WHERE role = 'supervisor'");
-      $stmt_sup->execute();
-      $supervisores = $stmt_sup->fetchAll(PDO::FETCH_COLUMN);
-
-      $stmt_admin = $pdo->prepare("SELECT id FROM user WHERE role = 'admin'");
-      $stmt_admin->execute();
-      $admins = $stmt_admin->fetchAll(PDO::FETCH_COLUMN);
-
-      $mensaje = "Nuevo ticket #$tid creado por el usuario $email.";
-      $noti = $pdo->prepare("INSERT INTO notifications (user_id, ticket_id, type, message) VALUES (?, ?, 'nuevo_ticket', ?)");
-
-      foreach ($supervisores as $sup_id) {
-        $noti->execute([$sup_id, $tid, $mensaje]);
-      }
-      foreach ($admins as $admin_id) {
-        $noti->execute([$admin_id, $tid, $mensaje]);
-      }
+      // 🔔 Notificar supervisores y admins usando el helper
+      notificarCreacionTicket($tid);
 
       $show_success_toast = true;
       $_POST = [];
@@ -78,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">

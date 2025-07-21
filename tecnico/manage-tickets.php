@@ -2,11 +2,11 @@
 session_start();
 require_once("dbconnection.php");
 require("checklogin.php");
+require_once '../assets/data/notifications_helper.php'; // ✅ Importamos el helper
 check_login("tecnico");
 
 $tecnico_id = $_SESSION['user_id'] ?? 0;
 
-// Procesar respuesta del técnico
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_POST['aremark'])) {
   $ticketId = intval($_POST['frm_id']);
   $remark = trim($_POST['aremark']);
@@ -32,43 +32,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
       ]);
 
       if ($stmt->rowCount() > 0) {
-        $stmt = $pdo->prepare("SELECT id FROM user WHERE role = 'admin' LIMIT 1");
-        $stmt->execute();
-        $admin = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($admin) {
-          $mensaje = "El técnico ha respondido al ticket (ID interno: $ticketId).";
-          $stmt = $pdo->prepare("
-            INSERT INTO notifications (user_id, message, is_read, created_at) 
-            VALUES (:user_id, :message, 0, NOW())
-          ");
-          $stmt->execute([
-            ':user_id' => $admin['id'],
-            ':message' => $mensaje
-          ]);
-        }
-
-        $stmt = $pdo->prepare("SELECT email_id FROM ticket WHERE id = :ticket_id LIMIT 1");
+        // Obtener el ID del usuario dueño del ticket
+        $stmt = $pdo->prepare("SELECT u.id 
+                               FROM user u 
+                               JOIN ticket t ON t.email_id = u.email 
+                               WHERE t.id = :ticket_id LIMIT 1");
         $stmt->execute([':ticket_id' => $ticketId]);
-        $ticketEmail = $stmt->fetchColumn();
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+        $id_usuario = $usuario['id'] ?? null;
 
-        if ($ticketEmail) {
-          $stmt = $pdo->prepare("SELECT id FROM user WHERE email = :email LIMIT 1");
-          $stmt->execute([':email' => $ticketEmail]);
-          $ticketUser = $stmt->fetch(PDO::FETCH_ASSOC);
-
-          if ($ticketUser) {
-            $mensajeUsuario = "El técnico ha respondido tu ticket (ID interno: $ticketId). Revisa tu panel de tickets.";
-
-            $stmt = $pdo->prepare("
-              INSERT INTO notifications (user_id, message, is_read, created_at) 
-              VALUES (:user_id, :message, 0, NOW())
-            ");
-            $stmt->execute([
-              ':user_id' => $ticketUser['id'],
-              ':message' => $mensajeUsuario
-            ]);
-          }
+        // 🔔 Notificar al usuario, supervisor y admin
+        if ($id_usuario) {
+          notificarRespuestaTicket($ticketId, $id_usuario);
         }
 
         $pdo->commit();

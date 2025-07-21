@@ -98,7 +98,7 @@
     <div class="p-3 border-top text-center bg-light">
       <div class="d-flex justify-content-center gap-2 mb-2">
         <a href="change-password.php" class="text-muted"><i class="fas fa-lock"></i></a>
-        <a href="#" class="text-muted"><i class="fas fa-cog"></i></a>
+        <a href="profile.php" class="text-muted"><i class="fas fa-cog"></i></a>
         <a href="logout.php" class="text-muted"><i class="fas fa-sign-out-alt"></i></a>
       </div>
       <small class="text-muted d-block">Versión 1.0</small>
