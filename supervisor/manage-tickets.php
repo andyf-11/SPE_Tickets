@@ -2,6 +2,7 @@
 session_start();
 require_once("dbconnection.php");
 include("checklogin.php");
+require_once '../assets/data/notifications_helper.php'; // ✅ Importamos el helper
 check_login("supervisor");
 
 // Obtener técnicos disponibles
@@ -22,6 +23,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['tecnico']) && $ticketI
         ':tecnico' => $tecnico,
         ':id' => $ticketId
       ]);
+
+      // 🔔 Notificar al técnico y admin
+      notificarAsignacionTicket($ticketId, $tecnico);
+
       $mensaje_exito = "Ticket asignado correctamente";
     } catch (PDOException $e) {
       $error = "Error al asignar el ticket: " . $e->getMessage();
@@ -41,6 +46,7 @@ if ($filtro !== 'todos') {
   $params[':edificio'] = $filtro;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">

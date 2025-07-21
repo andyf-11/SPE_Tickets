@@ -23,7 +23,7 @@
     <!-- Perfil -->
     <div class="text-center py-4 border-bottom bg-gradient-light">
       <div class="position-relative d-inline-block">
-        <img src="../assets/img/Logo-Gobierno_small.png" alt="Perfil Admin" 
+        <img src="../assets/img/Logo-Gobierno_small.png" alt="Perfil Supervisor" 
              class="img-fluid rounded-circle border border-3 border-white shadow"
              style="width: 90px; height: 90px; object-fit: cover;">
         <span class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-3 border-white"
@@ -114,7 +114,7 @@
       
       <ul class="nav flex-column gap-2">
         <li class="nav-item">
-          <a href="#" class="nav-link rounded-3 px-3 py-2 d-flex align-items-center text-dark">
+          <a href="config/profile.php" class="nav-link rounded-3 px-3 py-2 d-flex align-items-center text-dark">
             <div class="icon-container bg-secondary bg-opacity-10 rounded-2 p-2 me-3">
               <i class="fas fa-cog fs-5 text-secondary"></i>
             </div>

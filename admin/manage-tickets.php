@@ -2,33 +2,50 @@
 session_start();
 include("dbconnection.php");
 include("checklogin.php");
+require_once '../assets/data/notifications_helper.php'; // ✅ Importamos el helper
 check_login("admin");
 
 // Obtener filtro desde GET
 $filtro = $_GET['filtro'] ?? 'todos';
 
-
 // Guardar respuesta del admin sin sobrescribir
 if (isset($_POST['update'])) {
-  $adminremark = $_POST['aremark'];
-  $fid = $_POST['frm_id'];
+  $adminremark = trim($_POST['aremark']);
+  $fid = intval($_POST['frm_id']);
 
-  $stmt = $pdo->prepare("SELECT admin_remark FROM ticket WHERE id = :id");
-  $stmt->execute(['id' => $fid]);
-  $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
-  $oldRemark = $ticket['admin_remark'];
+  if (empty($adminremark)) {
+    $error = "Debes escribir una respuesta antes de enviarla.";
+  } else {
+    // Obtener el comentario previo
+    $stmt = $pdo->prepare("SELECT admin_remark, email_id FROM ticket WHERE id = :id");
+    $stmt->execute([':id' => $fid]);
+    $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
 
-  $newRemark = $oldRemark . "\n[" . date("Y-m-d H:i") . "] Admin: " . $adminremark;
+    if ($ticket) {
+      $oldRemark = $ticket['admin_remark'];
+      $newRemark = $oldRemark . "\n[" . date("Y-m-d H:i") . "] Admin: " . $adminremark;
 
-  $stmt = $pdo->prepare("UPDATE ticket SET admin_remark = :remark, status = 'Cerrado' WHERE id = :id");
-  $stmt->execute(['remark' => $newRemark, 'id' => $fid]);
+      $stmt = $pdo->prepare("UPDATE ticket SET admin_remark = :remark, status = 'Cerrado' WHERE id = :id");
+      $stmt->execute([':remark' => $newRemark, ':id' => $fid]);
 
-  $_SESSION['ticket_updated'] = true;
-  header("Location: " . $_SERVER["HTP_REFERER"]);
-  exit;
+      // 🔔 Notificar al usuario, supervisor y admin
+      $stmtUser = $pdo->prepare("SELECT id FROM user WHERE email = :email LIMIT 1");
+      $stmtUser->execute([':email' => $ticket['email_id']]);
+      $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
+      if ($user) {
+        notificarRespuestaTicket($fid, $user['id']);
+      }
+
+      $_SESSION['ticket_updated'] = true;
+      header("Location: " . $_SERVER["HTTP_REFERER"]);
+      exit;
+    } else {
+      $error = "No se encontró el ticket.";
+    }
+  }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -64,7 +81,6 @@ if (isset($_POST['update'])) {
   </script>
   <?php unset($_SESSION['ticket_updated']); ?>
 <?php endif; ?>
-
 
 <body>
   <?php include("header.php"); ?>
@@ -249,5 +265,4 @@ if (isset($_POST['update'])) {
     })()
   </script>
 </body>
-
 </html>

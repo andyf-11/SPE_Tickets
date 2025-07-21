@@ -14,6 +14,7 @@ console.log("🔍 ENV cargado:", {
 
 const app = express();
 app.use(cors());
+app.use(express.json()); // Para recibir JSON en las rutas
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -38,10 +39,13 @@ db.connect(err => {
   }
 });
 
+// =========================
+// SOCKET.IO
+// =========================
 io.on('connection', (socket) => {
   console.log('🟢 Usuario conectado');
 
-  // El frontend ya envía el nombre completo de la sala: apply_15, chat_12, etc.
+  // ======= CHAT EXISTENTE =======
   socket.on('joinRoom', (room) => {
     socket.join(room);
     console.log(`🔗 Usuario se unió a la sala ${room}`);
@@ -56,7 +60,6 @@ io.on('connection', (socket) => {
     }
 
     if (tipo_chat === 'admin') {
-      // Chat técnico ↔ admin
       db.query(
         "INSERT INTO messg_tech_admin (apply_id, emisor, message, date) VALUES (?, ?, ?, NOW())",
         [chat_id, sender, mensaje],
@@ -79,7 +82,6 @@ io.on('connection', (socket) => {
         }
       );
     } else if (tipo_chat === 'usuario') {
-      // Chat técnico ↔ usuario
       db.query(
         "INSERT INTO messg_tech_user (chat_id, sender, message, timestamp) VALUES (?, ?, ?, NOW())",
         [chat_id, sender, mensaje],
@@ -106,9 +108,62 @@ io.on('connection', (socket) => {
     }
   });
 
+  // ======= NOTIFICACIONES =======
+  socket.on('joinNotificationRoom', ({ userId, rol }) => {
+    if (userId) {
+      socket.join(`user_${userId}`);
+      console.log(`👤 Usuario ${userId} unido a notificaciones personales`);
+    }
+    if (rol) {
+      socket.join(`role_${rol}`);
+      console.log(`👥 Usuario unido al rol ${rol} para notificaciones`);
+    }
+  });
+
+  socket.on('sendNotification', (data) => {
+    const { mensaje, rol, usuarioId } = data;
+
+    if (!mensaje || (!rol && !usuarioId)) {
+      console.warn("⚠️ Datos incompletos en sendNotification:", data);
+      return;
+    }
+
+    if (usuarioId) {
+      console.log(`🔔 Notificación a usuario ${usuarioId}: ${mensaje}`);
+      io.to(`user_${usuarioId}`).emit('receiveNotification', { mensaje, rol });
+    } else if (rol) {
+      console.log(`🔔 Notificación para rol ${rol}: ${mensaje}`);
+      io.to(`role_${rol}`).emit('receiveNotification', { mensaje, rol });
+    } else {
+      // Notificación general
+      console.log(`🔔 Notificación general: ${mensaje}`);
+      io.emit('receiveNotification', { mensaje });
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('🔴 Usuario desconectado');
   });
+});
+
+// =========================
+// ENDPOINTS EXTERNOS PARA PHP
+// =========================
+app.post('/notificar', (req, res) => {
+  const { mensaje, rol, usuarioId } = req.body;
+  if (!mensaje) {
+    return res.status(400).json({ error: "Mensaje requerido" });
+  }
+
+  if (usuarioId) {
+    io.to(`user_${usuarioId}`).emit('receiveNotification', { mensaje, rol });
+  } else if (rol) {
+    io.to(`role_${rol}`).emit('receiveNotification', { mensaje, rol });
+  } else {
+    io.emit('receiveNotification', { mensaje });
+  }
+
+  res.json({ success: true });
 });
 
 server.listen(3000, () => {

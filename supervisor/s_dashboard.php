@@ -93,12 +93,12 @@ $tickets_pendientes_hoy = $stmt->fetchColumn();
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <script src="https://code.highcharts.com/highcharts.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link href="../styles/superv.css" rel="stylesheet">
+  <link href="../styles/supervisor/superv.css" rel="stylesheet">
 
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      font-weight: 300;
+
     }
 
     @media (min-width: 768px) {
@@ -130,7 +130,7 @@ $tickets_pendientes_hoy = $stmt->fetchColumn();
         <h1 class="h2 mb-0"><i class="fas fa-tachometer-alt text-primary me-2"></i> Panel de Supervisor</h1>
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="s_dashboard.php">Inicio</a></li>
             <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
           </ol>
         </nav>
