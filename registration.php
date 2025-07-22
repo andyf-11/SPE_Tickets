@@ -78,15 +78,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Asignar el rol 'usuario' por defecto
     $rol = 'usuario';
 
-    // Insertar nuevo usuario incluyendo el edificio
-    $stmt = $pdo->prepare("INSERT INTO user (name, email, password, mobile, gender, role, edificio_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$name, $email, $hashedPassword, $phone, $gender, $rol, $edificio_id]);
+    // Generar token único
+    $token = bin2hex(random_bytes(32));
 
-    $success = true;
-    $messages[] = "¡Usuario registrado exitosamente! Redireccionando al inicio de sesión...";
+    // Insertar usuario con verificación pendiente
+    $stmt = $pdo->prepare("INSERT INTO user (name, email, password, mobile, gender, role, edificio_id, is_verified, verification_token) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)");
+    $stmt->execute([$name, $email, $hashedPassword, $phone, $gender, $rol, $edificio_id, $token]);
+
+    // Enviar correo de verificación
+    $verificationLink = "http://localhost/tu_proyecto/verify.php?token=" . $token;
+    $subject = "Verifica tu cuenta - SPE";
+    $message = "Hola $name,<br><br>
+    Por favor haz clic en el siguiente enlace para verificar tu cuenta:<br>
+    <a href='$verificationLink'>$verificationLink</a><br><br>
+    Si no solicitaste esta cuenta, ignora este correo.";
+
+    $headers = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-type:text/html;charset=UTF-8\r\n";
+    $headers .= "From: noreply@dominio.com\r\n";
+
+    if (mail($email, $subject, $message, $headers)) {
+      $success = true;
+      $messages[] = "¡Usuario registrado exitosamente! Revisa tu correo electrónico para activar la cuenta.";
+    } else {
+      $messages[] = "Error al enviar el correo de verificación. Contacta al soporte.";
+    }
 
     echo "<div class='alert alert-success text-center'>" . implode('<br>', $messages) . "</div>";
-    echo "<script>setTimeout(() => { window.location.href = 'login1.php'; }, 2500);</script>";
   } else {
     foreach ($errors as $error) {
       echo "<div class='alert alert-danger'>$error</div>";
@@ -104,104 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <title>Registro - SPE</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/css/style.css" rel="stylesheet">
-  <style>
-    :root {
-      --primary-color: #1ac7b34f;
-      --primary-dark: #0fa294;
-      --light-bg: #f8f9fa;
-    }
-    
-    body {
-      background-color: var(--light-bg);
-      display: flex;
-      min-height: 100vh;
-      align-items: center;
-      background-image: url('assets/img/bg-pattern.png');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-    }
-    
-    .register-card {
-      max-width: 650px;
-      margin: 0 auto;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      border: none;
-    }
-    
-    .register-header {
-      background-color: var(--primary-color);
-      color: white;
-      padding: 2rem;
-      text-align: center;
-    }
-    
-    .register-body {
-      padding: 2.5rem;
-      background-color: white;
-    }
-    
-    .form-control, .form-select {
-      padding: 12px 15px;
-      border-radius: 10px;
-      border: 1px solid #e0e0e0;
-    }
-    
-    .form-control:focus, .form-select:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.25rem rgba(26, 199, 178, 0.25);
-    }
-    
-    .btn-primary {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 600;
-      transition: all 0.3s;
-      color: black;
-    }
-    
-    .btn-primary:hover {
-      background-color: var(--primary-dark);
-      border-color: var(--primary-dark);
-      transform: translateY(-2px);
-    }
-    
-    .password-strength {
-      height: 5px;
-      margin-top: 5px;
-      border-radius: 5px;
-      transition: all 0.3s;
-    }
-    
-    .password-hint {
-      font-size: 0.85rem;
-      color: #6c757d;
-    }
-    
-    .login-link {
-      color: var(--primary-dark);
-      font-weight: 500;
-      text-decoration: none;
-    }
-    
-    .login-link:hover {
-      text-decoration: underline;
-    }
-    
-    .logo {
-      max-width: 180px;
-      margin-bottom: 1rem;
-    }
-    
-    .input-group-text {
-      background-color: #f8f9fa;
-    }
-  </style>
+  <link href="assets/css/registration.css" rel="stylesheet">
+  
 </head>
 
 <body>
