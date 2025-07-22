@@ -353,6 +353,14 @@ ALTER TABLE `user`
   ADD PRIMARY KEY (`id`);
 
 ALTER TABLE `user` ADD COLUMN `edificio_id` INT NULL;
+
+ALTER TABLE `user` 
+ADD COLUMN `is_verified` TINYINT (1) DEFAULT 0,
+ADD COLUMN `verification_token` VARCHAR(255) DEFAULT NULL;
+
+--Consulta de un solo uso
+UPDATE `user` SET is_verified = 1;
+
 --
 -- Indices de la tabla `usercheck`
 --
