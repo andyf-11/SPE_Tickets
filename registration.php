@@ -1,4 +1,11 @@
 <?php
+// Incluye PHPMailer
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require 'vendor/autoload.php';
+require_once __DIR__ . '/assets/config/mailer_config.php';
+
 // Configuración conexión PDO
 $host = 'localhost';
 $db = 'crm-gestion';
@@ -20,11 +27,12 @@ try {
 
 $success = false;
 $messages = [];
+$errors = [];
 
 $email = '';
 $password = '';
 
-// Obtener lista de edificios para el select
+// Obtener lista de edificios
 $stmt = $pdo->query("SELECT id, name FROM edificios ORDER BY name");
 $edificios = $stmt->fetchAll();
 
@@ -35,21 +43,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $phone = trim($_POST['phone']);
   $gender = $_POST['gender'];
   $edificio_id = $_POST['edificio_id'] ?? null;
-  $allowed_domain = '@spe.gob.hn';
 
-  $errors = [];
-
-  // Validar dominio del correo
-  if (!str_ends_with($email, $allowed_domain)) {
-    $errors[] = "El correo debe ser del dominio $allowed_domain";
+  // Validar dominio permitido
+  $allowed_domains = ['@spe.gob.hn', '@gmail.com'];
+  $domain_valid = false;
+  foreach ($allowed_domains as $domain) {
+    if (str_ends_with($email, $domain)) {
+      $domain_valid = true;
+      break;
+    }
   }
 
-  // Validar formato del correo
+  if (!$domain_valid) {
+    $errors[] = "Este correo no es permitido. Solo se permiten los dominios: " . implode(", ", $allowed_domains);
+  }
+
   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $errors[] = "El correo no es válido.";
   }
 
-  // Validar seguridad de la contraseña
+  // Validar contraseña segura
   if (
     strlen($password) < 8 ||
     !preg_match('/[A-Z]/', $password) ||
@@ -60,59 +73,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors[] = "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.";
   }
 
-  // Validar si el correo ya está registrado
+  // Validar correo existente
   $stmt = $pdo->prepare("SELECT id FROM user WHERE email = ?");
   $stmt->execute([$email]);
   if ($stmt->fetch()) {
     $errors[] = "El correo ya está registrado.";
   }
 
-  // Validar que haya seleccionado edificio y sea un ID válido
+  // Validar edificio
   if (empty($edificio_id) || !ctype_digit($edificio_id)) {
     $errors[] = "Debes seleccionar un edificio válido.";
   }
 
   if (empty($errors)) {
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-    // Asignar el rol 'usuario' por defecto
     $rol = 'usuario';
-
-    // Generar token único
     $token = bin2hex(random_bytes(32));
 
-    // Insertar usuario con verificación pendiente
     $stmt = $pdo->prepare("INSERT INTO user (name, email, password, mobile, gender, role, edificio_id, is_verified, verification_token) 
     VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)");
     $stmt->execute([$name, $email, $hashedPassword, $phone, $gender, $rol, $edificio_id, $token]);
 
-    // Enviar correo de verificación
-    $verificationLink = "http://localhost/tu_proyecto/verify.php?token=" . $token;
-    $subject = "Verifica tu cuenta - SPE";
-    $message = "Hola $name,<br><br>
-    Por favor haz clic en el siguiente enlace para verificar tu cuenta:<br>
-    <a href='$verificationLink'>$verificationLink</a><br><br>
-    Si no solicitaste esta cuenta, ignora este correo.";
-
-    $headers = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-type:text/html;charset=UTF-8\r\n";
-    $headers .= "From: noreply@dominio.com\r\n";
-
-    if (mail($email, $subject, $message, $headers)) {
+    if (sendVerificationEmail($email, $name, $token)) {
       $success = true;
       $messages[] = "¡Usuario registrado exitosamente! Revisa tu correo electrónico para activar la cuenta.";
     } else {
-      $messages[] = "Error al enviar el correo de verificación. Contacta al soporte.";
-    }
-
-    echo "<div class='alert alert-success text-center'>" . implode('<br>', $messages) . "</div>";
-  } else {
-    foreach ($errors as $error) {
-      echo "<div class='alert alert-danger'>$error</div>";
+      $messages[] = "Error al enviar el correo de verificación.";
     }
   }
 }
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -124,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/registration.css" rel="stylesheet">
-  
+
 </head>
 
 <body>
@@ -134,14 +126,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <img src="assets/img/Logo-Gobierno-en-Vertical.png" alt="Logo SPE" class="logo">
         <h2 class="mb-0">Crear una cuenta</h2>
       </div>
-      
+
       <div class="register-body">
-        <p class="text-center mb-4">¿Ya tienes una cuenta? <a href="login1.php" class="login-link">Inicia sesión aquí</a></p>
+        <p class="text-center mb-4">¿Ya tienes una cuenta? <a href="login1.php" class="login-link">Inicia sesión
+            aquí</a></p>
 
         <!-- Mostrar mensajes -->
         <?php if (!empty($messages)): ?>
           <?php foreach ($messages as $msg): ?>
-            <div class="alert <?php echo $success ? 'alert-success' : 'alert-danger'; ?> alert-dismissible fade show" role="alert">
+            <div class="alert <?php echo $success ? 'alert-success' : 'alert-danger'; ?> alert-dismissible fade show"
+              role="alert">
               <?php echo $msg; ?>
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -155,7 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <label for="name" class="form-label">Nombre completo</label>
               <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" class="form-control" id="name" name="name" required autocomplete="name" placeholder="Ingrese su nombre completo">
+                <input type="text" class="form-control" id="name" name="name" required autocomplete="name"
+                  placeholder="Ingrese su nombre completo">
               </div>
             </div>
 
@@ -163,7 +158,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <label for="email" class="form-label">Correo institucional</label>
               <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                <input type="email" class="form-control" id="email" name="email" required autocomplete="email" placeholder="usuario@spe.gob.hn">
+                <input type="email" class="form-control" id="email" name="email" required autocomplete="email"
+                  placeholder="usuario@spe.gob.hn">
               </div>
               <small class="text-muted">Solo correos @spe.gob.hn</small>
             </div>
@@ -172,7 +168,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <label for="password" class="form-label">Contraseña</label>
               <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                <input type="password" class="form-control" id="password" name="password" required autocomplete="new-password" placeholder="Crea una contraseña segura">
+                <input type="password" class="form-control" id="password" name="password" required
+                  autocomplete="new-password" placeholder="Crea una contraseña segura">
                 <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password">
                   <i class="bi bi-eye"></i>
                 </button>
@@ -187,7 +184,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <label for="cpassword" class="form-label">Confirmar contraseña</label>
               <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                <input type="password" class="form-control" id="cpassword" name="cpassword" required autocomplete="new-password" placeholder="Confirma tu contraseña">
+                <input type="password" class="form-control" id="cpassword" name="cpassword" required
+                  autocomplete="new-password" placeholder="Confirma tu contraseña">
                 <button class="btn btn-outline-secondary toggle-password" type="button" data-target="cpassword">
                   <i class="bi bi-eye"></i>
                 </button>
@@ -198,7 +196,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <label for="phone" class="form-label">Número de contacto</label>
               <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                <input type="tel" class="form-control" id="phone" name="phone" required autocomplete="tel" placeholder="Ingrese su número telefónico">
+                <input type="tel" class="form-control" id="phone" name="phone" required autocomplete="tel"
+                  placeholder="Ingrese su número telefónico">
               </div>
             </div>
 
@@ -217,7 +216,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <select class="form-select" id="edificio_id" name="edificio_id" required>
                 <option value="">Seleccione un edificio</option>
                 <?php foreach ($edificios as $edificio): ?>
-                  <option value="<?= htmlspecialchars($edificio['id']) ?>"><?= htmlspecialchars($edificio['name']) ?></option>
+                  <option value="<?= htmlspecialchars($edificio['id']) ?>"><?= htmlspecialchars($edificio['name']) ?>
+                  </option>
                 <?php endforeach; ?>
               </select>
             </div>
@@ -237,14 +237,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       // Toggle password visibility
       document.querySelectorAll('.toggle-password').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
           const targetId = this.getAttribute('data-target');
           const input = document.getElementById(targetId);
           const icon = this.querySelector('i');
-          
+
           if (input.type === 'password') {
             input.type = 'text';
             icon.classList.remove('bi-eye');
@@ -256,25 +256,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           }
         });
       });
-      
+
       // Password strength indicator
       const passwordInput = document.getElementById('password');
       const strengthBar = document.getElementById('password-strength');
-      
-      passwordInput.addEventListener('input', function() {
+
+      passwordInput.addEventListener('input', function () {
         const password = this.value;
         let strength = 0;
-        
+
         // Check length
         if (password.length >= 8) strength += 1;
         if (password.length >= 12) strength += 1;
-        
+
         // Check for uppercase, lowercase, numbers, symbols
         if (/[A-Z]/.test(password)) strength += 1;
         if (/[a-z]/.test(password)) strength += 1;
         if (/[0-9]/.test(password)) strength += 1;
         if (/[\W_]/.test(password)) strength += 1;
-        
+
         // Update strength bar
         let color, width;
         if (strength <= 2) {
@@ -287,29 +287,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           color = '#28a745';
           width = '100%';
         }
-        
+
         strengthBar.style.backgroundColor = color;
         strengthBar.style.width = width;
       });
     });
-    
+
     function checkpass() {
       const password = document.getElementById("password").value;
       const confirmPassword = document.getElementById("cpassword").value;
       const email = document.getElementById("email").value;
-      const allowedDomain = "@spe.gob.hn";
 
-      if (!email.endsWith(allowedDomain)) {
-        alert("Solo se permiten correos con el dominio " + allowedDomain);
+      // Lista de dominios permitidos
+      const allowedDomains = ["@spe.gob.hn", "@gmail.com"]; // Agrega más si lo deseas
+
+      // Validar dominio del correo
+      let domainValid = allowedDomains.some(domain => email.endsWith(domain));
+      if (!domainValid) {
+        alert("Solo se permiten correos con los dominios: " + allowedDomains.join(", "));
         return false;
       }
 
+      // Validar contraseña
       const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
       if (!passwordRegex.test(password)) {
         alert("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.");
         return false;
       }
 
+      // Confirmar contraseña
       if (password !== confirmPassword) {
         alert("Las contraseñas no coinciden.");
         return false;

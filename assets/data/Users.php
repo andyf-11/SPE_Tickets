@@ -31,11 +31,20 @@ try {
     $username = trim($_POST["username"]);
     $pass = $_POST["pass"];
 
-    $query = $pdo->prepare("SELECT id, name, email, password, role FROM user WHERE email = :username");
+    // Agregamos is_verified
+    $query = $pdo->prepare("SELECT id, name, email, password, role, is_verified FROM user WHERE email = :username");
     $query->execute([":username" => $username]);
     $user = $query->fetch();
 
     if ($user && password_verify($pass, $user["password"])) {
+        // Verificar si la cuenta está verificada
+        if (isset($user["is_verified"]) && $user["is_verified"] == 0) {
+            $_SESSION["error_message"] = "Tu cuenta no está verificada. Revisa tu correo para activarla.";
+            header("Location: ../../login1.php");
+            exit();
+        }
+
+        // Si está verificada, continuar con el login normal
         $_SESSION["login"] = $user["email"];
         $_SESSION["user_id"] = $user["id"];
         $_SESSION["user_name"] = $user["name"];
