@@ -26,7 +26,7 @@ $unreadNotifications = $stmt->fetchColumn();
     <!-- Título del sistema -->
     <div class="text-center flex-grow-1 d-none d-md-block">
       <h5 class="mb-0 text-white text-truncate px-2">
-        Sistema de Generación de Tickets - Acceso Cliente
+        Sistema de Generación de Tickets - Acceso Empleados
       </h5>
     </div>
 
