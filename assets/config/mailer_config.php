@@ -40,7 +40,7 @@ function sendVerificationEmail($toEmail, $toName, $token) {
         $mail->isHTML(true);
         $mail->Subject = 'Verifica tu cuenta - SPE';
 
-        $verificationLink = $_ENV['APP_DOMAIN'] . "/verify.php?token=" . $token;
+        $verificationLink = $_ENV['APP_DOMAIN_PHP'] . "/SPE_Soporte_Tickets/assets/config/verify.php?token=" . $token;
         $mail->Body = "
             Hola $toName, <br><br>
             Por favor haz clic en el siguiente enlace para verificar tu cuenta: <br>
