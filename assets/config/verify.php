@@ -1,5 +1,5 @@
 <?php
-require 'dbconnection.php';
+require '../../dbconnection.php';
 
 if (isset($_GET['token'])) {
     $token = trim($_GET['token']); // Limpieza básica
