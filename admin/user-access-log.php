@@ -7,6 +7,7 @@ check_login("admin");
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Admin | Registro de Acceso</title>
@@ -14,42 +15,31 @@ check_login("admin");
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="../styles/roles-layouts/user-access-log.css" rel="stylesheet">
 
   <style>
-    body {
-      background-color: #f8f9fa;
+    /* Sidebar fijo con altura completa menos header */
+    #leftbar {
+      position: fixed;
+      top: 56px;
+      /* altura del header fijo */
+      left: 0;
+      width: 250px;
+      height: calc(100vh - 56px);
+      background-color: #fff;
+      border-right: 1px solid #dee2e6;
+      z-index: 1030;
+      overflow-y: auto;
+      font-weight: 400;
     }
 
-    .browser-icon {
-      font-size: 1.1rem;
-      margin-right: 5px;
-    }
-
-    .card-shadow {
-      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-      border: none;
-      border-radius: 0.35rem;
-    }
-
-    .table-card {
-      padding: 1.25rem;
-    }
-
-    .table-header {
-      background-color: #4e73df;
-      color: white;
-    }
-
-    .breadcrumb {
-      background-color: transparent;
-      padding: 0.75rem 0;
-      margin-bottom: 1.5rem;
-    }
-
-    .page-title {
-      color: #2c3e50;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
+    /* Para el contenido principal, margen izquierdo igual al sidebar para evitar superposición */
+    #main-content {
+      margin-left: 250px;
+      padding-top: 70px;
+      /* espacio para header */
+      min-height: 100vh;
     }
   </style>
 </head>
@@ -66,17 +56,20 @@ check_login("admin");
       </button>
 
       <!-- Sidebar -->
-      <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse offcanvas-md offcanvas-start" id="leftbar">
-        <?php include("leftbar.php"); ?>
-      </nav>
+      <div class="col-lg-2 p-0">
+        <div class="offcanvas-md offcanvas-start bg-light" tabindex="-1" id="leftbar">
+          <?php include("leftbar.php"); ?>
+        </div>
+      </div>
 
       <!-- Contenido principal -->
-      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mt-5">
+      <div class="col-lg-10 p-4 mt-5">
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="home.php"><i class="fas fa-home me-1"></i>Inicio</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-sign-in-alt me-1"></i>Registro de Accesos</li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-sign-in-alt me-1"></i>Registro de
+              Accesos</li>
           </ol>
         </nav>
 
@@ -106,12 +99,18 @@ check_login("admin");
                   <?php
                   function detectarNavegador($userAgent)
                   {
-                    if (stripos($userAgent, 'Edg') !== false) return ['Edge', 'fa-brands fa-edge'];
-                    if (stripos($userAgent, 'OPR') !== false || stripos($userAgent, 'Opera') !== false) return ['Opera', 'fa-brands fa-opera'];
-                    if (stripos($userAgent, 'Chrome') !== false) return ['Chrome', 'fa-brands fa-chrome'];
-                    if (stripos($userAgent, 'Firefox') !== false) return ['Firefox', 'fa-brands fa-firefox'];
-                    if (stripos($userAgent, 'Safari') !== false && stripos($userAgent, 'Chrome') === false) return ['Safari', 'fa-brands fa-safari'];
-                    if (stripos($userAgent, 'MSIE') !== false || stripos($userAgent, 'Trident') !== false) return ['Internet Explorer', 'fa-solid fa-globe'];
+                    if (stripos($userAgent, 'Edg') !== false)
+                      return ['Edge', 'fa-brands fa-edge'];
+                    if (stripos($userAgent, 'OPR') !== false || stripos($userAgent, 'Opera') !== false)
+                      return ['Opera', 'fa-brands fa-opera'];
+                    if (stripos($userAgent, 'Chrome') !== false)
+                      return ['Chrome', 'fa-brands fa-chrome'];
+                    if (stripos($userAgent, 'Firefox') !== false)
+                      return ['Firefox', 'fa-brands fa-firefox'];
+                    if (stripos($userAgent, 'Safari') !== false && stripos($userAgent, 'Chrome') === false)
+                      return ['Safari', 'fa-brands fa-safari'];
+                    if (stripos($userAgent, 'MSIE') !== false || stripos($userAgent, 'Trident') !== false)
+                      return ['Internet Explorer', 'fa-solid fa-globe'];
                     return ['Desconocido', 'fa-solid fa-question'];
                   }
 
@@ -135,9 +134,9 @@ check_login("admin");
             </div>
           </div>
         </div>
-      </main>
-    </div>
-  </div>
+      </div> <!-- Fin contenido -->
+    </div> <!-- Fin row -->
+  </div> <!-- Fin container -->
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -152,8 +151,8 @@ check_login("admin");
         },
         responsive: true,
         dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-             "<'row'<'col-sm-12'tr>>" +
-             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+          "<'row'<'col-sm-12'tr>>" +
+          "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
         pageLength: 25,
         order: [[3, 'desc']]
       });
@@ -164,4 +163,5 @@ check_login("admin");
     });
   </script>
 </body>
+
 </html>

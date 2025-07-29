@@ -1,0 +1,115 @@
+:root {
+  --primary-color: #4e73df;
+  --primary-light: #e9f0ff;
+  --success-color: #1cc88a;
+  --warning-color: #f6c23e;
+  --danger-color: #e74a3b;
+  --secondary-color: #858796;
+  --light-bg: #f8f9fc;
+  --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+}
+
+/* Body y tipografía */
+body {
+  background-color: var(--light-bg);
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Ticket Card */
+.ticket-card {
+  transition: all 0.3s ease;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: none;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 1.5rem;
+}
+
+.ticket-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.5rem 1.5rem rgba(58, 59, 69, 0.15);
+}
+
+/* Header y body de ticket */
+.ticket-header {
+  background-color: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  padding: 1.25rem;
+}
+
+.ticket-header.collapsed {
+  border-bottom: none;
+}
+
+.ticket-body {
+  background-color: white;
+  padding: 1.5rem;
+}
+
+/* Message box */
+.message-box {
+  background-color: var(--light-bg);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  border-left: 3px solid var(--primary-color);
+  margin-bottom: 1.5rem;
+}
+
+/* Badges */
+.status-badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  display: inline-block;
+}
+
+.status-open {
+    background-color: rgba(78, 115, 223, 0.1);
+    color: var(--primary-color);
+}
+
+.status-progress {
+    background-color: rgba(246, 194, 62, 0.1);
+    color: var(--warning-color);
+}
+
+.status-closed {
+    background-color: rgba(28, 200, 138, 0.1);
+    color: var(--success-color);
+}
+
+.building-badge {
+  background-color: rgba(23, 162, 184, 0.1);
+  color: #17a2b8;
+}
+
+/* Filtros */
+.filter-container {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: var(--card-shadow);
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+/* Títulos secciones */
+.section-title {
+  font-weight: 600;
+  color: var(--secondary-color);
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background-color: var(--primary-color);
+  border-radius: 3px;
+}

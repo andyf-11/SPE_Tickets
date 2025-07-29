@@ -46,6 +46,7 @@ if (isset($_POST['update'])) {
   }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -55,43 +56,70 @@ if (isset($_POST['update'])) {
   <title>Admin | Gestión de Tickets</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link href="../assets/css/style-bootstrap5.css" rel="stylesheet" />
-  <link href="../styles/admin.css" rel="stylesheet">
-</head>
+  <link href="../styles/tickets/manage-tickets(admin).css" rel="stylesheet">
+  <style>
+    /* Sidebar fijo con altura completa menos header */
+    #leftbar {
+      position: fixed;
+      top: 56px;
+      /* altura del header fijo */
+      left: 0;
+      width: 250px;
+      height: calc(100vh - 56px);
+      background-color: #fff;
+      border-right: 1px solid #dee2e6;
+      z-index: 1030;
+      overflow-y: auto;
+      font-weight: 400;
+    }
 
-<?php if (isset($_SESSION['ticket_updated'])): ?>
-  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055">
-    <div id="ticketToast" class="toast align-items-center text-white bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="d-flex">
-        <div class="toast-body">
-          ✅ Ticket actualizado correctamente.
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
-      </div>
-    </div>
-  </div>
-  <script>
-    setTimeout(() => {
-      const toastEl = document.getElementById('ticketToast');
-      if (toastEl) {
-        const toast = bootstrap.Toast.getOrCreateInstance(toastEl);
-        toast.hide();
-      }
-    }, 3000);
-  </script>
-  <?php unset($_SESSION['ticket_updated']); ?>
-<?php endif; ?>
+    /* Para el contenido principal, margen izquierdo igual al sidebar para evitar superposición */
+    #main-content {
+      margin-left: 250px;
+      padding-top: 70px;
+      /* espacio para header */
+      min-height: 100vh;
+    }
+  </style>
+</head>
 
 <body>
   <?php include("header.php"); ?>
-  
+
+  <?php if (isset($_SESSION['ticket_updated'])): ?>
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055">
+      <div id="ticketToast" class="toast align-items-center text-white bg-success border-0 show" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            ✅ Ticket actualizado correctamente.
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+            aria-label="Cerrar"></button>
+        </div>
+      </div>
+    </div>
+    <script>
+      setTimeout(() => {
+        const toastEl = document.getElementById('ticketToast');
+        if (toastEl) {
+          const toast = bootstrap.Toast.getOrCreateInstance(toastEl);
+          toast.hide();
+        }
+      }, 3000);
+    </script>
+    <?php unset($_SESSION['ticket_updated']); ?>
+  <?php endif; ?>
+
   <div class="container-fluid">
     <div class="row">
-      <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="col-md-3 col-lg-2 p-0 bg-light">
         <?php include("leftbar.php"); ?>
-      </nav>
+      </div>
 
-      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mt-5">
+      <div class="col px-4 py-4 mt-5" style="padding-top: 70px; min-height: 100vh; margin-left: 20px;">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <div>
             <h2 class="mb-0 fw-bold mt-4">Gestión de Tickets</h2>
@@ -110,7 +138,8 @@ if (isset($_POST['update'])) {
                 <label for="filtro" class="me-2 mb-0">Edificio:</label>
                 <select name="filtro" id="filtro" class="form-select" onchange="this.form.submit()">
                   <option value="todos" <?= $filtro == 'todos' ? 'selected' : '' ?>>Todos los edificios</option>
-                  <option value="Santa Esmeralda" <?= $filtro == 'Santa Esmeralda' ? 'selected' : '' ?>>Santa Esmeralda</option>
+                  <option value="Santa Esmeralda" <?= $filtro == 'Santa Esmeralda' ? 'selected' : '' ?>>Santa Esmeralda
+                  </option>
                   <option value="Palmira" <?= $filtro == 'Palmira' ? 'selected' : '' ?>>Palmira</option>
                 </select>
               </form>
@@ -156,12 +185,14 @@ if (isset($_POST['update'])) {
 
             $edificio = htmlspecialchars($row['edificio_nombre'] ?? 'Sin edificio');
             $fecha = date('d/m/Y H:i', strtotime($row['posting_date']));
-          ?>
+            ?>
             <div class="ticket-card">
-              <div class="ticket-header accordion-header <?= $estado === 'cerrado' ? 'bg-light' : '' ?>" id="heading<?= $id ?>">
-                <button class="accordion-button <?= $estado === 'cerrado' ? 'bg-light' : '' ?> collapsed d-flex justify-content-between align-items-center" 
-                        type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?= $id ?>" 
-                        aria-expanded="false" aria-controls="collapse<?= $id ?>">
+              <div class="ticket-header accordion-header <?= $estado === 'cerrado' ? 'bg-light' : '' ?>"
+                id="heading<?= $id ?>">
+                <button
+                  class="accordion-button <?= $estado === 'cerrado' ? 'bg-light' : '' ?> collapsed d-flex justify-content-between align-items-center"
+                  type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?= $id ?>" aria-expanded="false"
+                  aria-controls="collapse<?= $id ?>">
                   <div class="d-flex flex-column flex-md-row align-items-md-center w-100">
                     <div class="me-md-4 mb-2 mb-md-0">
                       <span class="badge building-badge me-2"><?= $edificio ?></span>
@@ -170,7 +201,8 @@ if (isset($_POST['update'])) {
                     <div class="flex-grow-1">
                       <h5 class="mb-1"><?= htmlspecialchars($row['subject']) ?></h5>
                       <div class="d-flex flex-wrap text-muted small">
-                        <span class="me-3"><i class="far fa-id-card me-1"></i> #<?= htmlspecialchars($row['ticket_id']) ?></span>
+                        <span class="me-3"><i class="far fa-id-card me-1"></i>
+                          #<?= htmlspecialchars($row['ticket_id']) ?></span>
                         <span><i class="far fa-clock me-1"></i> <?= $fecha ?></span>
                       </div>
                     </div>
@@ -178,8 +210,8 @@ if (isset($_POST['update'])) {
                 </button>
               </div>
 
-              <div id="collapse<?= $id ?>" class="accordion-collapse collapse" aria-labelledby="heading<?= $id ?>" 
-                   data-bs-parent="#ticketsAccordion">
+              <div id="collapse<?= $id ?>" class="accordion-collapse collapse" aria-labelledby="heading<?= $id ?>"
+                data-bs-parent="#ticketsAccordion">
                 <div class="ticket-body">
                   <!-- Mensaje del usuario -->
                   <div class="message-box">
@@ -227,8 +259,8 @@ if (isset($_POST['update'])) {
                       <label for="aremark<?= $id ?>" class="form-label fw-bold">
                         <i class="fas fa-reply me-1"></i>Agregar respuesta
                       </label>
-                      <textarea class="form-control" id="aremark<?= $id ?>" name="aremark" rows="4" 
-                                placeholder="Escribe tu respuesta aquí..." required></textarea>
+                      <textarea class="form-control" id="aremark<?= $id ?>" name="aremark" rows="4"
+                        placeholder="Escribe tu respuesta aquí..." required></textarea>
                       <div class="invalid-feedback">Por favor ingrese un comentario.</div>
                     </div>
                     <input type="hidden" name="frm_id" value="<?= $id ?>" />
@@ -244,7 +276,7 @@ if (isset($_POST['update'])) {
           <?php } ?>
         </div>
 
-      </main>
+      </div>
     </div>
   </div>
 
@@ -265,4 +297,5 @@ if (isset($_POST['update'])) {
     })()
   </script>
 </body>
+
 </html>

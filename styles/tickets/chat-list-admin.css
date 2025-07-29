@@ -1,0 +1,64 @@
+/* Fondo general */
+body,
+html {
+    height: 100%;
+    background-color: #f8f9fa;
+    font-family: 'Poppins', sans-serif;
+    margin-left: 180px;
+}
+
+/* Tarjetas de chat */
+.chat-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid;
+}
+
+.chat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Colores por estado */
+.status-pendiente {
+    border-left-color: #ffc107;
+}
+
+.status-aprobado {
+    border-left-color: #198754;
+}
+
+.status-rechazado {
+    border-left-color: #dc3545;
+}
+
+.status-resuelto {
+    border-left-color: #0dcaf0;
+}
+
+/* Último mensaje truncado */
+.last-message {
+    display: -webkit-box;
+    line-clamp: 2;
+    /* Asegúrate que tenga el prefijo correcto */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Estilo del estado */
+.badge-status {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Avatar de usuario */
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}

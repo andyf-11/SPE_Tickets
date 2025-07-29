@@ -1,5 +1,4 @@
 <?php $page = ''?>
-<link href="../styles/superv.css">
 
 <!-- Botón de menú para móviles -->
 <button class="btn btn-outline-primary d-md-none m-3 rounded-pill shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#leftbar" aria-controls="leftbar">
@@ -114,7 +113,7 @@
       
       <ul class="nav flex-column gap-2">
         <li class="nav-item">
-          <a href="config/profile.php" class="nav-link rounded-3 px-3 py-2 d-flex align-items-center text-dark">
+          <a href="profile.php" class="nav-link rounded-3 px-3 py-2 d-flex align-items-center text-dark">
             <div class="icon-container bg-secondary bg-opacity-10 rounded-2 p-2 me-3">
               <i class="fas fa-cog fs-5 text-secondary"></i>
             </div>

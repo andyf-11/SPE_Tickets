@@ -1,7 +1,7 @@
 <?php
 session_start();
-require("../dbconnection.php");
-require("../checklogin.php");
+require("dbconnection.php");
+require("checklogin.php");
 check_login("supervisor");
 
 $page = 'profile';
@@ -61,9 +61,48 @@ if (!empty($row['edificio_id'])) {
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link href="../styles/superv.css" rel="stylesheet">
-  <link href="../styles/roles-layouts/profile.css" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="../styles/supervisor/profile.css" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 300;
+      margin-left: 50px;
+    }
+
+    #leftbar {
+      position: fixed;
+      top: 41px;
+      left: 0;
+      width: 250px;
+      height: calc(100vh - 41px);
+      background-color: #fff;
+      border-right: 1px solid #dee2e6;
+      z-index: 1030;
+      overflow-y: auto;
+      font-weight: 400;
+    }
+
+    main.main-content {
+      margin-left: 250px;
+      padding: 2rem;
+      min-height: calc(100vh - 56px);
+    }
+
+    @media (max-width: 767px) {
+      #leftbar {
+        position: relative;
+        top: 0;
+        width: 100%;
+        height: auto;
+      }
+
+      main.main-content {
+        margin-left: 0;
+      }
+    }
+  </style>
 </head>
 
 <body class="bg-light">
@@ -79,7 +118,7 @@ if (!empty($row['edificio_id'])) {
       </div>
 
       <!-- Contenido principal -->
-      <main class="col-lg-10 py-4 px-4 mt-4">
+      <main class="col-lg-10 py-4 px-4 mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <div>
             <h1 class="mb-0"><i class="fas fa-user-circle text-primary me-2"></i> Mi Perfil</h1>
@@ -90,8 +129,8 @@ if (!empty($row['edificio_id'])) {
               </ol>
             </nav>
           </div>
-          <a href="change-password.php" class="btn btn-outline-primary">
-            <i class="fas fa-lock me-1"></i> Ayuda contraseña
+          <a href="s_dashboard.php" class="btn btn-outline-primary">
+            <i class="fas fa-lock me-1"></i> Volver al panel
           </a>
         </div>
 
@@ -103,7 +142,7 @@ if (!empty($row['edificio_id'])) {
         <?php endif; ?>
 
         <?php if ($row): ?>
-          <!-- Tarjeta de perfil modernizada -->
+          <!-- Tarjeta de perfil -->
           <div class="profile-card mb-4">
             <div class="profile-header d-flex align-items-center">
               <img src="../assets/img/user.png" alt="Avatar" class="profile-avatar rounded-circle me-3">
@@ -114,14 +153,14 @@ if (!empty($row['edificio_id'])) {
               </div>
             </div>
             
-            <form method="post">
+            <form method="post" class="p-4">
               <!-- Sección de información personal -->
-              <div class="form-section">
-                <h5 class="mb-4"><i class="fas fa-user-tag text-primary me-2"></i> Información Personal</h5>
+              <div class="mb-4">
+                <h5 class="mb-3"><i class="fas fa-user-tag text-primary me-2"></i> Información Personal</h5>
                 
                 <div class="row g-3">
                   <div class="col-md-6">
-                    <label class="form-label fw-medium">Nombre completo</label>
+                    <label class="form-label">Nombre completo</label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="fas fa-user"></i></span>
                       <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($row['name']) ?>" required>
@@ -129,7 +168,7 @@ if (!empty($row['edificio_id'])) {
                   </div>
                   
                   <div class="col-md-6">
-                    <label class="form-label fw-medium">Correo institucional</label>
+                    <label class="form-label">Correo institucional</label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                       <input type="email" class="form-control" value="<?= htmlspecialchars($row['email']) ?>" disabled>
@@ -137,7 +176,7 @@ if (!empty($row['edificio_id'])) {
                   </div>
                   
                   <div class="col-md-6">
-                    <label class="form-label fw-medium">Teléfono</label>
+                    <label class="form-label">Teléfono</label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="fas fa-phone"></i></span>
                       <input type="tel" name="phone" maxlength="10" class="form-control" value="<?= htmlspecialchars($row['mobile']) ?>">
@@ -145,7 +184,7 @@ if (!empty($row['edificio_id'])) {
                   </div>
                   
                   <div class="col-md-6">
-                    <label class="form-label fw-medium">Género</label>
+                    <label class="form-label">Género</label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="fas fa-venus-mars"></i></span>
                       <select name="gender" class="form-select" required>
@@ -157,7 +196,7 @@ if (!empty($row['edificio_id'])) {
                   </div>
                   
                   <div class="col-12">
-                    <label class="form-label fw-medium">Dirección</label>
+                    <label class="form-label">Dirección</label>
                     <div class="input-group">
                       <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                       <textarea name="address" rows="3" class="form-control"><?= htmlspecialchars($row['address']) ?></textarea>
@@ -167,8 +206,8 @@ if (!empty($row['edificio_id'])) {
               </div>
               
               <!-- Sección de edificio -->
-              <div class="form-section">
-                <h5 class="mb-4"><i class="fas fa-building text-primary me-2"></i> Ubicación</h5>
+              <div class="mb-4">
+                <h5 class="mb-3"><i class="fas fa-building text-primary me-2"></i> Ubicación</h5>
                 
                 <?php if (!empty($buildingName)): ?>
                   <div class="info-badge d-flex align-items-center mb-3">
@@ -180,7 +219,7 @@ if (!empty($row['edificio_id'])) {
                 <?php endif; ?>
                 
                 <div class="mb-3">
-                  <label class="form-label fw-medium">Seleccionar edificio</label>
+                  <label class="form-label">Seleccionar edificio</label>
                   <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-warehouse"></i></span>
                     <select name="building_id" class="form-select" required>
@@ -196,7 +235,7 @@ if (!empty($row['edificio_id'])) {
               </div>
               
               <!-- Botones de acción -->
-              <div class="form-section d-flex justify-content-between pt-3">
+              <div class="d-flex justify-content-between pt-3 border-top">
                 <button type="reset" class="btn btn-outline-secondary">
                   <i class="fas fa-undo me-1"></i> Restablecer
                 </button>

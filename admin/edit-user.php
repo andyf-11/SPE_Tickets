@@ -40,96 +40,30 @@ if (isset($_POST['update'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-  
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="../styles/roles-layouts/edit-user.css" rel="stylesheet">
   <style>
-    :root {
-      --primary-color: #4361ee;
-      --secondary-color: #3a0ca3;
-      --light-bg: #f8f9fa;
-    }
-    
-    body {
-      background-color: var(--light-bg);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    .sidebar {
+    /* Sidebar fijo con altura completa menos header */
+    #leftbar {
+      position: fixed;
+      top: 56px;
+      /* altura del header fijo */
+      left: 0;
+      width: 250px;
       height: calc(100vh - 56px);
+      background-color: #fff;
+      border-right: 1px solid #dee2e6;
+      z-index: 1030;
       overflow-y: auto;
-      background: white;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+      font-weight: 400;
     }
-    
-    .main-content {
-      padding: 2rem;
-    }
-    
-    .profile-card {
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-      background: white;
-    }
-    
-    .form-header {
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      padding: 1.25rem 1.5rem;
-    }
-    
-    .form-body {
-      padding: 1.5rem;
-    }
-    
-    .form-control, .form-select {
-      border-radius: 8px;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #dee2e6;
-    }
-    
-    .form-control:focus, .form-select:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
-    }
-    
-    .btn-primary-custom {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-      border-radius: 50px;
-      padding: 0.5rem 1.5rem;
-      color: white;
-    }
-    
-    .btn-primary-custom:hover {
-      background-color: var(--secondary-color);
-      border-color: var(--secondary-color);
-      color: white;
-    }
-    
-    .user-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background-color: #e9ecef;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1rem;
-      font-size: 2rem;
-      color: #6c757d;
-    }
-    
-    .invalid-feedback {
-      font-size: 0.85rem;
-    }
-    
-    .building-badge {
-      background-color: #f8f9fa;
-      color: var(--primary-color);
-      font-weight: 500;
-      padding: 0.35rem 0.75rem;
-      border-radius: 50px;
-      display: inline-flex;
-      align-items: center;
+
+    /* Para el contenido principal, margen izquierdo igual al sidebar para evitar superposición */
+    #main-content {
+      margin-left: 250px;
+      padding-top: 70px;
+      /* espacio para header */
+      min-height: 100vh;
     }
   </style>
 </head>
@@ -140,12 +74,12 @@ if (isset($_POST['update'])) {
   <div class="container-fluid">
     <div class="row">
       <!-- Sidebar -->
-      <div class="col-md-3 col-lg-2 p-0 sidebar">
+      <div class="col-md-3 col-lg-2 p-0">
         <?php include("leftbar.php"); ?>
       </div>
 
       <!-- Contenido principal -->
-      <main class="col-md-9 col-lg-10 main-content">
+      <main class="col-md-9 col-lg-10 main-content mt-5">
         <?php
         $userid = $_GET['id'];
         $sql = "SELECT u.*, e.name as edificio_nombre FROM user u LEFT JOIN edificios e ON u.edificio_id = e.id WHERE u.id = :id";
@@ -158,7 +92,7 @@ if (isset($_POST['update'])) {
           <div class="profile-card">
             <!-- Encabezado -->
             <div class="form-header">
-              <div class="d-flex justify-content-between align-items-center">
+              <div class="d-flex justify-content-between align-items-center flex-wrap">
                 <div>
                   <h3 class="mb-0"><i class="fas fa-user-edit me-2 text-primary"></i>Editar Usuario</h3>
                   <nav aria-label="breadcrumb" class="mt-2">
@@ -170,15 +104,15 @@ if (isset($_POST['update'])) {
                   </nav>
                 </div>
                 <?php if (!empty($rw['edificio_nombre'])): ?>
-                  <span class="building-badge">
+                  <span class="building-badge mt-2 mt-md-0">
                     <i class="fas fa-building me-1"></i>
                     <?= htmlspecialchars($rw['edificio_nombre']) ?>
                   </span>
                 <?php endif; ?>
               </div>
             </div>
-            
-            <!-- Cuerpo del formulario -->
+
+            <!-- Formulario -->
             <div class="form-body">
               <form name="muser" method="post" action="" enctype="multipart/form-data" class="needs-validation" novalidate>
                 <div class="row justify-content-center">
@@ -234,8 +168,7 @@ if (isset($_POST['update'])) {
 
                       <div class="col-12">
                         <label for="address" class="form-label">Dirección</label>
-                        <textarea class="form-control" id="address" name="address" rows="3"
-                          required><?= htmlspecialchars($rw['address']) ?></textarea>
+                        <textarea class="form-control" id="address" name="address" rows="3" required><?= htmlspecialchars($rw['address']) ?></textarea>
                         <div class="invalid-feedback">
                           Por favor ingrese la dirección
                         </div>
@@ -289,19 +222,20 @@ if (isset($_POST['update'])) {
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    (function() {
-      'use strict'
-      var forms = document.querySelectorAll('.needs-validation')
-      Array.prototype.slice.call(forms).forEach(function(form) {
-        form.addEventListener('submit', function(event) {
+    (function () {
+      'use strict';
+      var forms = document.querySelectorAll('.needs-validation');
+      Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
           if (!form.checkValidity()) {
-            event.preventDefault()
-            event.stopPropagation()
+            event.preventDefault();
+            event.stopPropagation();
           }
-          form.classList.add('was-validated')
-        }, false)
-      })
-    })()
+          form.classList.add('was-validated');
+        }, false);
+      });
+    })();
   </script>
 </body>
+
 </html>

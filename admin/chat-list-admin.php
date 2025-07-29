@@ -35,66 +35,38 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Solicitudes de Aprobación</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="../styles/tickets/chat-list-admin.css" rel="stylesheet" /> <!-- Ajusta ruta si es necesario -->
   <style>
-    body {
-      background-color: #f8f9fa;
-    }
+  /* Sidebar fijo con altura completa menos header */
+  #leftbar {
+    position: fixed;
+    top: 56px;
+    /* altura del header fijo */
+    left: 0;
+    width: 250px;
+    height: calc(100vh - 56px);
+    background-color: #fff;
+    border-right: 1px solid #dee2e6;
+    z-index: 1030;
+    overflow-y: auto;
+    font-weight: 400;
+  }
 
-    .chat-card {
-      transition: all 0.3s ease;
-      border-left: 4px solid;
-    }
-
-    .chat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .status-pendiente {
-      border-left-color: #ffc107;
-    }
-
-    .status-aprobado {
-      border-left-color: #198754;
-    }
-
-    .status-rechazado {
-      border-left-color: #dc3545;
-    }
-
-    .status-resuelto {
-      border-left-color: #0dcaf0;
-    }
-
-    .last-message {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .badge-status {
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
-
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: #e9ecef;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 12px;
-    }
-  </style>
+  /* Para el contenido principal, margen izquierdo igual al sidebar para evitar superposición */
+  #main-content {
+    margin-left: 250px;
+    padding-top: 70px;
+    /* espacio para header */
+    min-height: 100vh;
+  }
+</style>
 </head>
 
 <body>
@@ -108,14 +80,13 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <i class="fas fa-bars"></i>
       </button>
 
-      <!-- Sidebar fijo en desktop, offcanvas en móviles -->
-      <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse offcanvas-md offcanvas-start"
-        id="leftbar">
+      <!-- Sidebar -->
+      <nav class="col-lg-2 p-0 bg-light offcanvas-md offcanvas-start" id="leftbar">
         <?php include("leftbar.php"); ?>
       </nav>
 
       <!-- Contenido principal -->
-      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mt-5">
+      <main class="col-lg-10 px-2 py-4 mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4 mt-4 mt-md-0">
           <h2 class="h4 mb-0"><i class="fas fa-comments me-2 text-primary"></i>Solicitudes de Aprobación</h2>
           <a href="home.php" class="btn btn-outline-secondary">
@@ -165,7 +136,7 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
               $senderLabel = ($chat['last_sender'] === 'tecnico') ? 'Técnico: ' : (($chat['last_sender'] === 'admin') ? 'Admin: ' : '');
               $fecha = $chat['last_message_date'] ? date('d/m/Y H:i', strtotime($chat['last_message_date'])) : 'Sin mensajes';
-            ?>
+              ?>
               <div class="col-12">
                 <a href="chat-tech-admin.php?apply_id=<?= $chat['apply_id'] ?>" class="text-decoration-none">
                   <div class="card chat-card <?= $statusClass ?> mb-0 h-100">
@@ -210,4 +181,5 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

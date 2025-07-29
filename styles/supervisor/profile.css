@@ -5,7 +5,7 @@
      background-color: #f8f9fa;
  }
 
- #leftbar {
+ /*#leftbar {
      position: fixed;
      top: 41px;
      left: 0;
@@ -16,7 +16,7 @@
      z-index: 1030;
      overflow-y: auto;
      font-weight: 400;
- }
+ }*/
 
  main.main-content {
      margin-left: 250px;
