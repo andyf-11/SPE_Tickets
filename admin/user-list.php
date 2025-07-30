@@ -20,88 +20,53 @@ check_login("admin");
   <!-- DataTables -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
-
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="../styles/roles-layouts/user-list.css" rel="stylesheet">
   <style>
-    :root {
-      --primary-color: #4361ee;
-      --secondary-color: #3a0ca3;
+    /* Sidebar fijo con altura completa menos header */
+    #leftbar {
+      position: fixed;
+      top: 56px;
+      /* altura del header fijo */
+      left: 0;
+      width: 250px;
+      height: calc(100vh - 56px);
+      background-color: #fff;
+      border-right: 1px solid #dee2e6;
+      z-index: 1030;
+      overflow-y: auto;
+      font-weight: 400;
     }
 
-    body {
-      background-color: #f8f9fa;
-    }
-
-    .table-card {
-      border: none;
-      border-radius: 0.5rem;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-      overflow: hidden;
-    }
-
-    .table thead {
-      background-color: var(--primary-color);
-      color: white;
-    }
-
-    .badge-role {
-      font-size: 0.75rem;
-      font-weight: 500;
-      border-radius: 50px;
-      padding: 0.35rem 0.75rem;
-      text-transform: capitalize;
-    }
-
-    .badge-admin {
-      background-color: #f72585;
-      color: white;
-    }
-
-    .badge-tech {
-      background-color: #4cc9f0;
-      color: #111;
-    }
-
-    .badge-user {
-      background-color: #7209b7;
-      color: white;
-    }
-
-    .avatar-sm {
-      width: 35px;
-      height: 35px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background-color: #dee2e6;
-    }
-
-    .breadcrumb {
-      background-color: transparent;
-      padding-left: 0;
-    }
-
-    .breadcrumb-item.active {
-      color: var(--primary-color);
-      font-weight: 500;
+    /* Para el contenido principal, margen izquierdo igual al sidebar para evitar superposición */
+    #main-content {
+      margin-left: 250px;
+      padding-top: 70px;
+      /* espacio para header */
+      min-height: 100vh;
     }
   </style>
 </head>
 
 <body>
-  <?php include("header.php"); ?>
+  <!-- Header fijo -->
+  <header class="position-fixed top-0 start-0 end-0 bg-white shadow-sm z-3">
+    <?php include("header.php"); ?>
+  </header>
 
   <div class="container-fluid">
     <div class="row">
-      <!-- Botón de menú en móviles -->
-      <button class="btn btn-outline-primary d-md-none m-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#leftbar">
-        <i class="fas fa-bars"></i>
-      </button>
-
-      <!-- Sidebar -->
-      <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse offcanvas-md offcanvas-start" id="leftbar">
+      <!-- Sidebar fijo en desktop y offcanvas en móvil -->
+      <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar mt-5 p-0 collapse offcanvas-md offcanvas-start"
+        id="leftbar">
         <?php include("leftbar.php"); ?>
       </nav>
+
+      <!-- Botón para mostrar sidebar en móviles -->
+      <button class="btn btn-outline-primary d-md-none m-2 mt-5" type="button" data-bs-toggle="offcanvas"
+        data-bs-target="#leftbar">
+        <i class="fas fa-bars"></i>
+      </button>
 
       <!-- Contenido principal -->
       <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 mt-5">
@@ -109,11 +74,12 @@ check_login("admin");
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="home.php"><i class="fas fa-home me-1"></i>Inicio</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-users me-1"></i>Lista de Usuarios</li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-users me-1"></i>Lista de Usuarios
+            </li>
           </ol>
         </nav>
 
-        <!-- Título y botón -->
+        <!-- Título -->
         <div class="d-flex justify-content-between align-items-center mb-4">
           <div>
             <h2 class="h4 mb-0"><i class="fas fa-users me-2 text-primary"></i>Lista de Usuarios</h2>
@@ -124,7 +90,7 @@ check_login("admin");
           </a>
         </div>
 
-        <!-- Tabla de usuarios -->
+        <!-- Tabla -->
         <div class="card table-card">
           <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Todos los usuarios registrados</h5>
@@ -155,7 +121,7 @@ check_login("admin");
                 </thead>
                 <tbody>
                   <?php while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    $badgeClass = match(strtolower($row['role'])) {
+                    $badgeClass = match (strtolower($row['role'])) {
                       'admin' => 'badge-admin',
                       'tecnico' => 'badge-tech',
                       default => 'badge-user',
@@ -221,4 +187,5 @@ check_login("admin");
     });
   </script>
 </body>
+
 </html>

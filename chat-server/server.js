@@ -3,7 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const mysql = require('mysql2');
 const cors = require('cors');
-require('dotenv').config({path: '../.env'});
+require('dotenv').config();
 
 console.log("🔍 ENV cargado:", {
   DB_HOST: process.env.DB_HOST,

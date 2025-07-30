@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../assets/config/mailer_config.php';
 require("dbconnection.php");
 require_once("checklogin.php");
 check_login("admin");
@@ -37,14 +38,37 @@ if (isset($_POST['add_user'])) {
     }
 
     $password = password_hash($password_plain, PASSWORD_DEFAULT);
+    $token = bin2hex(random_bytes(32));
 
-    $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile, gender, edificio_id, area_id, role, password, posting_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-    if ($stmt->execute([$name, $email, $mobile, $gender, $edificio, $area, $role, $password])) {
-        echo "<script>alert('Usuario creado correctamente'); window.location.href = 'manage-users.php';</script>";
+    // Insertar usuario
+    $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile, gender, edificio_id, area_id, role, password, posting_date, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 0)");
+    $success = $stmt->execute([$name, $email, $mobile, $gender, $edificio, $area, $role, $password, $token]);
+
+    if ($success) {
+        try {
+            $verificationLink = $_ENV['APP_DOMAIN_PHP'] . "/assets/config/verify.php?token=" . $token;
+
+            $mail->addAddress($email, $name);
+            $mail->Subject = 'Verifica tu cuenta - SPE';
+            $mail->isHTML(true);
+            $mail->Body = "
+                Hola $name,<br><br>
+                Tu cuenta fue creada por el administrador del sistema.<br>
+                Antes de poder acceder, necesitas verificar tu cuenta haciendo clic en el siguiente enlace:<br><br>
+                <a href='$verificationLink'>$verificationLink</a><br><br>
+                Si no solicitaste este correo, simplemente ignóralo.";
+
+            $mail->send();
+
+            echo "<script>alert('Usuario creado y correo de verificación enviado'); window.location.href = 'manage-users.php';</script>";
+        } catch (Exception $e) {
+            echo "<script>alert('Usuario creado, pero hubo un error al enviar el correo: " . $mail->ErrorInfo . "'); window.location.href = 'manage-users.php';</script>";
+        }
     } else {
         echo "<script>alert('Error al crear el usuario'); window.location.href = 'manage-users.php';</script>";
     }
 }
+
 
 $edificios = $pdo->query("SELECT id, name FROM edificios ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 $areas = $pdo->query("SELECT id, name FROM areas ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);

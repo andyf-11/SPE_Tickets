@@ -5,7 +5,7 @@ use PHPMailer\PHPMailer\Exception;
 require_once __DIR__ . '/../../vendor/autoload.php'; // Ajusta la ruta si es necesario
 
 // Cargar variables de entorno del archivo .env
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../', '.env.local');
 $dotenv->load();
 
 // Configuración del servidor SMTP desde .env

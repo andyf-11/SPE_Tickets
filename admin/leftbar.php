@@ -114,7 +114,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="password-generator/generator.php" class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= ($page == 'change-password') ? 'active bg-primary text-white shadow-sm' : 'text-dark hover-bg-light'; ?>">
+          <a href="change-password.php" class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= ($page == 'change-password') ? 'active bg-primary text-white shadow-sm' : 'text-dark hover-bg-light'; ?>">
             <div class="icon-wrapper <?= ($page == 'change-password') ? 'bg-white text-primary' : 'bg-primary bg-opacity-10 text-primary'; ?> rounded-2 p-2 me-3">
               <i class="fas fa-key fs-6"></i>
             </div>
@@ -131,7 +131,7 @@
     <div class="p-3 border-top text-center bg-light">
       <div class="d-flex justify-content-center gap-2 mb-2">
         <a href="#" class="text-secondary" title="Ayuda"><i class="fas fa-question-circle"></i></a>
-        <a href="#" class="text-muted" title="Configuración"><i class="fas fa-cog"></i></a>
+        <a href="profile.php" class="text-muted" title="Configuración"><i class="fas fa-cog"></i></a>
         <a href="logout.php" class="text-muted" title="Cerrar sesión"><i class="fas fa-sign-out-alt"></i></a>
       </div>
       <small class="text-muted d-block">Versión 1.0</small>
