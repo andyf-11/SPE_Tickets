@@ -50,6 +50,7 @@ if ($filtro !== 'todos') {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <title>Supervisor | Tickets</title>
@@ -60,7 +61,7 @@ if ($filtro !== 'todos') {
   <link href="../assets/css/style.css" rel="stylesheet">
   <link href="../styles/superv.css" rel="stylesheet">
 
-   <style>
+  <style>
     body {
       font-family: 'Poppins', sans-serif;
       font-weight: 200;
@@ -83,6 +84,7 @@ if ($filtro !== 'todos') {
     }
   </style>
 </head>
+
 <body>
   <?php include("header.php"); ?>
   <div class="sidebar">
@@ -110,7 +112,8 @@ if ($filtro !== 'todos') {
             <label for="filtro_edificio" class="form-label mb-1">Edificio:</label>
             <select class="form-select" id="filtro_edificio" name="filtro_edificio" onchange="this.form.submit()">
               <option value="todos" <?= ($filtro === 'todos') ? 'selected' : '' ?>>Todos los edificios</option>
-              <option value="Santa Esmeralda" <?= ($filtro === 'Santa Esmeralda') ? 'selected' : '' ?>>Santa Esmeralda</option>
+              <option value="Santa Esmeralda" <?= ($filtro === 'Santa Esmeralda') ? 'selected' : '' ?>>Santa Esmeralda
+              </option>
               <option value="Palmira" <?= ($filtro === 'Palmira') ? 'selected' : '' ?>>Palmira</option>
             </select>
           </div>
@@ -158,7 +161,7 @@ if ($filtro !== 'todos') {
             $status = strtolower($row['status']);
             $ticketText = htmlspecialchars($row['ticket']);
             $edificio = htmlspecialchars($row['edificio_nombre'] ?? 'Sin edificio');
-            $id = (int)$row['id'];
+            $id = (int) $row['id'];
 
             $badgeClass = 'secondary';
             $estadoTexto = ucfirst($status);
@@ -172,7 +175,7 @@ if ($filtro !== 'todos') {
               $badgeClass = 'success';
               $estadoTexto = 'Cerrado';
             }
-        ?>
+            ?>
             <div class="card mb-4">
               <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
@@ -181,10 +184,12 @@ if ($filtro !== 'todos') {
                     <span class="text-muted me-2">#<?= $ticketId ?></span>
                     <span class="text-muted me-2"><i class="far fa-calendar me-1"></i><?= $postingDate ?></span>
                     <span class="badge bg-<?= $badgeClass ?> ticket-status-badge me-2"><?= $estadoTexto ?></span>
-                    <span class="badge bg-info text-dark ticket-status-badge"><i class="fas fa-building me-1"></i><?= $edificio ?></span>
+                    <span class="badge bg-info text-dark ticket-status-badge"><i
+                        class="fas fa-building me-1"></i><?= $edificio ?></span>
                   </div>
                 </div>
-                <button class="btn btn-sm btn-outline-primary ticket-details-btn" type="button" data-bs-toggle="collapse" data-bs-target="#ticket<?= $id ?>" aria-expanded="false" aria-controls="ticket<?= $id ?>">
+                <button class="btn btn-sm btn-outline-primary ticket-details-btn" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#ticket<?= $id ?>" aria-expanded="false" aria-controls="ticket<?= $id ?>">
                   <i class="fas fa-chevron-down me-1"></i> Detalles
                 </button>
               </div>
@@ -207,7 +212,8 @@ if ($filtro !== 'todos') {
                 </div>
               </div>
             </div>
-        <?php endwhile; } catch (PDOException $e) {
+          <?php endwhile;
+        } catch (PDOException $e) {
           echo '<div class="alert alert-danger d-flex align-items-center"><i class="fas fa-exclamation-triangle me-2"></i> Error al obtener tickets: ' . htmlspecialchars($e->getMessage()) . '</div>';
         }
         ?>
@@ -215,5 +221,13 @@ if ($filtro !== 'todos') {
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+    const role = <?php echo json_encode($_SESSION['user_role']); ?>;
+  </script>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script src="../chat-server/notifications.js"></script>
+
 </body>
+
 </html>

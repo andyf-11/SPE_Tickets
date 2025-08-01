@@ -247,5 +247,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
       });
     })();
   </script>
+
+  <script>
+  const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+  const role = <?php echo json_encode($_SESSION['user_role']); ?>;
+</script>
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script src="../chat-server/notifications.js"></script>
+
 </body>
 </html>

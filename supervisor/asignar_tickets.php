@@ -82,46 +82,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
       --primary-color: #4361ee;
       --primary-hover: #3a56d4;
     }
-    
+
     body {
       min-height: 100vh;
       background-color: #f8fafc;
     }
-    
+
     .navbar-brand {
       font-weight: 600;
       letter-spacing: 0.5px;
     }
-    
+
     .main-content {
       margin-left: 280px;
       padding: 2rem;
       margin-top: 60px;
     }
-    
+
     @media (max-width: 991.98px) {
       .main-content {
         margin-left: 0;
       }
     }
-    
+
     .card {
       border: none;
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
-    
-    .form-select, .form-control {
+
+    .form-select,
+    .form-control {
       padding: 0.75rem 1rem;
       border-radius: 8px;
       border: 1px solid #e2e8f0;
     }
-    
-    .form-select:focus, .form-control:focus {
+
+    .form-select:focus,
+    .form-control:focus {
       border-color: var(--primary-color);
       box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
     }
-    
+
     .btn-primary {
       background-color: var(--primary-color);
       border: none;
@@ -130,25 +132,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
       font-weight: 500;
       transition: all 0.3s ease;
     }
-    
+
     .btn-primary:hover {
       background-color: var(--primary-hover);
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
     }
-    
+
     .alert-success {
       background-color: #f0fdf4;
       border-color: #bbf7d0;
       color: #166534;
     }
-    
+
     .alert-danger {
       background-color: #fef2f2;
       border-color: #fecaca;
       color: #991b1b;
     }
-    
+
     .page-title {
       color: #1e293b;
       font-weight: 600;
@@ -156,7 +158,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
       position: relative;
       padding-bottom: 0.75rem;
     }
-    
+
     .page-title::after {
       content: '';
       position: absolute;
@@ -174,7 +176,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
   <!-- Navbar superior -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-sm">
     <div class="container-fluid px-4">
-      <button class="btn btn-outline-light d-lg-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#leftbar" aria-controls="leftbar">
+      <button class="btn btn-outline-light d-lg-none me-2" type="button" data-bs-toggle="offcanvas"
+        data-bs-target="#leftbar" aria-controls="leftbar">
         <i class="fas fa-bars"></i>
       </button>
       <a class="navbar-brand d-flex align-items-center" href="#">
@@ -219,7 +222,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
               <h5 class="card-title mb-4 text-primary">
                 <i class="fas fa-user-cog me-2"></i>Seleccionar Técnico
               </h5>
-              
+
               <form method="post" class="needs-validation" novalidate>
                 <div class="mb-4">
                   <label for="tecnico" class="form-label fw-semibold">Técnico disponible</label>
@@ -243,14 +246,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
             </div>
           </div>
         </div>
-        
+
         <div class="col-lg-4 mt-4 mt-lg-0">
           <div class="card">
             <div class="card-body p-4">
               <h5 class="card-title mb-4 text-primary">
                 <i class="fas fa-info-circle me-2"></i>Información
               </h5>
-              
+
               <div class="d-flex align-items-center mb-3">
                 <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
                   <i class="fas fa-ticket-alt text-primary"></i>
@@ -260,7 +263,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
                   <div class="fw-semibold">#<?= htmlspecialchars($ticketId) ?></div>
                 </div>
               </div>
-              
+
               <div class="d-flex align-items-center mb-3">
                 <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
                   <i class="fas fa-calendar-alt text-primary"></i>
@@ -270,7 +273,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
                   <div class="fw-semibold"><?= date('d/m/Y') ?></div>
                 </div>
               </div>
-              
+
               <div class="d-flex align-items-center">
                 <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
                   <i class="fas fa-exclamation-circle text-primary"></i>
@@ -303,6 +306,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
       }
     })();
   </script>
+
+  <script>
+    const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+    const role = <?php echo json_encode($_SESSION['user_role']); ?>;
+  </script>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script src="../chat-server/notifications.js"></script>
+
 </body>
 
 </html>

@@ -13,7 +13,7 @@ $stmt->execute([$chat_id, $user_id]);
 $chat = $stmt->fetch();
 
 if (!$chat) {
-    die("Chat no encontrado o acceso no autorizado.");
+  die("Chat no encontrado o acceso no autorizado.");
 }
 
 // Obtener info del técnico
@@ -29,6 +29,7 @@ $mensajes = $stmt->fetchAll();
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Chat con Técnico</title>
@@ -43,10 +44,19 @@ $mensajes = $stmt->fetchAll();
       padding: 10px;
       border-radius: 5px;
     }
-    .mensaje-tecnico { text-align: right; color: #0d6efd; }
-    .mensaje-usuario { text-align: left; color: #212529; }
+
+    .mensaje-tecnico {
+      text-align: right;
+      color: #0d6efd;
+    }
+
+    .mensaje-usuario {
+      text-align: left;
+      color: #212529;
+    }
   </style>
 </head>
+
 <body class="bg-light">
   <div class="container py-4">
     <div class="card shadow-sm">
@@ -71,7 +81,8 @@ $mensajes = $stmt->fetchAll();
         <?php if ($chat['status_chat'] === 'abierto'): ?>
           <form id="formMensaje" class="mt-3">
             <div class="input-group">
-              <input type="text" id="mensajeInput" class="form-control" placeholder="Escribe tu mensaje..." required autocomplete="off">
+              <input type="text" id="mensajeInput" class="form-control" placeholder="Escribe tu mensaje..." required
+                autocomplete="off">
               <button type="submit" class="btn btn-primary">Enviar</button>
             </div>
           </form>
@@ -128,5 +139,14 @@ $mensajes = $stmt->fetchAll();
       });
     });
   </script>
+
+  <script>
+    const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+    const role = <?php echo json_encode($_SESSION['user_role']); ?>;
+  </script>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script src="chat-server/notification.js"></script>
+
 </body>
+
 </html>

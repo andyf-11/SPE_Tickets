@@ -7,66 +7,66 @@ check_login("admin");
 
 // Eliminar usuario si se confirma
 if (isset($_POST['delete_user_id'])) {
-    $userIdToDelete = $_POST['delete_user_id'];
-    $stmt = $pdo->prepare("DELETE FROM user WHERE id = ?");
-    if ($stmt->execute([$userIdToDelete])) {
-        $_SESSION['user_deleted'] = true;
-    }
-    header("Location: manage-users.php");
-    exit;
+  $userIdToDelete = $_POST['delete_user_id'];
+  $stmt = $pdo->prepare("DELETE FROM user WHERE id = ?");
+  if ($stmt->execute([$userIdToDelete])) {
+    $_SESSION['user_deleted'] = true;
+  }
+  header("Location: manage-users.php");
+  exit;
 }
 
 // Crear usuario
 if (isset($_POST['add_user'])) {
-    $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $mobile = trim($_POST['mobile']);
-    $gender = trim($_POST['gender']);
-    $edificio = $_POST['edificio'];
-    $area = $_POST['area'];
-    $role = $_POST['role'];
-    $password_plain = $_POST['password'];
+  $name = trim($_POST['name']);
+  $email = trim($_POST['email']);
+  $mobile = trim($_POST['mobile']);
+  $gender = trim($_POST['gender']);
+  $edificio = $_POST['edificio'];
+  $area = $_POST['area'];
+  $role = $_POST['role'];
+  $password_plain = $_POST['password'];
 
-    if (!str_ends_with($email, '@spe.gob.hn')) {
-        echo "<script>alert('Solo se permiten correos @spe.gob.hn'); window.location.href = 'manage-users.php';</script>";
-        exit;
-    }
+  if (!str_ends_with($email, '@spe.gob.hn')) {
+    echo "<script>alert('Solo se permiten correos @spe.gob.hn'); window.location.href = 'manage-users.php';</script>";
+    exit;
+  }
 
-    if (!preg_match('/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[\W_]).{8,}$/', $password_plain)) {
-        echo "<script>alert('La contraseña debe tener al menos 8 caracteres, incluir una letra, un número y un símbolo.'); window.location.href = 'manage-users.php';</script>";
-        exit;
-    }
+  if (!preg_match('/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[\W_]).{8,}$/', $password_plain)) {
+    echo "<script>alert('La contraseña debe tener al menos 8 caracteres, incluir una letra, un número y un símbolo.'); window.location.href = 'manage-users.php';</script>";
+    exit;
+  }
 
-    $password = password_hash($password_plain, PASSWORD_DEFAULT);
-    $token = bin2hex(random_bytes(32));
+  $password = password_hash($password_plain, PASSWORD_DEFAULT);
+  $token = bin2hex(random_bytes(32));
 
-    // Insertar usuario
-    $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile, gender, edificio_id, area_id, role, password, posting_date, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 0)");
-    $success = $stmt->execute([$name, $email, $mobile, $gender, $edificio, $area, $role, $password, $token]);
+  // Insertar usuario
+  $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile, gender, edificio_id, area_id, role, password, posting_date, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 0)");
+  $success = $stmt->execute([$name, $email, $mobile, $gender, $edificio, $area, $role, $password, $token]);
 
-    if ($success) {
-        try {
-            $verificationLink = $_ENV['APP_DOMAIN_PHP'] . "/assets/config/verify.php?token=" . $token;
+  if ($success) {
+    try {
+      $verificationLink = $_ENV['APP_DOMAIN_PHP'] . "/assets/config/verify.php?token=" . $token;
 
-            $mail->addAddress($email, $name);
-            $mail->Subject = 'Verifica tu cuenta - SPE';
-            $mail->isHTML(true);
-            $mail->Body = "
+      $mail->addAddress($email, $name);
+      $mail->Subject = 'Verifica tu cuenta - SPE';
+      $mail->isHTML(true);
+      $mail->Body = "
                 Hola $name,<br><br>
                 Tu cuenta fue creada por el administrador del sistema.<br>
                 Antes de poder acceder, necesitas verificar tu cuenta haciendo clic en el siguiente enlace:<br><br>
                 <a href='$verificationLink'>$verificationLink</a><br><br>
                 Si no solicitaste este correo, simplemente ignóralo.";
 
-            $mail->send();
+      $mail->send();
 
-            echo "<script>alert('Usuario creado y correo de verificación enviado'); window.location.href = 'manage-users.php';</script>";
-        } catch (Exception $e) {
-            echo "<script>alert('Usuario creado, pero hubo un error al enviar el correo: " . $mail->ErrorInfo . "'); window.location.href = 'manage-users.php';</script>";
-        }
-    } else {
-        echo "<script>alert('Error al crear el usuario'); window.location.href = 'manage-users.php';</script>";
+      echo "<script>alert('Usuario creado y correo de verificación enviado'); window.location.href = 'manage-users.php';</script>";
+    } catch (Exception $e) {
+      echo "<script>alert('Usuario creado, pero hubo un error al enviar el correo: " . $mail->ErrorInfo . "'); window.location.href = 'manage-users.php';</script>";
     }
+  } else {
+    echo "<script>alert('Error al crear el usuario'); window.location.href = 'manage-users.php';</script>";
+  }
 }
 
 
@@ -223,11 +223,13 @@ $areas = $pdo->query("SELECT id, name FROM areas ORDER BY name ASC")->fetchAll(P
             </div>
             <div class="col-md-6">
               <label class="form-label">Correo institucional:</label>
-              <input type="email" name="email" class="form-control" required pattern="^[a-zA-Z0-9._%+-]+@spe\.gob\.hn$" title="Debe ser un correo @spe.gob.hn">
+              <input type="email" name="email" class="form-control" required pattern="^[a-zA-Z0-9._%+-]+@spe\.gob\.hn$"
+                title="Debe ser un correo @spe.gob.hn">
             </div>
             <div class="col-md-6">
               <label class="form-label">Teléfono:</label>
-              <input type="text" name="mobile" class="form-control" pattern="[0-9]{8}" required title="Debe contener 8 dígitos">
+              <input type="text" name="mobile" class="form-control" pattern="[0-9]{8}" required
+                title="Debe contener 8 dígitos">
             </div>
             <div class="col-md-6">
               <label class="form-label">Género:</label>
@@ -267,7 +269,9 @@ $areas = $pdo->query("SELECT id, name FROM areas ORDER BY name ASC")->fetchAll(P
             </div>
             <div class="col-md-6">
               <label class="form-label">Contraseña:</label>
-              <input type="text" name="password" class="form-control" minlength="8" required pattern="^(?=.*\d)(?=.*[a-zA-Z])(?=.*[\W_]).{8,}$" title="Debe tener al menos 8 caracteres, una letra, un número y un símbolo">
+              <input type="text" name="password" class="form-control" minlength="8" required
+                pattern="^(?=.*\d)(?=.*[a-zA-Z])(?=.*[\W_]).{8,}$"
+                title="Debe tener al menos 8 caracteres, una letra, un número y un símbolo">
             </div>
           </div>
         </div>
@@ -301,7 +305,8 @@ $areas = $pdo->query("SELECT id, name FROM areas ORDER BY name ASC")->fetchAll(P
   </div>
 
   <!-- Toast de Éxito -->
-  <?php if (!empty($_SESSION['user_deleted'])): unset($_SESSION['user_deleted']); ?>
+  <?php if (!empty($_SESSION['user_deleted'])):
+    unset($_SESSION['user_deleted']); ?>
     <div class="toast-container position-fixed top-0 end-0 p-3">
       <div class="toast align-items-center text-white bg-success border-0 show" role="alert">
         <div class="d-flex">
@@ -326,6 +331,14 @@ $areas = $pdo->query("SELECT id, name FROM areas ORDER BY name ASC")->fetchAll(P
       });
     });
   </script>
+
+  <script>
+    const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+    const role = <?php echo json_encode($_SESSION['user_role']); ?>;
+  </script>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script src="../chat-server/notifications.js"></script>
+
 </body>
 
 </html>

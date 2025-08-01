@@ -1,15 +1,17 @@
 <?php
-require_once '../../dbconnection.php';
-session_start();
+require_once("../../dbconnection.php");
 
-$id = intval($_GET['id'] ?? 0);
-$userId = $_SESSION['user_id'] ?? 0;
-
-if ($id > 0 && $userId > 0) {
-    $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?");
-    $stmt->execute([$id, $userId]);
-
+if (isset($_GET['id'])) {
+    $id = (int) $_GET['id'];
+    $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE id = ?");
+    $stmt->execute([$id]);
+    echo json_encode(['success' => true]);
+} elseif (isset($_GET['all'])) {
+    session_start();
+    $userId = $_SESSION['user_id'] ?? 0;
+    $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ?");
+    $stmt->execute([$userId]);
     echo json_encode(['success' => true]);
 } else {
-    echo json_encode(['success' => false, 'error' => 'Datos inválidos']);
+    echo json_encode(['success' => false]);
 }

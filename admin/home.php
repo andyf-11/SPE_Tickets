@@ -121,7 +121,8 @@ $esFinDeMes = ($hoy == $ultimoDiaMes);
     /* Sidebar fijo con altura completa menos header */
     #leftbar {
       position: fixed;
-      top: 56px; /* altura del header fijo */
+      top: 56px;
+      /* altura del header fijo */
       left: 0;
       width: 250px;
       height: calc(100vh - 56px);
@@ -135,7 +136,8 @@ $esFinDeMes = ($hoy == $ultimoDiaMes);
     /* Para el contenido principal, margen izquierdo igual al sidebar para evitar superposición */
     #main-content {
       margin-left: 250px;
-      padding-top: 70px; /* espacio para header */
+      padding-top: 70px;
+      /* espacio para header */
       min-height: 100vh;
     }
   </style>
@@ -303,7 +305,8 @@ $esFinDeMes = ($hoy == $ultimoDiaMes);
     </div>
 
     <!-- Modal Solicitudes -->
-    <div class="modal fade" id="solicitudesModal" tabindex="-1" aria-labelledby="solicitudesModalLabel" aria-hidden="true">
+    <div class="modal fade" id="solicitudesModal" tabindex="-1" aria-labelledby="solicitudesModalLabel"
+      aria-hidden="true">
       <div class="modal-dialog modal-dialog-scrollable modal-lg">
         <div class="modal-content">
           <div class="modal-header">
@@ -392,6 +395,14 @@ $esFinDeMes = ($hoy == $ultimoDiaMes);
       this.prepend(document.createElement('i')).className = 'fas fa-exchange-alt me-1';
     });
   </script>
+
+  <script>
+    const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+    const role = <?php echo json_encode($_SESSION['user_role']); ?>;
+  </script>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script src="../chat-server/notifications.js"></script>
+
 </body>
 
 </html>

@@ -51,7 +51,8 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         <i class="fas fa-ticket-alt me-2"></i>
-                        Ticket #<?= htmlspecialchars($solicitud['ticket_id']) ?> - <?= htmlspecialchars($solicitud['subject']) ?>
+                        Ticket #<?= htmlspecialchars($solicitud['ticket_id']) ?> -
+                        <?= htmlspecialchars($solicitud['subject']) ?>
                     </h5>
                     <a href="chat-list-admin.php" class="btn btn-sm btn-light back-btn">
                         <i class="fas fa-arrow-left me-1"></i> Volver
@@ -72,17 +73,18 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
             <div id="chatMessages" class="chat-messages">
                 <?php if (count($mensajes) > 0): ?>
-                    <?php 
+                    <?php
                     $currentDate = null;
-                    foreach ($mensajes as $msg): 
+                    foreach ($mensajes as $msg):
                         $messageDate = date('Y-m-d', strtotime($msg['date']));
                         if ($currentDate !== $messageDate) {
                             $currentDate = $messageDate;
-                            echo '<div class="message-divider text-center text-muted small my-2">'.date('d/m/Y', strtotime($currentDate)).'</div>';
+                            echo '<div class="message-divider text-center text-muted small my-2">' . date('d/m/Y', strtotime($currentDate)) . '</div>';
                         }
-                    ?>
+                        ?>
                         <div class="<?= ($msg['emisor'] === 'admin') ? 'align-self-end' : 'align-self-start' ?>">
-                            <div class="d-flex <?= ($msg['emisor'] === 'admin') ? 'flex-row-reverse' : 'flex-row' ?> align-items-end">
+                            <div
+                                class="d-flex <?= ($msg['emisor'] === 'admin') ? 'flex-row-reverse' : 'flex-row' ?> align-items-end">
                                 <?php if ($msg['emisor'] !== 'admin'): ?>
                                     <div class="avatar avatar-tech">
                                         <i class="fas fa-user-tie"></i>
@@ -118,16 +120,17 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
                 <div class="chat-input">
                     <form id="formMensaje" class="d-flex flex-column gap-3">
                         <input type="hidden" id="apply_id" value="<?= $apply_id ?>">
-                        
+
                         <div class="d-flex align-items-center gap-2">
-                            <textarea id="message" rows="1" class="form-control flex-grow-1" 
-                                placeholder="Escribe tu mensaje aquí..." required 
+                            <textarea id="message" rows="1" class="form-control flex-grow-1"
+                                placeholder="Escribe tu mensaje aquí..." required
                                 style="border-radius: 20px; padding: 10px 15px; resize: none;"></textarea>
-                            <button type="button" id="scrollToBottom" class="btn btn-outline-secondary rounded-circle" title="Ir al final">
+                            <button type="button" id="scrollToBottom" class="btn btn-outline-secondary rounded-circle"
+                                title="Ir al final">
                                 <i class="fas fa-arrow-down"></i>
                             </button>
                         </div>
-                        
+
                         <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
                             <div class="d-flex flex-wrap gap-2">
                                 <button type="submit" data-action="aprobar" class="btn btn-success action-btn">
@@ -140,11 +143,11 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
                                     <i class="fas fa-paper-plane me-1"></i> Enviar
                                 </button>
                             </div>
-                            <small class="text-muted">Estado: 
+                            <small class="text-muted">Estado:
                                 <span class="badge status-badge 
-                                    <?= $solicitud['status'] === 'pendiente' ? 'bg-warning text-dark' : 
-                                       ($solicitud['status'] === 'aprobado' ? 'bg-success' : 
-                                       ($solicitud['status'] === 'rechazado' ? 'bg-danger' : 'bg-info text-dark')) ?>">
+                                    <?= $solicitud['status'] === 'pendiente' ? 'bg-warning text-dark' :
+                                        ($solicitud['status'] === 'aprobado' ? 'bg-success' :
+                                            ($solicitud['status'] === 'rechazado' ? 'bg-danger' : 'bg-info text-dark')) ?>">
                                     <?= ucfirst($solicitud['status']) ?>
                                 </span>
                             </small>
@@ -167,10 +170,10 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
         document.addEventListener('DOMContentLoaded', function () {
             scrollToBottom();
-            
+
             // Botón para scroll al final
             document.getElementById('scrollToBottom')?.addEventListener('click', scrollToBottom);
-            
+
             const socket = io("http://localhost:3000");
             const applyId = <?= $apply_id ?>;
             const chatMessages = document.getElementById('chatMessages');
@@ -197,12 +200,12 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
                 const messageDate = new Date(data.timestamp);
                 const currentDate = messageDate.toISOString().split('T')[0];
-                
+
                 // Verificar si necesitamos añadir un divisor de fecha
                 const lastDivider = chatMessages.lastElementChild;
-                const lastMessageDate = lastDivider?.classList?.contains('message-divider') ? 
+                const lastMessageDate = lastDivider?.classList?.contains('message-divider') ?
                     lastDivider.textContent : null;
-                
+
                 if (!lastMessageDate || lastMessageDate !== messageDate.toLocaleDateString()) {
                     const divider = document.createElement("div");
                     divider.className = "message-divider text-center text-muted small my-2";
@@ -212,7 +215,7 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
                 const wrapper = document.createElement("div");
                 wrapper.className = data.sender === 'admin' ? 'align-self-end' : 'align-self-start';
-                
+
                 wrapper.innerHTML = `
                     <div class="d-flex ${data.sender === 'admin' ? 'flex-row-reverse' : 'flex-row'} align-items-end">
                         ${data.sender !== 'admin' ? `
@@ -233,7 +236,7 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                     </div>
                 `;
-                
+
                 chatMessages.appendChild(wrapper);
                 scrollToBottom();
             });
@@ -274,12 +277,20 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
             // Autoajuste del textarea
             if (messageInput) {
-                messageInput.addEventListener('input', function() {
+                messageInput.addEventListener('input', function () {
                     this.style.height = 'auto';
                     this.style.height = (this.scrollHeight) + 'px';
                 });
             }
         });
     </script>
+    <script>
+        const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+        const role = <?php echo json_encode($_SESSION['user_role']); ?>;
+    </script>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="../chat-server/notifications.js"></script>
+
 </body>
+
 </html>

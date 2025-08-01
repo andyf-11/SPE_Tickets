@@ -108,36 +108,18 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ======= NOTIFICACIONES =======
-  socket.on('joinNotificationRoom', ({ userId, rol }) => {
+  // =========================
+  // NOTIFICACIONES
+  // =========================
+  socket.on('joinNotificationRoom', ({ userId, role }) => {
     if (userId) {
       socket.join(`user_${userId}`);
-      console.log(`👤 Usuario ${userId} unido a notificaciones personales`);
-    }
-    if (rol) {
-      socket.join(`role_${rol}`);
-      console.log(`👥 Usuario unido al rol ${rol} para notificaciones`);
-    }
-  });
-
-  socket.on('sendNotification', (data) => {
-    const { mensaje, rol, usuarioId } = data;
-
-    if (!mensaje || (!rol && !usuarioId)) {
-      console.warn("⚠️ Datos incompletos en sendNotification:", data);
-      return;
+      console.log(`✅ Usuario ${userId} unido a sala user_${userId}`);
     }
 
-    if (usuarioId) {
-      console.log(`🔔 Notificación a usuario ${usuarioId}: ${mensaje}`);
-      io.to(`user_${usuarioId}`).emit('receiveNotification', { mensaje, rol });
-    } else if (rol) {
-      console.log(`🔔 Notificación para rol ${rol}: ${mensaje}`);
-      io.to(`role_${rol}`).emit('receiveNotification', { mensaje, rol });
-    } else {
-      // Notificación general
-      console.log(`🔔 Notificación general: ${mensaje}`);
-      io.emit('receiveNotification', { mensaje });
+    if (role) {
+      socket.join(`role_${role}`);
+      console.log(`✅ Rol ${role} unido a sala role_${role}`);
     }
   });
 
@@ -150,21 +132,26 @@ io.on('connection', (socket) => {
 // ENDPOINTS EXTERNOS PARA PHP
 // =========================
 app.post('/notificar', (req, res) => {
-  const { mensaje, rol, usuarioId } = req.body;
+  const { mensaje, role, usuarioId } = req.body;
+
   if (!mensaje) {
     return res.status(400).json({ error: "Mensaje requerido" });
   }
 
   if (usuarioId) {
-    io.to(`user_${usuarioId}`).emit('receiveNotification', { mensaje, rol });
-  } else if (rol) {
-    io.to(`role_${rol}`).emit('receiveNotification', { mensaje, rol });
+    console.log(`📣 Emitiendo notificación a user_${usuarioId}: ${mensaje}`);
+    io.to(`user_${usuarioId}`).emit('receiveNotification', { mensaje, role });
+  } else if (role) {
+    console.log(`📣 Emitiendo notificación a role_${role}: ${mensaje}`);
+    io.to(`role_${role}`).emit('receiveNotification', { mensaje, role });
   } else {
+    console.log(`📣 Emitiendo notificación global: ${mensaje}`);
     io.emit('receiveNotification', { mensaje });
   }
 
   res.json({ success: true });
 });
+
 
 server.listen(3000, () => {
   console.log('🚀 Servidor WebSocket escuchando en http://localhost:3000');

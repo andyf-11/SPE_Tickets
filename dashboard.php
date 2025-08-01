@@ -12,8 +12,8 @@ $stmt->execute([$user_email]);
 $total_tickets = $stmt->fetchColumn();
 
 if (empty($user_email)) {
-    echo "<div class='alert alert-danger'>Error: no hay email de usuario en sesión.</div>";
-    exit;
+  echo "<div class='alert alert-danger'>Error: no hay email de usuario en sesión.</div>";
+  exit;
 }
 
 // Tickets de hoy
@@ -31,6 +31,7 @@ $page = 'dashboard'; // para el leftbar
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -60,7 +61,8 @@ $page = 'dashboard'; // para el leftbar
     /* Sidebar fijo debajo del header */
     #leftbar {
       position: fixed;
-      top: 43px; /* Altura del header */
+      top: 43px;
+      /* Altura del header */
       left: 0;
       width: 250px;
       height: calc(100vh - 43px);
@@ -82,13 +84,13 @@ $page = 'dashboard'; // para el leftbar
     .card-stat {
       border-radius: 12px;
       border: none;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .card-stat:hover {
       transform: translateY(-5px);
-      box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
     }
 
     .ticket-item {
@@ -117,6 +119,7 @@ $page = 'dashboard'; // para el leftbar
     }
   </style>
 </head>
+
 <body>
 
   <?php include('header.php'); ?>
@@ -223,6 +226,13 @@ $page = 'dashboard'; // para el leftbar
     setInterval(updateClock, 1000);
     updateClock();
   </script>
-</body>
-</html>
+  <script>
+    const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+    const role = <?php echo json_encode($_SESSION['user_role']); ?>;
+  </script>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script src="chat-server/notification.js"></script>
 
+</body>
+
+</html>

@@ -4,6 +4,7 @@ if (session_status() == PHP_SESSION_NONE)
 require_once 'dbconnection.php';
 
 $userId = $_SESSION['user_id'] ?? 0;
+$role == $_SESSION['user_role'] ?? '';
 
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
 $stmt->execute([$userId]);
@@ -38,12 +39,14 @@ $unreadNotifications = $stmt->fetchColumn();
       </a>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="user-options">
         <li>
-          <a class="dropdown-item d-flex justify-content-between align-items-center" href="assets/data/notifications.php">
+          <a class="dropdown-item d-flex justify-content-between align-items-center"
+            href="../assets/data/notifications.php">
             <span><i class="fa fa-bell"></i>&nbsp;&nbsp;Notificaciones</span>
-            <?php if ($unreadNotifications > 0): ?>
-              <span class="badge bg-danger ms-2"><?= $unreadNotifications ?></span>
-            <?php endif; ?>
+            <span id="noti-count" class="badge bg-danger ms-2 <?= $unreadNotifications > 0 ? '' : 'd-none' ?>">
+              <?= $unreadNotifications ?>
+            </span>
           </a>
+
         </li>
 
         <li><a class="dropdown-item" href="logout.php"><i class="fa fa-power-off"></i>&nbsp;&nbsp;Cerrar Sesión</a></li>
@@ -52,3 +55,40 @@ $unreadNotifications = $stmt->fetchColumn();
 
   </div>
 </nav>
+
+<!-- Script de notificaciones Socket.IO -->
+<script>
+  const userId = <?= json_encode($userId) ?>;
+  const role = <?= json_encode($userRole) ?>;
+</script>
+<script src="../chat-server/notifications.js"></script>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+  const USER_ID = <?= json_encode($userId) ?>;
+  const USER_ROLE = <?= json_encode($userRole) ?>;
+  const socket = io("http://localhost:3000");
+
+  socket.emit("joinRoom", {
+    userId: USER_ID,
+    role: USER_ROLE
+  });
+
+  socket.on("nuevaNotificacion", (data) => {
+    const badge = document.getElementById("noti-count");
+
+    if (badge) {
+      let current = parseInt(badge.innerText || 0);
+      badge.innerText = current + 1;
+      badge.classList.remove("d-none");
+    } else {
+      const newBadge = document.createElement("span");
+      newBadge.id = "noti-count";
+      newBadge.className = "badge bg-danger ms-2";
+      newBadge.innerText = "1";
+
+      const link = document.querySelector("a[href*='notifications.php']");
+      link.appendChild(newBadge);
+    }
+  });
+</script>

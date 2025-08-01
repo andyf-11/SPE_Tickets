@@ -27,8 +27,8 @@ switch ($role) {
         break;
 }
 
+// Notificaciones a mostrar
 $sql = "SELECT * FROM notifications WHERE user_id = ? ";
-
 switch ($role) {
     case 'usuario':
         $sql .= "AND type IN ('respuesta_ticket', 'nuevo_mensaje_chat')";
@@ -45,12 +45,16 @@ switch ($role) {
         $sql .= "AND 0";
         break;
 }
-
 $sql .= " ORDER BY created_at DESC";
-
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$userId]);
 $notificaciones = $stmt->fetchAll();
+
+// Contador de no leídas
+$sqlCount = "SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0";
+$stmtCount = $pdo->prepare($sqlCount);
+$stmtCount->execute([$userId]);
+$notiCount = (int)$stmtCount->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -58,7 +62,6 @@ $notificaciones = $stmt->fetchAll();
     <meta charset="UTF-8">
     <title>Notificaciones</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <!-- Toastr para notificaciones en tiempo real -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 </head>
 <body class="bg-light">
@@ -66,7 +69,16 @@ $notificaciones = $stmt->fetchAll();
         <div class="container-fluid">
             <a class="navbar-brand" href="dashboard.php">SPE</a>
             <span class="navbar-text text-white">Notificaciones</span>
-            <a class="btn btn-outline-light" href="<?= $dashboard ?>">Volver</a>
+            <a class="btn btn-outline-light position-relative" href="<?= $dashboard ?>">
+                Volver
+                <?php if ($notiCount > 0): ?>
+                    <span id="noti-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        <?= $notiCount ?>
+                    </span>
+                <?php else: ?>
+                    <span id="noti-count" class="d-none"></span>
+                <?php endif; ?>
+            </a>
         </div>
     </nav>
 
@@ -98,15 +110,19 @@ $notificaciones = $stmt->fetchAll();
         const role = "<?= $role ?>";
         const socket = io("http://localhost:3000");
 
-        // Unir al usuario a su sala de notificaciones
         socket.emit('joinNotificationRoom', { userId: userId, rol: role });
 
-        // Escuchar notificaciones en vivo
         socket.on('receiveNotification', (data) => {
             console.log("🔔 Nueva notificación:", data);
-            toastr.info(data.mensaje); // Notificación visual
+            toastr.info(data.mensaje);
 
-            // Opcional: agregar la notificación al DOM
+            // Actualizar contador
+            const badge = document.getElementById("noti-count");
+            let current = parseInt(badge?.innerText || 0);
+            badge.innerText = current + 1;
+            badge.classList.remove("d-none");
+
+            // Insertar en el DOM
             const lista = document.getElementById('lista-notificaciones');
             const nueva = document.createElement('div');
             nueva.classList.add('card', 'mb-2', 'fw-bold');
@@ -122,9 +138,28 @@ $notificaciones = $stmt->fetchAll();
             fetch('check_read.php?id=' + id)
                 .then(res => res.json())
                 .then(data => {
-                    location.reload();
+                    if (data.success) {
+                        const badge = document.getElementById("noti-count");
+                        let current = parseInt(badge?.innerText || 0);
+                        if (current > 1) {
+                            badge.innerText = current - 1;
+                        } else {
+                            badge.innerText = '';
+                            badge.classList.add("d-none");
+                        }
+                        location.reload();
+                    }
                 });
         }
+
+        // Al abrir la página, se puede marcar todo como leído (opcional)
+        fetch('check_read.php?all=1')
+            .then(res => res.json())
+            .then(data => {
+                const badge = document.getElementById("noti-count");
+                badge.innerText = '';
+                badge.classList.add("d-none");
+            });
     </script>
 </body>
 </html>
