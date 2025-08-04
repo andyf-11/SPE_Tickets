@@ -73,10 +73,10 @@ if (!empty($row['edificio_id'])) {
 
     #leftbar {
       position: fixed;
-      top: 41px;
+      top: 56px;
       left: 0;
       width: 250px;
-      height: calc(100vh - 41px);
+      height: calc(100vh - 56px);
       background-color: #fff;
       border-right: 1px solid #dee2e6;
       z-index: 1030;

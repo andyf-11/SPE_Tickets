@@ -103,17 +103,6 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="manage-passwords.php" class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= ($page == 'manage-passwords') ? 'active bg-primary text-white shadow-sm' : 'text-dark hover-bg-light'; ?>">
-            <div class="icon-wrapper <?= ($page == 'manage-passwords') ? 'bg-white text-primary' : 'bg-primary bg-opacity-10 text-primary'; ?> rounded-2 p-2 me-3">
-              <i class="fas fa-lock fs-6"></i>
-            </div>
-            <span class="flex-grow-1">Permisos Contraseñas</span>
-            <?php if($page == 'manage-passwords'): ?>
-              <i class="fas fa-chevron-right fa-xs ms-2"></i>
-            <?php endif; ?>
-          </a>
-        </li>
-        <li class="nav-item">
           <a href="change-password.php" class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= ($page == 'change-password') ? 'active bg-primary text-white shadow-sm' : 'text-dark hover-bg-light'; ?>">
             <div class="icon-wrapper <?= ($page == 'change-password') ? 'bg-white text-primary' : 'bg-primary bg-opacity-10 text-primary'; ?> rounded-2 p-2 me-3">
               <i class="fas fa-key fs-6"></i>

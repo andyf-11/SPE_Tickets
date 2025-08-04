@@ -106,7 +106,7 @@ check_login("admin");
               $stmt = $pdo->query("SELECT u.id, u.name, e.name AS edificio_name, u.email, u.role, u.posting_date 
                                     FROM user u
                                     LEFT JOIN edificios e ON u.edificio_id = e.id 
-                                    ORDER BY u.posting_date DESC");
+                                    ORDER BY u.posting_date ASC");
               ?>
               <table id="usersTable" class="table table-hover align-middle w-100">
                 <thead>

@@ -13,6 +13,7 @@
 body {
   background-color: var(--light-bg);
   font-family: 'Poppins', sans-serif;
+  margin-left: 20px;
 }
 
 /* Ticket Card */

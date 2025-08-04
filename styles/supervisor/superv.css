@@ -64,83 +64,12 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.sidebar {
-  position: fixed;
-  top: 56px;
-  left: 0;
-  width: 250px;
-  height: calc(100vh - 56px);
-  background-color: #f8f9fa;
-  padding-top: 1rem;
-}
-
-.main-content {
-  margin-left: 250px;
-  padding: 1.5rem;
-  margin-top: 56px;
-}
-
-.mt-header {
-  margin-top: 15px;
-}
-
-/* --- Sidebar fijo en escritorio --- */
-@media (min-width: 768px) {
-  #leftbar {
-    position: fixed !important;
-    top: 50px;
-    left: 0;
-    width: 250px;
-    height: calc(100vh - 70px);
-    z-index: 1020;
-    overflow-y: auto;
-    transform: none !important;
-    visibility: visible !important;
-  }
-}
-
-/* Evitar el fondo oscuro del offcanvas en escritorio */
-@media (min-width: 768px) {
-  .offcanvas-backdrop {
-    display: none !important;
-  }
-}
-
-/*leftbar*/
-#leftbar {
-  transition: all 0.3s ease;
-  width: 250px;
-}
-
-.nav-link {
-  transition: all 0.2s ease;
-}
-
-.nav-link:not(.active):hover {
-  background-color: var(--sidebar-hover);
-  transform: translateX(3px);
-}
-
-.nav-link.active {
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(78, 115, 223, 0.2);
-}
-
-.bg-gradient-light {
-  background: linear-gradient(135deg, #f8f9fc 0%, white 100%);
-}
-
-.rounded-circle {
-  transition: transform 0.3s ease;
-}
-
-.rounded-circle:hover {
-  transform: scale(1.05);
-}
 
 /*Manage-Tickets*/
 
 :root {
+  --header-height: 56px;
+  --sidebar-width: 250px;
   --primary-color: #4e73df;
   --secondary-color: #f8f9fc;
   --accent-color: #2e59d9;
@@ -148,81 +77,121 @@
 }
 
 body {
-  background-color: #f8f9fc;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 300;
+  background-color: var(--secondary-color);
   color: var(--text-color);
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
 }
 
-
-
-.main-content {
-  margin-left: 250px;
-  padding: 2rem;
-  margin-top: 56px;
+/* Header fijo */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  z-index: 1040;
+  background-color: white;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
 }
 
-@media (max-width: 768px) {
-  .sidebar {
-    display: none;
-  }
-
-  .main-content {
-    margin-left: 0;
-    padding: 1rem;
-  }
+/* Wrapper flex para sidebar y contenido */
+body > .page-wrapper {
+  display: flex;
+  min-height: 100vh;
+  margin-top: var(--header-height);
 }
 
-.card {
+/* Sidebar fijo */
+#leftbar {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100vh - var(--header-height));
+  z-index: 1030;
+  font-weight: 300;
+  overflow-y: auto;
+  background-color: white;
+  border-right: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+}
+
+/* Contenido principal */
+main.main-content {
+  margin-left: var(--sidebar-width);
+  flex-grow: 1;
+  padding: 1.5rem;
+  background-color: var(--secondary-color);
+}
+
+/* Cards de tickets */
+.ticket-card {
   border: none;
-  border-radius: 0.35rem;
-  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  margin-bottom: 1rem;
+  transition: transform 0.2s;
 }
-
-.card:hover {
+.ticket-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0.5rem 1.5rem 0 rgba(58, 59, 69, 0.2);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
 }
-
-.card-header {
-  background-color: white;
-  border-bottom: 1px solid #e3e6f0;
-}
-
-.badge {
-  font-weight: 500;
-  padding: 0.35em 0.65em;
-}
-
-.breadcrumb {
-  background-color: transparent;
-  padding: 0;
-}
-
-.filter-card {
-  background-color: white;
-  border-radius: 0.35rem;
-  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+.ticket-card .card-header {
+  background-color: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   padding: 1.25rem;
-  margin-bottom: 1.5rem;
 }
 
+/* Badges y texto */
 .ticket-status-badge {
   font-size: 0.75rem;
-  letter-spacing: 0.5px;
-  padding: 0.5em 0.75em;
+  font-weight: 500;
+  padding: 0.35rem 0.65rem;
 }
-
-.ticket-details-btn {
-  border-radius: 50px;
-  padding: 0.25rem 0.75rem;
-}
-
 .user-avatar {
   width: 40px;
   height: 40px;
   object-fit: cover;
 }
+.ticket-text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Header y filtros */
+.header-section,
+.filter-card {
+  background: #fff;
+  padding: 1.25rem 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  margin-bottom: 1.5rem;
+}
+
+/* Botón detalles ticket */
+.btn-outline-primary.rounded-pill {
+  border-radius: 50px !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #leftbar {
+    position: static;
+    width: 100%;
+    height: auto;
+    border: none;
+    box-shadow: none;
+  }
+  main.main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+}
+
 
 /*Tech-layout*/
 

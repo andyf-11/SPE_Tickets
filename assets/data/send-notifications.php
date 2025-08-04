@@ -1,6 +1,6 @@
 <?php
 // send_notification.php
-require_once("../../dbconnection.php");
+require_once ("dbconnection.php");
 
 /**
  * Envía una notificación a Node.js y la guarda en la base de datos.

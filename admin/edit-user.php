@@ -6,28 +6,29 @@ require_once("dbconnection.php");
 
 if (isset($_POST['update'])) {
   $name = $_POST['name'];
-  $altemail = $_POST['alt_email'];  // Unificado con el form
+  $email = $_POST['email'];  // Unificado con el form
   $contact = $_POST['mobile'];      // Unificado con el form
   $address = $_POST['address'];
   $gender = $_POST['gender'];
-  $building_id = $_POST['building_id'];
+  $edificio_id = $_POST['edificio_id'];
   $userid = $_GET['id'];
 
   $sql = "UPDATE user 
-          SET name = :name, alt_email = :altemail, mobile = :contact, gender = :gender, address = :address, building_id = :building_id 
+          SET name = :name, email = :email, mobile = :contact, gender = :gender, address = :address, edificio_id = :edificio_id 
           WHERE id = :userid";
   $stmt = $pdo->prepare($sql);
   $stmt->bindParam(':name', $name);
   $stmt->bindParam(':contact', $contact);
   $stmt->bindParam(':gender', $gender);
   $stmt->bindParam(':address', $address);
-  $stmt->bindParam(':altemail', $altemail);
-  $stmt->bindParam(':building_id', $building_id, PDO::PARAM_INT);
+  $stmt->bindParam(':email', $email);
+  $stmt->bindParam(':edificio_id', $edificio_id, PDO::PARAM_INT);
   $stmt->bindParam(':userid', $userid, PDO::PARAM_INT);
 
   if ($stmt->execute()) {
-    echo "<script>alert('Data Updated'); location.replace(document.referrer)</script>";
+    $toast = true;
   }
+
 }
 ?>
 
@@ -71,6 +72,27 @@ if (isset($_POST['update'])) {
 <body>
   <?php include("header.php"); ?>
 
+  <?php if (isset($toast) && $toast): ?>
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+      <div id="successToast" class="toast align-items-center text-white bg-success border-0 show" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Datos actualizados correctamente.
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+            aria-label="Cerrar"></button>
+        </div>
+      </div>
+    </div>
+    <script>
+      setTimeout(() => {
+        window.location.href = "manage-users.php";
+      }, 3000);
+    </script>
+  <?php endif; ?>
+
+
   <div class="container-fluid">
     <div class="row">
       <!-- Sidebar -->
@@ -88,7 +110,7 @@ if (isset($_POST['update'])) {
         $stmt->execute();
 
         if ($rw = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        ?>
+          ?>
           <div class="profile-card">
             <!-- Encabezado -->
             <div class="form-header">
@@ -114,7 +136,8 @@ if (isset($_POST['update'])) {
 
             <!-- Formulario -->
             <div class="form-body">
-              <form name="muser" method="post" action="" enctype="multipart/form-data" class="needs-validation" novalidate>
+              <form name="muser" method="post" action="" enctype="multipart/form-data" class="needs-validation"
+                novalidate>
                 <div class="row justify-content-center">
                   <div class="col-lg-8">
                     <div class="text-center mb-4">
@@ -157,7 +180,8 @@ if (isset($_POST['update'])) {
                         <label for="gender" class="form-label">Género</label>
                         <select class="form-select" id="gender" name="gender" required>
                           <option value="">Seleccione...</option>
-                          <option value="masculino" <?= ($rw['gender'] == 'masculino') ? 'selected' : '' ?>>Masculino</option>
+                          <option value="masculino" <?= ($rw['gender'] == 'masculino') ? 'selected' : '' ?>>Masculino
+                          </option>
                           <option value="femenino" <?= ($rw['gender'] == 'femenino') ? 'selected' : '' ?>>Femenino</option>
                           <option value="otro" <?= ($rw['gender'] == 'otro') ? 'selected' : '' ?>>Otro</option>
                         </select>
@@ -168,7 +192,8 @@ if (isset($_POST['update'])) {
 
                       <div class="col-12">
                         <label for="address" class="form-label">Dirección</label>
-                        <textarea class="form-control" id="address" name="address" rows="3" required><?= htmlspecialchars($rw['address']) ?></textarea>
+                        <textarea class="form-control" id="address" name="address" rows="3"
+                          required><?= htmlspecialchars($rw['address']) ?></textarea>
                         <div class="invalid-feedback">
                           Por favor ingrese la dirección
                         </div>
@@ -176,7 +201,7 @@ if (isset($_POST['update'])) {
 
                       <div class="col-md-6">
                         <label for="building" class="form-label">Edificio</label>
-                        <select class="form-select" id="building" name="building_id" required>
+                        <select class="form-select" id="building" name="edificio_id" required>
                           <option value="">Seleccione un edificio</option>
                           <?php
                           $buildings = $pdo->query("SELECT id, name FROM edificios ORDER BY name ASC");
@@ -193,7 +218,8 @@ if (isset($_POST['update'])) {
 
                       <div class="col-md-6">
                         <label class="form-label">Rol</label>
-                        <input type="text" class="form-control bg-light" value="<?= ucfirst(htmlspecialchars($rw['role'])) ?>" readonly>
+                        <input type="text" class="form-control bg-light"
+                          value="<?= ucfirst(htmlspecialchars($rw['role'])) ?>" readonly>
                       </div>
 
                       <div class="col-12 text-center mt-4">

@@ -98,10 +98,6 @@ unset($_SESSION["error_message"]);
               </div>
             </div>
             
-            <div class="mb-3">
-              <label for="motivo" class="form-label fw-semibold">Motivo</label>
-              <textarea name="motivo" id="motivo" rows="3" class="form-control" placeholder="Describe brevemente tu problema..." required></textarea>
-            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>

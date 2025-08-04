@@ -57,7 +57,7 @@ try {
 
         // Registrar inicio de sesión en usercheck
         try {
-            $insertLogin = $pdo->prepare("INSERT INTO usercheck (user_id, logindate, email, username, ip, user_agent, os) 
+            $insertLogin = $pdo->prepare("INSERT INTO usercheck (user_id, logindatetime, email, username, ip, user_agent, os) 
                                           VALUES (:user_id, NOW(), :email, :username, :ip, :user_agent, :os)");
             $insertLogin->execute([
                 ':user_id' => $user["id"],

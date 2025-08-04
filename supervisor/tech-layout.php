@@ -25,18 +25,76 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link href="../styles/superv.css" rel="stylesheet">
 
   <style>
     body {
       font-family: 'Poppins', sans-serif;
       font-weight: 300;
+      background-color: #f8f9fa;
+    }
+
+    .header-section {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tech-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #0d6efd;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      font-weight: 500;
+    }
+
+    .table-responsive {
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    .table thead {
+      background-color: #f8f9fa;
+    }
+
+    .table th {
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      color: #6c757d;
+    }
+
+    .badge-count {
+      font-size: 0.85rem;
+      font-weight: 500;
+      min-width: 30px;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn-action {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
     }
 
     @media (min-width: 768px) {
       #leftbar {
         position: fixed;
-        top: 42px;
+        top: 56px;
         left: 0;
         height: calc(100vh - 52px);
         z-index: 1030;
@@ -45,7 +103,6 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
       main {
         margin-left: 250px;
-        /* Ancho del sidebar */
       }
     }
   </style>
@@ -55,44 +112,42 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <?php include("header.php"); ?>
 
   <!-- Sidebar -->
-  <div class="sidebar">
     <?php include("leftbar.php"); ?>
-  </div>
 
   <!-- Contenido principal -->
-  <div class="main-content">
-    <div class="container-fluid">
+  <main class="main-content mt-5">
+    <div class="container-fluid py-4">
       <div class="header-section">
         <div>
-          <h2 class="fw-bold mb-0"><i class="fa-solid fa-gears me-2"></i>Plantilla de Técnicos</h2>
+          <h2 class="fw-bold mb-1"><i class="fa-solid fa-user-gear me-2"></i>Plantilla de Técnicos</h2>
           <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
+            <ol class="breadcrumb mb-0">
               <li class="breadcrumb-item"><a href="s_dashboard.php" class="text-decoration-none">Inicio</a></li>
               <li class="breadcrumb-item active" aria-current="page">Técnicos</li>
             </ol>
           </nav>
         </div>
-        <button class="btn btn-dark">
-          <i class="fas fa-plus me-2"></i>Nuevo Técnico
+        <button class="btn btn-dark btn-sm">
+          <i class="fas fa-plus me-1"></i> Nuevo Técnico
         </button>
       </div>
 
-      <div class="card shadow-sm mb-4">
+      <div class="card shadow-sm border-0">
         <div class="card-body p-0">
           <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead class="table-info">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
                 <tr>
-                  <th>Técnico</th>
+                  <th class="ps-4">Técnico</th>
                   <th>Contacto</th>
-                  <th>Tickets Asignados</th>
-                  <th>Acciones</th>
+                  <th class="text-center">Tickets</th>
+                  <th class="text-end pe-4">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 <?php foreach ($tecnicos as $tecnico): ?>
                   <tr>
-                    <td>
+                    <td class="ps-4">
                       <div class="d-flex align-items-center">
                         <div class="tech-avatar">
                           <?= strtoupper(substr($tecnico['name'], 0, 1)) ?>
@@ -109,21 +164,21 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <small class="text-muted">Teléfono</small>
                       </div>
                     </td>
-                    <td>
+                    <td class="text-center">
                       <span class="badge bg-primary bg-opacity-10 text-primary badge-count py-2 px-2">
                         <?= htmlspecialchars($tecnico['tickets_asignados']) ?>
                       </span>
                     </td>
-                    <td>
-                      <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-primary">
-                          <i class="fas fa-eye"></i>
+                    <td class="text-end pe-4">
+                      <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn btn-sm btn-action btn-outline-primary rounded-circle">
+                          <i class="fas fa-eye fa-xs"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-secondary">
-                          <i class="fas fa-edit"></i>
+                        <button class="btn btn-sm btn-action btn-outline-secondary rounded-circle">
+                          <i class="fas fa-edit fa-xs"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger">
-                          <i class="fas fa-trash-alt"></i>
+                        <button class="btn btn-sm btn-action btn-outline-danger rounded-circle">
+                          <i class="fas fa-trash-alt fa-xs"></i>
                         </button>
                       </div>
                     </td>
@@ -135,7 +190,7 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

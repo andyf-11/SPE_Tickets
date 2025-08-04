@@ -4,7 +4,7 @@ if (session_status() == PHP_SESSION_NONE)
 require_once 'dbconnection.php';
 
 $userId = $_SESSION['user_id'] ?? 0;
-$role == $_SESSION['user_role'] ?? '';
+$role = $_SESSION['user_role'] ?? ' ';
 
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
 $stmt->execute([$userId]);
@@ -40,7 +40,7 @@ $unreadNotifications = $stmt->fetchColumn();
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="user-options">
         <li>
           <a class="dropdown-item d-flex justify-content-between align-items-center"
-            href="../assets/data/notifications.php">
+            href="assets/data/notifications.php">
             <span><i class="fa fa-bell"></i>&nbsp;&nbsp;Notificaciones</span>
             <span id="noti-count" class="badge bg-danger ms-2 <?= $unreadNotifications > 0 ? '' : 'd-none' ?>">
               <?= $unreadNotifications ?>

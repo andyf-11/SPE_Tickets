@@ -104,7 +104,7 @@ $tickets_pendientes_hoy = $stmt->fetchColumn();
     @media (min-width: 768px) {
       #leftbar {
         position: fixed;
-        top: 42px;
+        top: 56px;
         left: 0;
         height: calc(100vh - 52px);
         z-index: 1030;
@@ -123,7 +123,7 @@ $tickets_pendientes_hoy = $stmt->fetchColumn();
   <?php include("header.php"); ?>
   <?php include("leftbar.php"); ?>
 
-  <main class="flex-grow-1 px-4 py-3 mt-header">
+  <main class="flex-grow-1 px-4 py-3 mt-header mt-5">
     <!-- Encabezado -->
     <div class="page-header d-flex justify-content-between align-items-center pb-3 mb-4">
       <div>
