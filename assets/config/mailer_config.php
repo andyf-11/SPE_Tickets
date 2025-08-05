@@ -56,3 +56,40 @@ function sendVerificationEmail($toEmail, $toName, $token) {
         return false;
     }
 }
+
+function sendPasswordResetEmail($toEmail, $toName, $token) {
+    global $mail_host, $mail_port, $mail_username, $mail_password, $mail_encryption, $mail_from, $mail_from_name;
+
+    $mail = new PHPMailer(true);
+
+    try {
+        $mail->isSMTP();
+        $mail->Host = $mail_host;
+        $mail->SMTPAuth = true;
+        $mail->Username = $mail_username;
+        $mail->Password = $mail_password;
+        $mail->SMTPSecure = $mail_encryption;
+        $mail->Port = $mail_port;
+
+        $mail->setFrom($mail_from, $mail_from_name);
+        $mail->addAddress($toEmail, $toName);
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Restablece tu contraseña - SPE';
+
+        $resetLink = $_ENV['APP_DOMAIN_PHP'] . "/SPE_Soporte_Tickets/assets/config/resetform.php?token=" . $token;
+        $mail->Body = "
+            Hola $toName, <br><br>
+            Hemos recibido una solicitud para restablecer tu contraseña. <br>
+            Haz clic en el siguiente enlace para continuar: <br>
+            <a href='$resetLink>$resetLink</a><br><br>
+            Si no solicitaste este cambio, puedes ignorar este correo.";
+
+            $mail->send();
+            return true;
+           
+    } catch (Exception $e) {
+        error_log("Error al enviar correo de recuperación: " . $mail->ErrorInfo);
+        return false;
+    }
+}

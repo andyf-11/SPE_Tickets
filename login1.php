@@ -86,7 +86,7 @@ unset($_SESSION["error_message"]);
           </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
-        <form class="modal-content" method="post" action="forgot-password.php">
+        <form class="modal-content" method="post" action="assets/config/send_reset_email.php">
           <div class="modal-body">
             <p class="text-muted mb-4">Ingresa tu correo electrónico registrado y te enviaremos instrucciones para recuperar tu contraseña.</p>
             

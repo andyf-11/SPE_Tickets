@@ -280,6 +280,13 @@ CREATE TABLE `password_request` (
   `status` ENUM ('pendiente', 'atendida') DEFAULT 'pendiente'
 );
 
+CREATE TABLE `password_resets` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `email` VARCHAR(255) NOT NULL,
+  `token` VARCHAR(255) NOT NULL,
+  `expires_at` DATETIME NOT NULL
+);
+
 INSERT INTO `edificios`(name) VALUES ('Santa Esmeralda'),
 ('Palmira');
 INSERT INTO `areas`(name) VALUES ('Administración'),
