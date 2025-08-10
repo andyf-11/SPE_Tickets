@@ -30,9 +30,9 @@ header {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.sidebar {
+#leftbar {
   position: fixed;
-  top: 56px;
+  top: 41px;
   left: 0;
   bottom: 0;
   width: 250px;
@@ -44,7 +44,7 @@ header {
 }
 
 main.main-content {
-  margin-top: 56px;
+  margin-top: 42px;
   margin-left: 250px;
   height: calc(100vh - 56px);
   overflow-y: auto;

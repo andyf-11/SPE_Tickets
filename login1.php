@@ -94,7 +94,7 @@ unset($_SESSION["error_message"]);
               <label for="correo" class="form-label fw-semibold">Correo electrónico</label>
               <div class="input-group">
                 <span class="input-group-text bg-light"><i class="bi bi-envelope-fill text-muted"></i></span>
-                <input type="email" name="correo" id="correo" class="form-control" value="" placeholder="tu@correo.com" required>
+                <input type="email" name="email" id="email" class="form-control" value="" placeholder="tu@correo.com" required>
               </div>
             </div>
             

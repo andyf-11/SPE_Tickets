@@ -70,7 +70,7 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div class="card card-technician mb-3">
             <div class="card-body">
               <div class="d-flex align-items-start gap-3 mb-3">
-                <img src="../assets/img/user.png" alt="Técnico" class="technician-avatar">
+                <img src="../assets/img/tech.png" alt="Técnico" class="technician-avatar">
                 <div>
                   <h5 class="card-title mb-1"><?= htmlspecialchars($tecnico['name']) ?></h5>
                   <span class="badge bg-primary rounded-pill">

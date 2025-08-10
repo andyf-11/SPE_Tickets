@@ -5,7 +5,6 @@ check_login("usuario");
 require("dbconnection.php");
 
 $email = $_SESSION['login'];
-$DIAS_ESPERA = 180; // Ahora deben pasar 180 días entre cambios
 
 $stmt = $pdo->prepare("SELECT password, password_last_changed FROM user WHERE email = ?");
 $stmt->execute([$email]);
@@ -15,25 +14,12 @@ if (!$userData) {
     $_SESSION['msg1'] = "Usuario no encontrado.";
     $_SESSION['msg_type'] = "danger";
 } else {
-    $puedeCambiar = true;
-    $diasRestantes = 0;
-
-    if ($userData['password_last_changed']) {
-        $fechaUltimoCambio = new DateTime($userData['password_last_changed']);
-        $hoy = new DateTime();
-        $interval = $fechaUltimoCambio->diff($hoy);
-
-        if ($interval->days < $DIAS_ESPERA) {
-            $diasRestantes = $DIAS_ESPERA - $interval->days;
-            $puedeCambiar = false;
-            $_SESSION['msg1'] = "Ya cambiaste tu contraseña. Puedes volver a cambiarla en $diasRestantes días.";
-            $_SESSION['msg_type'] = "warning";
-        }
-    }
-
+    $puedeCambiar = true; // Ya no hay restricción de días
+    
     if (isset($_POST['change'])) {
         if (!$puedeCambiar) {
-            $_SESSION['msg1'] = "No puedes cambiar la contraseña aún. Espera $diasRestantes días.";
+            // Nunca entrará aquí porque $puedeCambiar siempre es true
+            $_SESSION['msg1'] = "No puedes cambiar la contraseña aún.";
             $_SESSION['msg_type'] = "warning";
         } else {
             $oldpass = $_POST['oldpass'];
@@ -216,7 +202,7 @@ if (!$userData) {
           <form name="form1" method="post" action="" onsubmit="return valid();" class="needs-validation" novalidate>
             <div class="card-body password-body">
               <div class="mb-4">
-                <p class="text-muted">Por motivos de seguridad, te recomendamos usar una contraseña fuerte y cambiarla periódicamente.</p>
+                <p class="text-muted">Por motivos de seguridad, te recomendamos usar una contraseña fuerte y cambiarla cuando desees.</p>
               </div>
               
               <div class="row mb-4">
@@ -289,9 +275,9 @@ if (!$userData) {
           </div>
           <div class="card-body">
             <ul class="list-unstyled">
-              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Una vez cambies tu contraseña, no se podrá volver a cambiar después de <?php echo $DIAS_ESPERA; ?> días por seguridad.</li>
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Usa una contraseña diferente a la de otros servicios.</li>
               <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> No compartas tu contraseña con nadie.</li>
-              <li><i class="fas fa-check-circle text-success me-2"></i> Usa una contraseña diferente a la de otros servicios.</li>
+              <li><i class="fas fa-check-circle text-success me-2"></i> Recibirás un correo electrónico confirmando el cambio de contraseña</li>
             </ul>
           </div>
         </div>

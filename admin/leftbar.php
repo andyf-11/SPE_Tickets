@@ -70,12 +70,12 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="user-access-log.php" class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= ($page == 'user-access-log') ? 'active bg-primary text-white shadow-sm' : 'text-dark hover-bg-light'; ?>">
-            <div class="icon-wrapper <?= ($page == 'user-access-log') ? 'bg-white text-primary' : 'bg-primary bg-opacity-10 text-primary'; ?> rounded-2 p-2 me-3">
-              <i class="fas fa-users fs-6"></i>
+          <a href="data/charts-tickets.php" class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= ($page == 'user-access-log') ? 'active bg-primary text-white shadow-sm' : 'text-dark hover-bg-light'; ?>">
+            <div class="icon-wrapper <?= ($page == 'charts-tickets.php') ? 'bg-white text-primary' : 'bg-primary bg-opacity-10 text-primary'; ?> rounded-2 p-2 me-3">
+              <i class="fas fa-chart-pie fs-6"></i>
             </div>
-            <span class="flex-grow-1">Registro de Acceso</span>
-            <?php if($page == 'user-access-log'): ?>
+            <span class="flex-grow-1">Análisis</span>
+            <?php if($page == 'charts-tickets.php'): ?>
               <i class="fas fa-chevron-right fa-xs ms-2"></i>
             <?php endif; ?>
           </a>

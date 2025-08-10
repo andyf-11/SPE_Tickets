@@ -77,7 +77,7 @@ function sendPasswordResetEmail($toEmail, $toName, $token) {
         $mail->isHTML(true);
         $mail->Subject = 'Restablece tu contraseña - SPE';
 
-        $resetLink = $_ENV['APP_DOMAIN_PHP'] . "/SPE_Soporte_Tickets/assets/config/resetform.php?token=" . $token;
+        $resetLink = $_ENV['APP_DOMAIN_PHP'] . "/SPE_Soporte_Tickets/assets/config/reset_form.php?token=" . $token;
         $mail->Body = "
             Hola $toName, <br><br>
             Hemos recibido una solicitud para restablecer tu contraseña. <br>

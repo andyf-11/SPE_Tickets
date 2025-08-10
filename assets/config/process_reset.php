@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    $stmt = $pdo->prepare("UPDATE user SET password = ? WHERE email ?");
+    $stmt = $pdo->prepare("UPDATE user SET password = ? WHERE email = ?");
     $stmt->execute([$hashedPassword, $email]);
 
     $stmt = $pdo->prepare("DELETE FROM password_resets WHERE email = ?");
