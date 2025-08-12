@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $priority = $_POST['priority'];
   $ticket = trim($_POST['description']);
   $edificio_id = $_POST['edificio_id'] ?? null;
-  $st = "Open";
+  $st = "Abierto";
   $pdate = date('Y-m-d H:i:s');
 
   if (!$subject || !$priority || !$ticket || !$edificio_id) {

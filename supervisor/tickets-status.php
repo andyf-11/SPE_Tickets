@@ -9,40 +9,57 @@ $filtro = $_GET['filtro'] ?? 'todos';
 $condicionFecha = '';
 
 switch ($filtro) {
-  case 'hoy':
-    $condicionFecha = "AND DATE(posting_date) = CURDATE()";
-    break;
-  case '7dias':
-    $condicionFecha = "AND posting_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
-    break;
-  case '30dias':
-    $condicionFecha = "AND posting_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
-    break;
-  case 'todos':
-  default:
-    $condicionFecha = "";
-    break;
+    case 'hoy':
+        $condicionFecha = "AND DATE(posting_date) = CURDATE()";
+        break;
+    case '7dias':
+        $condicionFecha = "AND posting_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
+        break;
+    case '30dias':
+        $condicionFecha = "AND posting_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
+        break;
+    case 'todos':
+    default:
+        $condicionFecha = '';
+        break;
 }
 
 // Consulta tickets abiertos
-$stmt_abiertos = $pdo->query("SELECT * FROM ticket WHERE status = 'Abierto' $condicionFecha ORDER BY posting_date DESC");
+$sql_abiertos = "
+    SELECT * 
+    FROM ticket 
+    WHERE TRIM(status) = 'Abierto' 
+    $condicionFecha 
+    ORDER BY posting_date DESC
+";
+$stmt_abiertos = $pdo->query($sql_abiertos);
 $tickets_abiertos = $stmt_abiertos->fetchAll(PDO::FETCH_ASSOC);
 
 // Consulta tickets en proceso con nombre de técnico
 $condicionFechaProceso = str_replace('posting_date', 't.posting_date', $condicionFecha);
-$stmt_proceso = $pdo->query(
-  "SELECT t.*, u.name as tecnico_nombre 
+$sql_proceso = "
+    SELECT t.*, u.name as tecnico_nombre 
     FROM ticket t 
-    JOIN user u ON t.technician_id = u.id 
-    WHERE t.status = 'En Proceso' $condicionFechaProceso 
-    ORDER BY t.posting_date DESC"
-);
+    LEFT JOIN user u ON t.technician_id = u.id 
+    WHERE TRIM(t.status) = 'En Proceso' 
+    $condicionFechaProceso 
+    ORDER BY t.posting_date DESC
+";
+$stmt_proceso = $pdo->query($sql_proceso);
 $tickets_proceso = $stmt_proceso->fetchAll(PDO::FETCH_ASSOC);
 
 // Consulta tickets cerrados
-$stmt_cerrados = $pdo->query("SELECT * FROM ticket WHERE status = 'Cerrado' $condicionFecha ORDER BY posting_date DESC");
+$sql_cerrados = "
+    SELECT * 
+    FROM ticket 
+    WHERE TRIM(status) = 'Cerrado' 
+    $condicionFecha 
+    ORDER BY posting_date DESC
+";
+$stmt_cerrados = $pdo->query($sql_cerrados);
 $tickets_cerrados = $stmt_cerrados->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">

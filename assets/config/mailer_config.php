@@ -93,3 +93,39 @@ function sendPasswordResetEmail($toEmail, $toName, $token) {
         return false;
     }
 }
+
+function sendPasswordChangedNotification($toEmail, $toName) {
+    global $mail_host, $mail_port, $mail_username, $mail_password, $mail_encryption, $mail_from, $mail_from_name;
+
+    $mail = new PHPMailer(true);
+
+    try {
+        $mail->isSMTP();
+        $mail->Host = $mail_host;
+        $mail->SMTPAuth = true;
+        $mail->Username = $mail_username;
+        $mail->Password = $mail_password;
+        $mail->SMTPSecure = $mail_encryption;
+        $mail->Port = $mail_port;
+
+        $mail->setFrom($mail_from, $mail_from_name);
+        $mail->addAddress($toEmail, $toName);
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Notificación de cambio de contraseña - SPE';
+        $mail->Body = "
+            Hola $toName, <br><br>
+            Te informamos que tu contraseña ha sido cambiada exitosamente desde el sistema SPE. <br>
+            Si no realizaste este cambio, por favor contacta de inmediato al soporte técnico. <br><br>
+            Saludos, <br>
+            El equipo de TI SPE.
+        ";
+
+        $mail->send();
+        return true;
+
+    } catch (Exception $e) {
+        error_log("Error al enviar notificación de cambio de contraseña: " . $mail->ErrorInfo);
+        return false;
+    }
+}

@@ -3,6 +3,13 @@ session_start();
 require_once '../dbconnection.php';
 include '../checklogin.php';
 check_login("admin");
+
+$user_id = $_SESSION['user_id'] ?? 0;
+
+//Tickets Abiertos
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM ticket WHERE status = 'Abierto' AND assigned_to = ?");
+$stmt->execute([$user_id]);
+$ticketsAbiertos = $stmt->fetchColumn();
 ?>
 
 <!DOCTYPE html>
@@ -42,7 +49,7 @@ check_login("admin");
                             <div class="mb-3">
                                 <i class="bi bi-exclamation-octagon-fill text-primary fs-1"></i>
                             </div>
-                            <h2 class="display-4 fw-bold text-primary mb-2" id="openTicketsCount">0</h2>
+                            <h2 class="display-4 fw-bold text-primary mb-2" id="openTicketsCount"><?= $ticketsAbiertos ?? 0?></h2>
                             <p class="text-muted mb-0 fw-medium">Tickets Abiertos</p>
                             <small class="text-muted">Pendientes de resolver</small>
                         </div>

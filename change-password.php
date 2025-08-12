@@ -3,10 +3,11 @@ session_start();
 require_once("checklogin.php");
 check_login("usuario");
 require("dbconnection.php");
+require_once __DIR__ . "/assets/config/mailer_config.php"; // ajusta la ruta si es necesario
 
 $email = $_SESSION['login'];
 
-$stmt = $pdo->prepare("SELECT password, password_last_changed FROM user WHERE email = ?");
+$stmt = $pdo->prepare("SELECT name, password, password_last_changed FROM user WHERE email = ?");
 $stmt->execute([$email]);
 $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -17,30 +18,30 @@ if (!$userData) {
     $puedeCambiar = true; // Ya no hay restricción de días
     
     if (isset($_POST['change'])) {
-        if (!$puedeCambiar) {
-            // Nunca entrará aquí porque $puedeCambiar siempre es true
-            $_SESSION['msg1'] = "No puedes cambiar la contraseña aún.";
-            $_SESSION['msg_type'] = "warning";
-        } else {
-            $oldpass = $_POST['oldpass'];
-            $newpass = $_POST['newpass'];
+        $oldpass = $_POST['oldpass'];
+        $newpass = $_POST['newpass'];
 
-            if (password_verify($oldpass, $userData['password'])) {
-                $newHashedPass = password_hash($newpass, PASSWORD_DEFAULT);
-                $update = $pdo->prepare("UPDATE user SET password = ?, password_last_changed = NOW() WHERE email = ?");
-                $update->execute([$newHashedPass, $email]);
+        if (password_verify($oldpass, $userData['password'])) {
+            $newHashedPass = password_hash($newpass, PASSWORD_DEFAULT);
+            $update = $pdo->prepare("UPDATE user SET password = ?, password_last_changed = NOW() WHERE email = ?");
+            if ($update->execute([$newHashedPass, $email])) {
+                
+                // Enviar notificación de cambio de contraseña
+                sendPasswordChangedNotification($email, $userData['name']);
 
-                $_SESSION['msg1'] = "Contraseña cambiada correctamente.";
+                $_SESSION['msg1'] = "Contraseña cambiada correctamente. Hemos enviado un correo de confirmación.";
                 $_SESSION['msg_type'] = "success";
             } else {
-                $_SESSION['msg1'] = "La contraseña actual es incorrecta.";
+                $_SESSION['msg1'] = "Error al actualizar la contraseña.";
                 $_SESSION['msg_type'] = "danger";
             }
+        } else {
+            $_SESSION['msg1'] = "La contraseña actual es incorrecta.";
+            $_SESSION['msg_type'] = "danger";
         }
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="es">
@@ -169,15 +170,7 @@ if (!$userData) {
 
     <main class="flex-grow-1 p-4 mt-5">
       <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2 class="mb-0"><i class="fas fa-key me-2"></i>Cambiar Contraseña</h2>
-          <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-              <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a></li>
-              <li class="breadcrumb-item active" aria-current="page">Cambiar Contraseña</li>
-            </ol>
-          </nav>
-        </div>
+      
 
         <?php if (!empty($_SESSION['msg1'])): ?>
           <div class="alert alert-<?php echo htmlspecialchars($_SESSION['msg_type'] ?? 'info'); ?> alert-dismissible fade show mb-4" role="alert">

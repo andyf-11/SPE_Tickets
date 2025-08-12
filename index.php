@@ -20,7 +20,7 @@ $isLoggedIn = isset($_SESSION['user_id']);
    <link href="assets/css/index.css" rel="stylesheet">
    <style>
      header.masthead {
-      background: url('assets/img/bg.jpg') no-repeat center center;
+      background: url('assets/img/index.jpg') no-repeat center center;
       background-size: cover;
       height: 100vh;
       display: flex;

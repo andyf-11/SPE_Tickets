@@ -1,3 +1,37 @@
+<?php
+session_start();
+require("checklogin.php");
+require_once("dbconnection.php");
+check_login("tecnico");
+
+$user_id = $_SESSION['user_id'] ?? 0; // Id del técnico
+
+// Tickets asignados
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM ticket WHERE assigned_to = ?");
+$stmt->execute([$user_id]);
+$tickets_abiertos = $stmt->fetchColumn();
+
+// Tickets en proceso
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM ticket WHERE assigned_to = ? AND status = 'En Proceso'");
+$stmt->execute([$user_id]);
+$tickets_proceso = $stmt->fetchColumn();
+
+// Tickets cerrados
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM ticket WHERE assigned_to = ? AND status = 'Cerrado'");
+$stmt->execute([$user_id]);
+$tickets_cerrados = $stmt->fetchColumn();
+
+// Tickets asignados nuevos
+$stmt = $pdo->prepare("SELECT id, subject, posting_date FROM ticket WHERE assigned_to = ? AND status = 'Nuevo' ORDER BY posting_date DESC LIMIT 10");
+$stmt->execute([$user_id]);
+$tickets_asignados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Tickets cerrados hoy
+$stmt = $pdo->prepare("SELECT id, subject, fecha_cierre FROM ticket WHERE assigned_to = ? AND status = 'Cerrado' AND DATE(fecha_cierre) = CURDATE() ORDER BY fecha_cierre DESC");
+$stmt->execute([$user_id]);
+$tickets_cerrados_hoy = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -20,7 +54,7 @@
   <?php include('leftbar.php'); ?>
 
   <main class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
       <h2 class="mb-0 fw-bold">Panel Técnico</h2>
       <div class="d-flex align-items-center">
         <small class="text-muted me-2"><?= date('d/m/Y') ?></small>
@@ -39,7 +73,7 @@
               <i class="fas fa-exclamation-circle fa-2x"></i>
             </div>
             <div>
-              <h6 class="card-subtitle mb-1">Tickets Abiertos</h6>
+              <h6 class="card-subtitle mb-1">Tickets Asignados</h6>
               <h3 class="mb-0"><?= $tickets_abiertos ?? 0 ?></h3>
             </div>
           </div>
@@ -144,7 +178,7 @@
                   <tr>
                     <td><?= $ticket['id'] ?></td>
                     <td><?= htmlspecialchars($ticket['subject']) ?></td>
-                    <td><?= date('H:i', strtotime($ticket['closing_date'])) ?></td>
+                    <td><?= date('H:i', strtotime($ticket['fecha_cierre'])) ?></td>
                   </tr>
                 <?php endforeach; ?>
               <?php endif; ?>

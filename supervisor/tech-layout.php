@@ -112,7 +112,7 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <?php include("header.php"); ?>
 
   <!-- Sidebar -->
-    <?php include("leftbar.php"); ?>
+  <?php include("leftbar.php"); ?>
 
   <!-- Contenido principal -->
   <main class="main-content mt-5">
@@ -127,9 +127,7 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </ol>
           </nav>
         </div>
-        <button class="btn btn-dark btn-sm">
-          <i class="fas fa-plus me-1"></i> Nuevo Técnico
-        </button>
+      
       </div>
 
       <div class="card shadow-sm border-0">
@@ -171,7 +169,8 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </td>
                     <td class="text-end pe-4">
                       <div class="d-flex gap-2 justify-content-end">
-                        <button class="btn btn-sm btn-action btn-outline-primary rounded-circle">
+                        <button class="btn btn-sm btn-action btn-outline-primary rounded-circle" data-bs-toggle="modal"
+                          data-bs-target="#modal-tech" data-id="<?= $tecnico_id ?>">
                           <i class="fas fa-eye fa-xs"></i>
                         </button>
                         <button class="btn btn-sm btn-action btn-outline-secondary rounded-circle">
@@ -192,7 +191,39 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </main>
 
+  <?php include $_SERVER['DOCUMENT_ROOT'] . '/SPE_Soporte_Tickets/supervisor/tech-data/tech-info.php'; ?>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    var modalTecnico = document.getElementById('modal-tech');
+
+modalTecnico.addEventListener('show.bs.modal', function (event) {
+  var button = event.relatedTarget; // botón que abrió el modal
+  var tecnicoId = button.getAttribute('data-id');
+
+  fetch('/supervisor/tech-data/get_tecnico_info.php?id=' + tecnicoId)
+    .then(res => res.json())
+    .then(data => {
+      if(data.error){
+        // Opcional: muestra mensaje o limpia campos
+        modalTecnico.querySelector('#nombreTecnico').textContent = 'No disponible';
+        modalTecnico.querySelector('#emailTecnico').textContent = '-';
+        modalTecnico.querySelector('#telefonoTecnico').textContent = '-';
+        modalTecnico.querySelector('#edificioTecnico').textContent = '-';
+        return;
+      }
+      modalTecnico.querySelector('#nombreTecnico').textContent = data.name || '-';
+      modalTecnico.querySelector('#emailTecnico').textContent = data.email || '-';
+      modalTecnico.querySelector('#telefonoTecnico').textContent = data.mobile || '-';
+      modalTecnico.querySelector('#edificioTecnico').textContent = data.edificio_id || '-';
+    })
+    .catch(err => {
+      console.error('Error al cargar técnico:', err);
+    });
+});
+
+</script>
+
 </body>
 
 </html>
