@@ -1,3 +1,1 @@
 # Ignorar archivos de entorno
-chat-server/.env
-.env.local
