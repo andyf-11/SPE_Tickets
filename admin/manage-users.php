@@ -1,21 +1,4 @@
 <?php
-session_start();
-require_once '../assets/config/mailer_config.php';
-require("dbconnection.php");
-require_once("checklogin.php");
-check_login("admin");
-
-// Eliminar usuario si se confirma
-if (isset($_POST['delete_user_id'])) {
-  $userIdToDelete = $_POST['delete_user_id'];
-  $stmt = $pdo->prepare("DELETE FROM user WHERE id = ?");
-  if ($stmt->execute([$userIdToDelete])) {
-    $_SESSION['user_deleted'] = true;
-  }
-  header("Location: manage-users.php");
-  exit;
-}
-
 // Crear usuario
 if (isset($_POST['add_user'])) {
   $name = trim($_POST['name']);
@@ -27,11 +10,13 @@ if (isset($_POST['add_user'])) {
   $role = $_POST['role'];
   $password_plain = $_POST['password'];
 
+  // Validar correo
   if (!str_ends_with($email, '@spe.gob.hn')) {
     echo "<script>alert('Solo se permiten correos @spe.gob.hn'); window.location.href = 'manage-users.php';</script>";
     exit;
   }
 
+  // Validar contraseña
   if (!preg_match('/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[\W_]).{8,}$/', $password_plain)) {
     echo "<script>alert('La contraseña debe tener al menos 8 caracteres, incluir una letra, un número y un símbolo.'); window.location.href = 'manage-users.php';</script>";
     exit;
@@ -41,37 +26,38 @@ if (isset($_POST['add_user'])) {
   $token = bin2hex(random_bytes(32));
 
   // Insertar usuario
-  $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile, gender, edificio_id, area_id, role, password, posting_date, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 0)");
+  $stmt = $pdo->prepare("INSERT INTO user 
+    (name, email, mobile, gender, edificio_id, area_id, role, password, posting_date, verification_token, is_verified) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 0)");
+    
   $success = $stmt->execute([$name, $email, $mobile, $gender, $edificio, $area, $role, $password, $token]);
 
   if ($success) {
-    try {
-      $verificationLink = $_ENV['APP_DOMAIN_PHP'] . "/assets/config/verify.php?token=" . $token;
-
-      $mail->addAddress($email, $name);
-      $mail->Subject = 'Verifica tu cuenta - SPE';
-      $mail->isHTML(true);
-      $mail->Body = "
-                Hola $name,<br><br>
-                Tu cuenta fue creada por el administrador del sistema.<br>
-                Antes de poder acceder, necesitas verificar tu cuenta haciendo clic en el siguiente enlace:<br><br>
-                <a href='$verificationLink'>$verificationLink</a><br><br>
-                Si no solicitaste este correo, simplemente ignóralo.";
-
-      $mail->send();
-
-      echo "<script>alert('Usuario creado y correo de verificación enviado'); window.location.href = 'manage-users.php';</script>";
-    } catch (Exception $e) {
-      echo "<script>alert('Usuario creado, pero hubo un error al enviar el correo: " . $mail->ErrorInfo . "'); window.location.href = 'manage-users.php';</script>";
+    if (sendVerificationEmail($email, $name, $token)) {
+      echo "<script>
+          document.addEventListener('DOMContentLoaded', function() {
+            showToast('Usuario creado y correo de verificación enviado', 'bg-success');
+            setTimeout(() => window.location.href = 'manage-users.php', 3000);
+          });
+        </script>";
+    } else {
+      echo "<script>
+          document.addEventListener('DOMContentLoaded', function() {
+            showToast('Usuario creado, pero hubo un error al enviar el correo de verificación', 'bg-warning');
+            setTimeout(() => window.location.href = 'manage-users.php', 3000);
+          });
+        </script>";
     }
   } else {
-    echo "<script>alert('Error al crear el usuario'); window.location.href = 'manage-users.php';</script>";
+    echo "<script>
+        document.addEventListener('DOMContentLoaded', function () {
+          showToast('Error al crear el usuario.', 'bg-danger');
+          setTimeout(() => window.location.href = 'manage-users.php', 3000);
+        });
+      </script>";
   }
 }
 
-
-$edificios = $pdo->query("SELECT id, name FROM edificios ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
-$areas = $pdo->query("SELECT id, name FROM areas ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -126,6 +112,15 @@ $areas = $pdo->query("SELECT id, name FROM areas ORDER BY name ASC")->fetchAll(P
       <!-- Contenido principal -->
       <main class="col-lg-10 px-4 py-4 mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
+
+          <!-- Contenedor Toasts-->
+          <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="toastMessage" class="toast align-items-center text-white bg-primary border-0 " role="alert">
+              <div class="toast-body" id="toastBody"></div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+          </div>
+
           <div>
             <h4 class="fw-semibold text-primary"><i class="fas fa-user-cog me-2"></i>Gestión de Usuarios</h4>
             <small class="text-muted">Administra los usuarios del sistema</small>
@@ -254,7 +249,7 @@ $areas = $pdo->query("SELECT id, name FROM areas ORDER BY name ASC")->fetchAll(P
               <select name="area" class="form-select" required>
                 <option value="">Seleccione...</option>
                 <?php foreach ($areas as $a): ?>
-                  <option value="<?= $a['id'] ?>"><?= htmlspecialchars($a['nombre']) ?></option>
+                  <option value="<?= $a['id'] ?>"><?= htmlspecialchars($a['name']) ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
@@ -339,6 +334,22 @@ $areas = $pdo->query("SELECT id, name FROM areas ORDER BY name ASC")->fetchAll(P
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
   <script src="../chat-server/notifications.js"></script>
 
+  <script>
+    function showToast(message, bgClass) {
+      const toastEl = document.getElementById('toastMessage');
+      const toastBody = document.getElementById('toastBody');
+
+      //Quita clases previas de color
+      toastEl.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+      toastEl.classList.add(bgClass);
+
+      //Asignar mensaje
+      toastBody.textContent = message;
+
+      const toast = new bootstrap.Toast(toastEl);
+      toast.show();
+    }
+  </script>
 </body>
 
 </html>

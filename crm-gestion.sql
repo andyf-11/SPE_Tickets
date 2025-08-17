@@ -25,9 +25,17 @@ INSERT INTO `application_approv` VALUES(4, 52, 16, '2025-07-03 11:30:16', 'resue
 INSERT INTO `application_approv` VALUES(5, 51, 16, '2025-07-16 08:25:08', 'resuelto', NULL);
 
 CREATE TABLE `areas` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `areas` (name) VALUES 
+('Administración'),
+('RRHH'),
+('Bienes'),
+('Contabilidad'),
+('Compras'),
+('Informatica');
 
 CREATE TABLE `chat_user_tech` (
   `id` int(11) NOT NULL,
@@ -265,6 +273,13 @@ CREATE TABLE `user` (
   `is_verified` tinyint(1) DEFAULT 0,
   `verification_token` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+ALTER TABLE `user` ADD COLUMN `area_id` INT NOT NULL;
+
+UPDATE `user` SET `area_id` = 1;
+ALTER TABLE `user` ADD CONSTRAINT `fk_user_area` 
+FOREIGN KEY (`area_id`) REFERENCES `areas`(id)
+ON DELETE CASCADE ON UPDATE CASCADE;
 
 INSERT INTO `user` VALUES(1, 'Mauricio Sevilla', 'hola@cweb.com', '$2y$10$w1x9IAU9onBhL3iMtPJZo.EHIzBAuHnumScN7iaToExRV9B30xHPe', '', 'male', 'Calle 45 23 21', 0, '2021-04-22 18:25:19', '', 0, NULL, 0, NULL, 'Activo', NULL, 1, NULL);
 INSERT INTO `user` VALUES(2, 'Pedro Cliente', 'pcliente@cweb.com', '$2y$10$2Hds/QIw1sGAaezQpuCkZOSKYP7n6WAEMEoKmOI5TOl9kdX9bGIT.', '3025869471', 'm', 'Sample Address only', 0, '2022-11-29 09:28:28', '', 0, NULL, 0, NULL, 'Activo', NULL, 1, NULL);

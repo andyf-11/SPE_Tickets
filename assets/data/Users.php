@@ -31,7 +31,7 @@ try {
     $username = trim($_POST["username"]);
     $pass = $_POST["pass"];
 
-    // Agregamos is_verified
+    // Agrega is_verified
     $query = $pdo->prepare("SELECT id, name, email, password, role, is_verified FROM user WHERE email = :username");
     $query->execute([":username" => $username]);
     $user = $query->fetch();
@@ -50,7 +50,7 @@ try {
         $_SESSION["user_name"] = $user["name"];
         $_SESSION["user_role"] = strtolower(trim($user["role"]));
 
-        // Obtener datos del cliente
+        // Obtener datos del usuario
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
         $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Desconocido';
         $os = getOS($user_agent);
