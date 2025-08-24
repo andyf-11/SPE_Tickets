@@ -1,8 +1,9 @@
 <?php
 session_start();
-include("dbconnection.php");
-include("checklogin.php");
-require_once '../assets/data/notifications_helper.php'; // ✅ Importamos el helper
+require_once("dbconnection.php");
+require("checklogin.php");
+require_once '../assets/data/notifications_helper.php';
+require_once '../file-badge.php';
 check_login("admin");
 
 // Obtener filtro desde GET
@@ -59,6 +60,7 @@ if (isset($_POST['update'])) {
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link href="../assets/css/style-bootstrap5.css" rel="stylesheet" />
   <link href="../styles/tickets/manage-tickets(admin).css" rel="stylesheet">
+  <link href="../styles/file-badge.css" rel=stylesheet>
   <style>
     /* Sidebar fijo con altura completa menos header */
     #leftbar {
@@ -224,6 +226,12 @@ if (isset($_POST['update'])) {
                       <?= nl2br(htmlspecialchars($row['ticket'])) ?>
                     </div>
                   </div>
+                  <!--Mostrar archivo adjunto -->
+                  <?php if (!empty($row['archivo'])): ?>
+                    <div class="mt-3">
+                      <?php mostrarArchivoBadge($row['archivo']); ?>
+                    </div>
+                  <?php endif; ?>
 
                   <!-- Respuesta del técnico -->
                   <?php if (!empty($row['tech_remark'])): ?>

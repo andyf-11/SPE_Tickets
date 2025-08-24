@@ -59,6 +59,7 @@ CREATE TABLE `edificios` (
 
 INSERT INTO `edificios` VALUES(2, 'Palmira');
 INSERT INTO `edificios` VALUES(1, 'Santa Esmeralda');
+INSERT INTO `edificios` VALUES(3, 'General');
 
 CREATE TABLE `messg_tech_admin` (
   `id` int(11) NOT NULL,
@@ -218,6 +219,8 @@ CREATE TABLE `ticket` (
   `edificio_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
+ALTER TABLE `ticket` ADD COLUMN `archivo` VARCHAR(255) NULL AFTER `edificio_id`;
+
 INSERT INTO `ticket` VALUES(13, 6, 'pcliente@cweb.com', 'Fallo con el Servidor IDPROD 26', 'Fallo a Nivel de Servidor', 'importante', 'Es necesario reiniciar la máquina de estados', 'Cerrado', NULL, NULL, 'Se realiza el proceso solicitado a satisfacción.', '2022-11-29 06:00:00', '2025-06-16 01:09:25', NULL, NULL, NULL, NULL);
 INSERT INTO `ticket` VALUES(14, 7, 'pcliente@cweb.com', 'Fallo con el Servidor IDPROD 26', 'Fallo a Nivel de Servidor', 'non-urgent', 'Es necesario reiniciar la máquina de estados', 'Cerrado', NULL, NULL, 'Se realiza el proceso solicitado a satisfacción.', '2022-11-29 06:00:00', '2025-06-16 01:09:25', NULL, NULL, NULL, NULL);
 INSERT INTO `ticket` VALUES(15, 1, 'jcliente@cweb.com', 'Fallo con el Servidor IDPROD 26', 'Fallo a Nivel de Servidor', 'Importante', 'Es necesario reiniciar la máquina de estados', 'Cerrado', NULL, NULL, 'Se realiza el proceso solicitado a satisfacción.', '2023-01-11 06:00:00', '2025-06-16 01:09:25', NULL, NULL, NULL, NULL);
@@ -277,9 +280,18 @@ CREATE TABLE `user` (
 ALTER TABLE `user` ADD COLUMN `area_id` INT NOT NULL;
 
 UPDATE `user` SET `area_id` = 1;
+
+--- Estos 3 comandos solo se utilizaron UNA VEZ
+UPDATE `user` SET `gender` = 'Femenino' WHERE `gender` IN ('femenino', 'female');
+UPDATE `user` SET `gender` = 'Masculino' WHERE `gender` IN ('masculino', 'male');
+UPDATE `user` SET `gender` = 'Otro' WHERE `gender` IN ('otro', 'other');
+-------------------------------------------------------------------------------
+
 ALTER TABLE `user` ADD CONSTRAINT `fk_user_area` 
 FOREIGN KEY (`area_id`) REFERENCES `areas`(id)
 ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `user` MODIFY `gender` ENUM('Femenino', 'Masculino', 'Otro') NOT NULL;
 
 INSERT INTO `user` VALUES(1, 'Mauricio Sevilla', 'hola@cweb.com', '$2y$10$w1x9IAU9onBhL3iMtPJZo.EHIzBAuHnumScN7iaToExRV9B30xHPe', '', 'male', 'Calle 45 23 21', 0, '2021-04-22 18:25:19', '', 0, NULL, 0, NULL, 'Activo', NULL, 1, NULL);
 INSERT INTO `user` VALUES(2, 'Pedro Cliente', 'pcliente@cweb.com', '$2y$10$2Hds/QIw1sGAaezQpuCkZOSKYP7n6WAEMEoKmOI5TOl9kdX9bGIT.', '3025869471', 'm', 'Sample Address only', 0, '2022-11-29 09:28:28', '', 0, NULL, 0, NULL, 'Activo', NULL, 1, NULL);

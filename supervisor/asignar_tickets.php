@@ -10,8 +10,8 @@ if ($ticketId <= 0) {
   exit;
 }
 
-// Obtener estado del ticket
-$stmt = $pdo->prepare("SELECT status FROM ticket WHERE id = :id");
+// Obtener datos del ticket
+$stmt = $pdo->prepare("SELECT * FROM ticket WHERE id = :id");
 $stmt->execute([':id' => $ticketId]);
 $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -30,21 +30,34 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Procesar asignación de ticket (con notificación al técnico)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
   $tecnico = $_POST['tecnico_id'] ?? null;
+  $prioridad = $_POST['prioridad'] ?? null;
+  $contexto = $_POST['contexto'] ?? null;
 
   if ($tecnico) {
     try {
       $pdo->beginTransaction();
 
-      // Actualizar el ticket
-      $stmt = $pdo->prepare("UPDATE ticket SET assigned_to = :tecnico, status = 'en proceso' WHERE id = :id");
+      // Actualizar el ticket con técnico, prioridad y contexto
+      $stmt = $pdo->prepare("UPDATE ticket 
+                       SET assigned_to = :tecnico, status = 'en proceso', 
+                           priority = :prioridad
+                       WHERE id = :id");
       $stmt->execute([
         ':tecnico' => $tecnico,
+        ':prioridad' => $prioridad,
         ':id' => $ticketId
       ]);
 
+      // Crear mensaje de notificación
+      $mensaje = "Se te ha asignado un nuevo ticket.";
+      if (!empty($prioridad))
+        $mensaje .= " Prioridad: $prioridad.";
+      if (!empty($contexto))
+        $mensaje .= " Contexto: $contexto.";
+
       // Insertar notificación al técnico
-      $mensaje = "Se te ha asignado un nuevo ticket (ID interno: $ticketId).";
-      $stmt = $pdo->prepare("INSERT INTO notifications (user_id, message, is_read, created_at) VALUES (:user_id, :message, 0, NOW())");
+      $stmt = $pdo->prepare("INSERT INTO notifications (user_id, message, is_read, created_at) 
+                             VALUES (:user_id, :message, 0, NOW())");
       $stmt->execute([
         ':user_id' => $tecnico,
         ':message' => $mensaje
@@ -77,99 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    :root {
-      --primary-color: #4361ee;
-      --primary-hover: #3a56d4;
-    }
-
-    body {
-      min-height: 100vh;
-      background-color: #f8fafc;
-    }
-
-    .navbar-brand {
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-
-    .main-content {
-      margin-left: 280px;
-      padding: 2rem;
-      margin-top: 60px;
-    }
-
-    @media (max-width: 991.98px) {
-      .main-content {
-        margin-left: 0;
-      }
-    }
-
-    .card {
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    }
-
-    .form-select,
-    .form-control {
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .form-select:focus,
-    .form-control:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
-    }
-
-    .btn-primary {
-      background-color: var(--primary-color);
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--primary-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
-    }
-
-    .alert-success {
-      background-color: #f0fdf4;
-      border-color: #bbf7d0;
-      color: #166534;
-    }
-
-    .alert-danger {
-      background-color: #fef2f2;
-      border-color: #fecaca;
-      color: #991b1b;
-    }
-
-    .page-title {
-      color: #1e293b;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      position: relative;
-      padding-bottom: 0.75rem;
-    }
-
-    .page-title::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 60px;
-      height: 4px;
-      background-color: var(--primary-color);
-      border-radius: 2px;
-    }
-  </style>
+  <link href="../styles/supervisor/asignar-tickets.css" rel="stylesheet">
 </head>
 
 <body>
@@ -191,23 +112,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
   <div class="main-content">
     <div class="container-fluid px-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="page-title">Asignar Ticket #<?= htmlspecialchars($ticketId) ?></h1>
+        <h1 class="page-title">
+          <i class="fas fa-ticket-alt me-2"></i>
+          Asignar Ticket #<?= htmlspecialchars($ticketId) ?>
+        </h1>
       </div>
 
       <?php if (!empty($error)): ?>
-        <div class="alert alert-danger d-flex align-items-center mb-4">
+        <div class="alert alert-danger mb-4">
           <i class="fas fa-exclamation-circle me-2"></i>
           <div><?= htmlspecialchars($error) ?></div>
         </div>
       <?php endif; ?>
 
       <?php if (!empty($_SESSION['mensaje_exito'])): ?>
-        <div id="mensajeExito" class="alert alert-success d-flex align-items-center mb-4" role="alert">
+        <div id="mensajeExito" class="alert alert-success mb-4" role="alert">
           <i class="fas fa-check-circle me-2"></i>
           <div><?= htmlspecialchars($_SESSION['mensaje_exito']) ?></div>
         </div>
         <script>
-          // Redirigir al dashboard después de 2 segundos
           setTimeout(() => {
             window.location.href = "manage-tickets.php";
           }, 2000);
@@ -217,19 +140,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
 
       <div class="row">
         <div class="col-lg-8">
-          <div class="card">
+          <div class="card mb-4">
             <div class="card-body p-4">
-              <h5 class="card-title mb-4 text-primary">
-                <i class="fas fa-user-cog me-2"></i>Seleccionar Técnico
+              <h5 class="card-title mb-4">
+                <i class="fas fa-user-cog me-2"></i>Asignación del Ticket
               </h5>
 
               <form method="post" class="needs-validation" novalidate>
+                <!-- Select de prioridad (ahora obligatorio) -->
                 <div class="mb-4">
-                  <label for="tecnico" class="form-label fw-semibold">Técnico disponible</label>
+                  <label for="prioridad" class="form-label">Prioridad del Ticket <span
+                      class="text-danger">*</span></label>
+                  <select class="form-select" id="prioridad" name="prioridad" required>
+                    <option value="" selected disabled>-- Selecciona prioridad --</option>
+                    <option value="Importante" <?= ($ticket['priority'] ?? '') === 'Importante' ? 'selected' : '' ?>>
+                      Importante</option>
+                    <option value="Urgente-(Problema Funcional)" <?= ($ticket['priority'] ?? '') === 'Urgente-(Problema Funcional)' ? 'selected' : '' ?>>Urgente (Problema Funcional)</option>
+                    <option value="No-Urgente" <?= ($ticket['priority'] ?? '') === 'No-Urgente' ? 'selected' : '' ?>>No
+                      Urgente</option>
+                    <option value="Pregunta" <?= ($ticket['priority'] ?? '') === 'Pregunta' ? 'selected' : '' ?>>Pregunta
+                    </option>
+                  </select>
+                  <div class="invalid-feedback">Por favor selecciona una prioridad.</div>
+                </div>
+
+                <!-- Contexto previo -->
+                <div class="mb-4">
+                  <label for="contexto" class="form-label">Contexto previo para el técnico</label>
+                  <textarea class="form-control" id="contexto" name="contexto" rows="4"
+                    placeholder="Escribe algún detalle que deba saber el técnico"></textarea>
+
+                </div>
+
+                <!-- Select de técnico -->
+                <div class="mb-4">
+                  <label for="tecnico" class="form-label">Técnico disponible <span class="text-danger">*</span></label>
                   <select class="form-select" id="tecnico" name="tecnico_id" required>
                     <option value="" disabled selected>-- Selecciona un técnico --</option>
                     <?php foreach ($tecnicos as $tecnico): ?>
-                      <option value="<?= htmlspecialchars($tecnico['id']) ?>">
+                      <option value="<?= htmlspecialchars($tecnico['id']) ?>" <?= ($ticket['assigned_to'] ?? '') == $tecnico['id'] ? 'selected' : '' ?>>
                         <?= htmlspecialchars($tecnico['name']) ?>
                       </option>
                     <?php endforeach; ?>
@@ -237,8 +186,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
                   <div class="invalid-feedback">Por favor selecciona un técnico.</div>
                 </div>
 
-                <div class="d-flex justify-content-end">
-                  <button type="submit" class="btn btn-primary px-4 py-2">
+                <div class="d-flex justify-content-end mt-4">
+                  <button type="submit" class="btn btn-primary">
                     <i class="fas fa-user-check me-2"></i>Asignar Ticket
                   </button>
                 </div>
@@ -247,42 +196,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
           </div>
         </div>
 
-        <div class="col-lg-4 mt-4 mt-lg-0">
+        <!-- Información del Ticket -->
+        <div class="col-lg-4">
           <div class="card">
             <div class="card-body p-4">
-              <h5 class="card-title mb-4 text-primary">
-                <i class="fas fa-info-circle me-2"></i>Información
+              <h5 class="card-title mb-4">
+                <i class="fas fa-info-circle me-2"></i>Información del Ticket
               </h5>
 
-              <div class="d-flex align-items-center mb-3">
-                <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
-                  <i class="fas fa-ticket-alt text-primary"></i>
-                </div>
-                <div>
-                  <small class="text-muted">Ticket ID</small>
-                  <div class="fw-semibold">#<?= htmlspecialchars($ticketId) ?></div>
-                </div>
+              <div class="ticket-info-item">
+                <strong>ID</strong>
+                <span>#<?= htmlspecialchars($ticket['id']) ?></span>
               </div>
 
-              <div class="d-flex align-items-center mb-3">
-                <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
-                  <i class="fas fa-calendar-alt text-primary"></i>
-                </div>
-                <div>
-                  <small class="text-muted">Fecha de asignación</small>
-                  <div class="fw-semibold"><?= date('d/m/Y') ?></div>
-                </div>
+              <div class="ticket-info-item">
+                <strong>Asunto</strong>
+                <span><?= htmlspecialchars($ticket['subject']) ?></span>
               </div>
 
-              <div class="d-flex align-items-center">
-                <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
-                  <i class="fas fa-exclamation-circle text-primary"></i>
-                </div>
-                <div>
-                  <small class="text-muted">Estado actual</small>
-                  <div class="fw-semibold"><?= $ticketCerrado ? 'Cerrado' : 'Pendiente' ?></div>
-                </div>
+              <div class="ticket-info-item">
+                <strong>Estado actual</strong>
+                <span><?= $ticketCerrado ? 'Cerrado' : ($ticket['status'] === 'en proceso' ? 'En proceso' : 'Pendiente') ?></span>
               </div>
+
+              <div class="ticket-info-item">
+                <strong>Fecha de creación</strong>
+                <span><?= date('d/m/Y H:i', strtotime($ticket['posting_date'])) ?></span>
+              </div>
+
+              <?php if (!empty($ticket['priority'])): ?>
+                <div class="ticket-info-item">
+                  <strong>Prioridad actual</strong>
+                  <span class="badge 
+                    <?= $ticket['priority'] === 'Urgente-(Problema Funcional)' ? 'bg-danger' : '' ?>
+                    <?= $ticket['priority'] === 'Importante' ? 'bg-warning text-dark' : '' ?>
+                    <?= $ticket['priority'] === 'No-Urgente' ? 'bg-info' : '' ?>
+                    <?= $ticket['priority'] === 'Pregunta' ? 'bg-light text-dark' : '' ?>
+                  ">
+                    <?= htmlspecialchars($ticket['priority']) ?>
+                  </span>
+                </div>
+              <?php endif; ?>
+
+              <?php if (!empty($ticket['context'])): ?>
+                <div class="ticket-info-item">
+                  <strong>Contexto actual</strong>
+                  <p class="mb-0"><?= nl2br(htmlspecialchars($ticket['context'])) ?></p>
+                </div>
+              <?php endif; ?>
             </div>
           </div>
         </div>

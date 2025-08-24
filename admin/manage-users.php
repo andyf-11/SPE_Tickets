@@ -1,4 +1,21 @@
 <?php
+session_start();
+require_once '../assets/config/mailer_config.php';
+require("dbconnection.php");
+require_once("checklogin.php");
+check_login("admin");
+
+// Eliminar usuario si se confirma
+if (isset($_POST['delete_user_id'])) {
+  $userIdToDelete = $_POST['delete_user_id'];
+  $stmt = $pdo->prepare("DELETE FROM user WHERE id = ?");
+  if ($stmt->execute([$userIdToDelete])) {
+    $_SESSION['user_deleted'] = true;
+  }
+  header("Location: manage-users.php");
+  exit;
+}
+
 // Crear usuario
 if (isset($_POST['add_user'])) {
   $name = trim($_POST['name']);
@@ -10,15 +27,21 @@ if (isset($_POST['add_user'])) {
   $role = $_POST['role'];
   $password_plain = $_POST['password'];
 
-  // Validar correo
+  // Validación de correo
   if (!str_ends_with($email, '@spe.gob.hn')) {
     echo "<script>alert('Solo se permiten correos @spe.gob.hn'); window.location.href = 'manage-users.php';</script>";
     exit;
   }
 
-  // Validar contraseña
+  // Validación de contraseña
   if (!preg_match('/^(?=.*\d)(?=.*[a-zA-Z])(?=.*[\W_]).{8,}$/', $password_plain)) {
     echo "<script>alert('La contraseña debe tener al menos 8 caracteres, incluir una letra, un número y un símbolo.'); window.location.href = 'manage-users.php';</script>";
+    exit;
+  }
+
+  // Evitar null en area_id
+  if (empty($area)) {
+    echo "<script>alert('Debe seleccionar un área.'); window.location.href = 'manage-users.php';</script>";
     exit;
   }
 
@@ -26,39 +49,41 @@ if (isset($_POST['add_user'])) {
   $token = bin2hex(random_bytes(32));
 
   // Insertar usuario
-  $stmt = $pdo->prepare("INSERT INTO user 
-    (name, email, mobile, gender, edificio_id, area_id, role, password, posting_date, verification_token, is_verified) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 0)");
-    
+  $stmt = $pdo->prepare("INSERT INTO user (name, email, mobile, gender, edificio_id, area_id, role, password, posting_date, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 0)");
   $success = $stmt->execute([$name, $email, $mobile, $gender, $edificio, $area, $role, $password, $token]);
 
   if ($success) {
     if (sendVerificationEmail($email, $name, $token)) {
       echo "<script>
-          document.addEventListener('DOMContentLoaded', function() {
-            showToast('Usuario creado y correo de verificación enviado', 'bg-success');
-            setTimeout(() => window.location.href = 'manage-users.php', 3000);
-          });
-        </script>";
+                document.addEventListener('DOMContentLoaded', function() {
+                    showToast('Usuario creado y correo de verificación enviado', 'bg-success');
+                    setTimeout(() => window.location.href = 'manage-users.php', 3000);
+                });
+            </script>";
     } else {
       echo "<script>
-          document.addEventListener('DOMContentLoaded', function() {
-            showToast('Usuario creado, pero hubo un error al enviar el correo de verificación', 'bg-warning');
-            setTimeout(() => window.location.href = 'manage-users.php', 3000);
-          });
-        </script>";
+                document.addEventListener('DOMContentLoaded', function() {
+                    showToast('Usuario creado, pero hubo un error al enviar el correo de verificación', 'bg-warning');
+                    setTimeout(() => window.location.href = 'manage-users.php', 3000);
+                });
+            </script>";
     }
   } else {
     echo "<script>
-        document.addEventListener('DOMContentLoaded', function () {
-          showToast('Error al crear el usuario.', 'bg-danger');
-          setTimeout(() => window.location.href = 'manage-users.php', 3000);
-        });
-      </script>";
+            document.addEventListener('DOMContentLoaded', function () {
+                showToast('Error al crear el usuario.', 'bg-danger');
+                setTimeout(() => window.location.href = 'manage-users.php', 3000);
+            });
+        </script>";
   }
 }
 
+// Consultas para selects
+$edificios = $pdo->query("SELECT id, name FROM edificios ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+$areas = $pdo->query("SELECT id, name FROM areas ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -316,6 +341,7 @@ if (isset($_POST['add_user'])) {
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // --- Modal de eliminación ---
       const deleteModal = document.getElementById("deleteModal");
       deleteModal.addEventListener("show.bs.modal", event => {
         const button = event.relatedTarget;
@@ -324,8 +350,60 @@ if (isset($_POST['add_user'])) {
         document.getElementById("deleteUserId").value = userId;
         document.getElementById("userToDeleteName").textContent = userName;
       });
+
+      // --- Modal de nuevo usuario ---
+      const rolSelect = document.querySelector('select[name="role"]');
+      const edificioSelect = document.querySelector('select[name="edificio"]');
+      const areaSelect = document.querySelector('select[name="area"]');
+
+      // ID real del edificio "General" en la base de datos
+      const generalEdificioId = '3'; // Cambia este valor si tu id es otro
+
+      // Función para actualizar Edificio y Área según rol
+      function actualizarModal() {
+        const rol = rolSelect.value.toLowerCase();
+
+        // --- Edificio ---
+        // Eliminar opción General si existe
+        const generalOption = edificioSelect.querySelector(`option[value="${generalEdificioId}"]`);
+        if (generalOption) generalOption.remove();
+
+        // Agregar General solo si rol es Admin y no existe
+        if (rol === 'admin') {
+          const option = document.createElement('option');
+          option.value = generalEdificioId;
+          option.textContent = 'General';
+          edificioSelect.appendChild(option);
+          // Seleccionar General automáticamente
+          edificioSelect.value = generalEdificioId;
+        }
+
+        if (['admin', 'supervisor', 'tecnico'].includes(rol)) {
+          // Buscar el option con texto "Informática" (ignora mayúsculas)
+          const informaticaOption = Array.from(areaSelect.options)
+            .find(opt => opt.text.toLowerCase() === 'Informatica');
+
+          if (informaticaOption) {
+            areaSelect.value = informaticaOption.value;
+          }
+        } else {
+          // Para otros roles, dejar vacío
+          areaSelect.value = '';
+        }
+      }
+
+      // Actualizar al cambiar el rol
+      rolSelect.addEventListener('change', actualizarModal);
+
+      // Actualizar también al abrir el modal por primera vez
+      const addUserModal = document.getElementById('addUserModal');
+      addUserModal.addEventListener('show.bs.modal', () => {
+        // Ejecutamos la función
+        actualizarModal();
+      });
     });
   </script>
+
 
   <script>
     const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
@@ -339,17 +417,19 @@ if (isset($_POST['add_user'])) {
       const toastEl = document.getElementById('toastMessage');
       const toastBody = document.getElementById('toastBody');
 
-      //Quita clases previas de color
+      // Quita clases previas de color
       toastEl.classList.remove('bg-success', 'bg-warning', 'bg-danger');
       toastEl.classList.add(bgClass);
 
-      //Asignar mensaje
+      // Asignar mensaje
       toastBody.textContent = message;
 
       const toast = new bootstrap.Toast(toastEl);
       toast.show();
     }
   </script>
+
+
 </body>
 
 </html>

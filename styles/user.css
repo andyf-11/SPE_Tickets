@@ -1,5 +1,5 @@
 :root {
-    --primary-color: #6240d4;
+    --primary-color: #46dee6d6;
     --secondary-color: #6c757d;
 }
 
@@ -54,84 +54,50 @@ textarea {
 }
 
 .btn-submit {
-    background-color: var(--primary-color);
+    background-color: #3fe4ecf0;
+    color: #504f4f;
     border: none;
     padding: 10px 25px;
     font-weight: 500;
 }
 
 .btn-submit:hover {
-    background-color: #4e2db3;
+    background-color: #1c9aa0;
 }
 
-/*View-tickets*/
-
-:root {
-    --primary-color: #6240d4;
-    --secondary-color: #6c757d;
+.form-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
 }
 
-.ticket-card {
-    border-radius: 10px;
-    border: none;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+.form-header {
+    padding-bottom: 1.5rem;
     margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
 }
 
-.ticket-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.accordion-button:not(.collapsed) {
-    background-color: rgba(98, 64, 212, 0.05);
-    color: var(--primary-color);
-}
-
-.accordion-button:focus {
-    box-shadow: none;
-    border-color: rgba(98, 64, 212, 0.25);
-}
-
-.status-badge {
-    min-width: 90px;
+.btn-submit {
+    background-color: #0D6EFD;
+    padding: 0.5rem 1.5rem;
     font-weight: 500;
 }
 
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
+.btn-submit:hover {
+    background-color: #0B5ED7;
 }
 
-.response-card {
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-top: 1rem;
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed #dee2e6;
 }
 
-.response-header {
-    font-weight: 600;
-    color: var(--primary-color);
-}
 
-.breadcrumb {
-    background-color: transparent;
-    padding: 0.5rem 0;
-}
-
-@media (max-width: 768px) {
-    .ticket-header {
-        flex-direction: column;
-        align-items: flex-start !important;
-    }
-
-    .ticket-meta {
-        margin-top: 0.5rem;
-    }
-}
 
 /*Chat-List*/
 :root {

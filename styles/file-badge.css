@@ -1,0 +1,46 @@
+.badge-archivo {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    max-width: 200px;       /* ancho máximo */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; /* puntos suspensivos */
+    position: relative;      /* necesario para el fade */
+    color: #fff;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+/* Fade al final del badge */
+.badge-archivo::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 40px; /* ancho del degradado */
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(197, 193, 193, 0), #eeeaeacc); /* cambia #000 según tu fondo */
+}
+
+/* ícono dentro del badge */
+.badge-archivo i {
+    font-size: 0.8rem;
+}
+
+/* Efecto hover */
+.badge-archivo:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+/* Colores según tipo de archivo */
+.badge-pdf   { background-color: #d9534f; }   /* rojo */
+.badge-doc   { background-color: #0275d8; }   /* azul Word */
+.badge-excel { background-color: #1d6f42; }   /* verde Excel */
+.badge-img   { background-color: #5cb85c; }   /* verde claro imágenes */
+.badge-other { background-color: #6c757d; }   /* gris */

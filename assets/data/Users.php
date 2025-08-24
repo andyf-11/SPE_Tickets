@@ -85,7 +85,7 @@ try {
                 header("Location: /SPE_Soporte_Tickets/supervisor/s_dashboard.php");
                 break;
             case "usuario":
-                header("Location: /SPE_Soporte_Tickets/dashboard.php");
+                header("Location: /SPE_Soporte_Tickets/usuario/dashboard.php");
                 break;
             default:
                 $_SESSION["error_message"] = "Rol no reconocido.";

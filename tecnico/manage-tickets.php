@@ -2,7 +2,8 @@
 session_start();
 require_once("dbconnection.php");
 require("checklogin.php");
-require_once '../assets/data/notifications_helper.php'; // ✅ Importamos el helper
+require_once '../assets/data/notifications_helper.php'; // ✅ Importamos el helper de notificaciones
+require_once '../file-badge.php'; // ✅ Importamos el helper de archivos adjuntos
 check_login("tecnico");
 
 $tecnico_id = $_SESSION['user_id'] ?? 0;
@@ -73,6 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="../styles/tickets/manage-tickets.css" rel="stylesheet">
+  <link href="../styles/file-bagde.css" rel="stylesheet">
 </head>
 
 <body>
@@ -87,7 +89,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="t_dashboard.php"><i class="fas fa-home me-1"></i> Inicio</a></li>
-          <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-ticket-alt me-1"></i> Tickets Asignados</li>
+          <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-ticket-alt me-1"></i> Tickets
+            Asignados</li>
         </ol>
       </nav>
       <h3 class="mb-0"><i class="fas fa-ticket me-2"></i>Tickets Asignados</h3>
@@ -127,6 +130,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
         $adminRemarkDate = htmlspecialchars($row['admin_remark_date']);
         $id = (int) $row['id'];
 
+        // Obtener la prioridad asignada por el supervisor
+        $priority = !empty($row['priority']) ? htmlspecialchars($row['priority']) : 'Pendiente de asignación';
+
+        // Estilos para la prioridad
+        $priorityBadgeClass = 'bg-secondary';
+        switch ($priority) {
+          case 'Urgente-(Problema Funcional)':
+            $priorityBadgeClass = 'bg-danger';
+            break;
+          case 'Importante':
+            $priorityBadgeClass = 'bg-warning text-dark';
+            break;
+          case 'No-Urgente':
+            $priorityBadgeClass = 'bg-info';
+            break;
+          case 'Pregunta':
+            $priorityBadgeClass = 'bg-light text-dark';
+            break;
+          case 'Pendiente de asignación':
+            $priorityBadgeClass = 'bg-secondary';
+            break;
+        }
+
+        // 🔎 Buscar si hay notificación con contexto de supervisor para este ticket
+        $stmtNotif = $pdo->prepare("SELECT message 
+                                    FROM notifications 
+                                    WHERE user_id = :uid 
+                                      AND message LIKE :msg
+                                    ORDER BY created_at DESC LIMIT 1");
+        $stmtNotif->execute([
+          ':uid' => $tecnico_id,
+          ':msg' => "%ticket (ID interno: {$id})%"
+        ]);
+        $notif = $stmtNotif->fetch(PDO::FETCH_ASSOC);
+
         $stmtChat = $pdo->prepare("SELECT status_chat FROM chat_user_tech WHERE ticket_id = ?");
         $stmtChat->execute([$id]);
         $chatInfo = $stmtChat->fetch();
@@ -143,6 +181,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
                   <span class="text-muted small"><i class="far fa-calendar-alt me-1"></i><?= $postingDate ?></span>
                   <span class="badge badge-status <?= ($status === 'Cerrado') ? 'badge-cerrado' : 'badge-en-proceso'; ?>">
                     <i class="fas fa-<?= ($status === 'Cerrado') ? 'lock' : 'spinner'; ?> me-1"></i><?= $status ?>
+                  </span>
+                  <span class="badge <?= $priorityBadgeClass ?>">
+                    <i class="fas fa-flag me-1"></i><?= $priority ?>
                   </span>
                   <?php if (!empty($row['edificio_nombre'])): ?>
                     <span class="badge badge-edificio badge-status">
@@ -173,9 +214,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
 
           <div class="collapse" id="ticketDetails<?= $id ?>">
             <div class="card-body">
+              <!-- 🔹 Mostrar modal con contexto del supervisor si existe -->
+              <?php if ($notif && strpos($notif['message'], 'Contexto:') !== false): ?>
+                <div class="alert alert-info">
+                  <i class="fas fa-user-tie me-2"></i><strong>Contexto del Supervisor:</strong><br>
+                  <?= nl2br(htmlspecialchars($notif['message'])) ?>
+                </div>
+              <?php endif; ?>
+
               <div class="d-flex align-items-start mb-4">
                 <img src="../assets/img/user.png" alt="Usuario" class="user-avatar me-3 rounded-circle" />
-                <div class="ticket-text"><?= nl2br($ticketText) ?></div>
+                <div>
+                  <div class="ticket-text mb-3"><?= nl2br($ticketText) ?></div>
+
+                  <!-- Mostrar archivo adjunto del usuario -->
+                  <?php if (!empty($row['archivo'])): ?>
+                    <div class="mt-3">
+                      <?php mostrarArchivoBadge($row['archivo']); ?>
+                    </div>
+                  <?php endif; ?>
+                </div>
               </div>
               <hr class="my-4">
 
@@ -186,7 +244,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
                   </h6>
                   <div class="alert alert-light border">
                     <div class="d-flex align-items-start">
-                      <img src="../assets/img/Logo-Gobierno_small.png" alt="Técnico" class="user-avatar me-3 rounded-circle" style="width: 35px; height: 35px;" />
+                      <img src="../assets/img/Logo-Gobierno_small.png" alt="Técnico" class="user-avatar me-3 rounded-circle"
+                        style="width: 35px; height: 35px;" />
                       <div>
                         <?= nl2br($adminRemark) ?>
                         <div class="text-muted small mt-2">
@@ -249,11 +308,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
   </script>
 
   <script>
-  const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
-  const role = <?php echo json_encode($_SESSION['user_role']); ?>;
-</script>
-<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-<script src="../chat-server/notifications.js"></script>
+    const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+    const role = <?php echo json_encode($_SESSION['user_role']); ?>;
+  </script>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script src="../chat-server/notifications.js"></script>
 
 </body>
+
 </html>

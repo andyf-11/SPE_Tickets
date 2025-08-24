@@ -6,15 +6,17 @@ require_once("dbconnection.php");
 
 if (isset($_POST['update'])) {
   $name = $_POST['name'];
-  $email = $_POST['email'];  // Unificado con el form
-  $contact = $_POST['mobile'];      // Unificado con el form
+  $email = $_POST['email'];
+  $contact = $_POST['mobile'];
   $address = $_POST['address'];
   $gender = $_POST['gender'];
   $edificio_id = $_POST['edificio_id'];
+  $area_id = $_POST['area_id']; // 👈 agregado
   $userid = $_GET['id'];
 
   $sql = "UPDATE user 
-          SET name = :name, email = :email, mobile = :contact, gender = :gender, address = :address, edificio_id = :edificio_id 
+          SET name = :name, email = :email, mobile = :contact, gender = :gender, 
+              address = :address, edificio_id = :edificio_id, area_id = :area_id 
           WHERE id = :userid";
   $stmt = $pdo->prepare($sql);
   $stmt->bindParam(':name', $name);
@@ -23,13 +25,16 @@ if (isset($_POST['update'])) {
   $stmt->bindParam(':address', $address);
   $stmt->bindParam(':email', $email);
   $stmt->bindParam(':edificio_id', $edificio_id, PDO::PARAM_INT);
+  $stmt->bindParam(':area_id', $area_id, PDO::PARAM_INT); // 👈 agregado
   $stmt->bindParam(':userid', $userid, PDO::PARAM_INT);
 
   if ($stmt->execute()) {
     $toast = true;
   }
-
 }
+
+// Obtener todas las áreas
+$areas = $pdo->query("SELECT id, name FROM areas ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -92,7 +97,6 @@ if (isset($_POST['update'])) {
     </script>
   <?php endif; ?>
 
-
   <div class="container-fluid">
     <div class="row">
       <!-- Sidebar -->
@@ -104,7 +108,10 @@ if (isset($_POST['update'])) {
       <main class="col-md-9 col-lg-10 main-content mt-5">
         <?php
         $userid = $_GET['id'];
-        $sql = "SELECT u.*, e.name as edificio_nombre FROM user u LEFT JOIN edificios e ON u.edificio_id = e.id WHERE u.id = :id";
+        $sql = "SELECT u.*, e.name as edificio_nombre 
+                FROM user u 
+                LEFT JOIN edificios e ON u.edificio_id = e.id 
+                WHERE u.id = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':id', $userid, PDO::PARAM_INT);
         $stmt->execute();
@@ -180,22 +187,27 @@ if (isset($_POST['update'])) {
                         <label for="gender" class="form-label">Género</label>
                         <select class="form-select" id="gender" name="gender" required>
                           <option value="">Seleccione...</option>
-                          <option value="masculino" <?= ($rw['gender'] == 'masculino') ? 'selected' : '' ?>>Masculino
-                          </option>
-                          <option value="femenino" <?= ($rw['gender'] == 'femenino') ? 'selected' : '' ?>>Femenino</option>
-                          <option value="otro" <?= ($rw['gender'] == 'otro') ? 'selected' : '' ?>>Otro</option>
+                          <option value="Femenino" <?php if ($row['gender'] == 'Femenino') echo 'selected';?>>Femenino</option>
+                          <option value="Masculino" <?php if ($row['gender'] == 'Mascuilino') echo 'selected';?>>Masculino</option>
+                          <option value="Otro" <?php if ($row['gender'] == 'Otro') echo 'selected';?>>Otro</option>
                         </select>
                         <div class="invalid-feedback">
                           Por favor seleccione el género
                         </div>
                       </div>
 
-                      <div class="col-12">
-                        <label for="address" class="form-label">Dirección</label>
-                        <textarea class="form-control" id="address" name="address" rows="3"
-                          required><?= htmlspecialchars($rw['address']) ?></textarea>
-                        <div class="invalid-feedback">
-                          Por favor ingrese la dirección
+                      <div class="col-md-6">
+                        <label class="form-label">Área</label>
+                        <div class="input-group">
+                          <span class="input-group-text"><i class="fas fa-layer-group"></i></span>
+                          <select name="area_id" class="form-select" required>
+                            <option value="">-- Selecciona un área --</option>
+                            <?php foreach ($areas as $areaItem): ?>
+                              <option value="<?= $areaItem['id'] ?>" <?= ($rw['area_id'] == $areaItem['id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($areaItem['name']) ?>
+                              </option>
+                            <?php endforeach; ?>
+                          </select>
                         </div>
                       </div>
 
@@ -206,7 +218,7 @@ if (isset($_POST['update'])) {
                           <?php
                           $buildings = $pdo->query("SELECT id, name FROM edificios ORDER BY name ASC");
                           while ($b = $buildings->fetch(PDO::FETCH_ASSOC)) {
-                            $selected = ($rw['building_id'] == $b['id']) ? 'selected' : '';
+                            $selected = ($rw['edificio_id'] == $b['id']) ? 'selected' : '';
                             echo "<option value='{$b['id']}' $selected>" . htmlspecialchars($b['name']) . "</option>";
                           }
                           ?>

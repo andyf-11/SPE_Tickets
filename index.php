@@ -66,7 +66,7 @@ $isLoggedIn = isset($_SESSION['user_id']);
   <!-- Footer -->
   <footer class="py-4 bg-dark">
     <div class="container text-center">
-      <p class="text-white small m-0">&copy; Secretaría de Planificación y Estrategias 2025</p>
+      <p class="text-white small m-0">&copy; Secretaría de Planificación Estratégica 2025</p>
     </div>
   </footer>
 

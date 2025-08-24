@@ -22,7 +22,7 @@ $stmt->execute([$user_id]);
 $tickets_cerrados = $stmt->fetchColumn();
 
 // Tickets asignados nuevos
-$stmt = $pdo->prepare("SELECT id, subject, posting_date FROM ticket WHERE assigned_to = ? AND status = 'Nuevo' ORDER BY posting_date DESC LIMIT 10");
+$stmt = $pdo->prepare("SELECT id, subject, posting_date FROM ticket WHERE assigned_to = ? AND status = 'En proceso' ORDER BY posting_date DESC LIMIT 10");
 $stmt->execute([$user_id]);
 $tickets_asignados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -137,10 +137,10 @@ $tickets_cerrados_hoy = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td><?= htmlspecialchars($ticket['subject']) ?></td>
                     <td><?= date('d/m/Y H:i', strtotime($ticket['posting_date'])) ?></td>
                     <td>
-                      <a href="responder.php?id=<?= $ticket['id'] ?>" class="btn btn-sm btn-primary">
+                      <a href="manage-tickets.php?id=<?= $ticket['id'] ?>" class="btn btn-sm btn-primary">
                         <i class="fas fa-reply"></i> Responder
                       </a>
-                      <a href="chat-aprobacion.php?id=<?= $ticket['id'] ?>" class="btn btn-sm btn-success">
+                      <a href="chat-tech-admin.php?id=<?= $ticket['id'] ?>" class="btn btn-sm btn-success">
                         <i class="fas fa-comments"></i> Aprobación
                       </a>
                     </td>
