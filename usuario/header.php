@@ -1,7 +1,7 @@
 <?php
 if (session_status() == PHP_SESSION_NONE)
   session_start();
-require_once 'dbconnection.php';
+require_once '../dbconnection.php';
 
 $userId = $_SESSION['user_id'] ?? 0;
 $role = $_SESSION['user_role'] ?? ' ';

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once("dbconnection.php");
+require_once("../dbconnection.php");
 require("checklogin.php");
 check_login("usuario");
 

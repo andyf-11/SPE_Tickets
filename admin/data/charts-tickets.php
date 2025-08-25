@@ -5,16 +5,11 @@ include '../checklogin.php';
 check_login("admin");
 
 $user_id = $_SESSION['user_id'] ?? 0;
-
-//Tickets Abiertos
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM ticket WHERE status = 'Abierto' AND assigned_to = ?");
-$stmt->execute([$user_id]);
-$ticketsAbiertos = $stmt->fetchColumn();
-
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -89,30 +84,21 @@ $ticketsAbiertos = $stmt->fetchColumn();
                 <div class="col-lg-6">
                     <div class="card card-primary h-100">
                         <div
-                            class="card-header card-header-gradient card-header-gradient-primary d-flex justify-content-between align-items-center"
-                        >
+                            class="card-header card-header-gradient card-header-gradient-primary d-flex justify-content-between align-items-center">
                             <div>
                                 <i class="bi bi-flag-fill me-2"></i>
                                 <span class="fw-semibold">Tickets por Prioridad</span>
                             </div>
-                            <button
-                                class="btn btn-sm btn-outline-dark rounded-pill"
-                                data-bs-toggle="tooltip"
-                                title="Distribución de tickets según nivel de prioridad"
-                            >
+                            <button class="btn btn-sm btn-outline-dark rounded-pill" data-bs-toggle="tooltip"
+                                title="Distribución de tickets según nivel de prioridad">
                                 <i class="bi bi-info-circle"></i>
                             </button>
                         </div>
                         <div class="card-body">
-                            <div
-                                class="chart-container position-relative"
-                                style="min-height: 200px;"
-                            >
+                            <div class="chart-container position-relative" style="min-height: 200px;">
                                 <canvas id="priorityChart"></canvas>
-                                <div
-                                    class="no-data-message text-center text-muted position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center"
-                                    style="display: none; font-weight: 600; font-size: 1.2rem; gap: 0.5rem;"
-                                >
+                                <div class="no-data-message text-center text-muted position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center"
+                                    style="display: none; font-weight: 600; font-size: 1.2rem; gap: 0.5rem;">
                                     <i class="bi bi-info-circle" style="font-size: 2.5rem; color: #6c757d;"></i>
                                     No hay datos para mostrar.
                                 </div>
@@ -124,30 +110,21 @@ $ticketsAbiertos = $stmt->fetchColumn();
                 <div class="col-lg-6">
                     <div class="card card-danger h-100">
                         <div
-                            class="card-header card-header-gradient card-header-gradient-danger d-flex justify-content-between align-items-center"
-                        >
+                            class="card-header card-header-gradient card-header-gradient-danger d-flex justify-content-between align-items-center">
                             <div>
                                 <i class="bi bi-bug-fill me-2"></i>
                                 <span class="fw-semibold">Problemas más Recurrentes</span>
                             </div>
-                            <button
-                                class="btn btn-sm btn-outline-light rounded-pill"
-                                data-bs-toggle="tooltip"
-                                title="Tipos de problemas más comunes reportados"
-                            >
+                            <button class="btn btn-sm btn-outline-light rounded-pill" data-bs-toggle="tooltip"
+                                title="Tipos de problemas más comunes reportados">
                                 <i class="bi bi-info-circle"></i>
                             </button>
                         </div>
                         <div class="card-body">
-                            <div
-                                class="chart-container position-relative"
-                                style="min-height: 200px;"
-                            >
+                            <div class="chart-container position-relative" style="min-height: 200px;">
                                 <canvas id="problemsChart"></canvas>
-                                <div
-                                    class="no-data-message text-center text-muted position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center"
-                                    style="display: none; font-weight: 600; font-size: 1.2rem; gap: 0.5rem;"
-                                >
+                                <div class="no-data-message text-center text-muted position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center"
+                                    style="display: none; font-weight: 600; font-size: 1.2rem; gap: 0.5rem;">
                                     <i class="bi bi-info-circle" style="font-size: 2.5rem; color: #6c757d;"></i>
                                     No hay datos para mostrar.
                                 </div>
@@ -162,37 +139,26 @@ $ticketsAbiertos = $stmt->fetchColumn();
                 <div class="col-lg-12">
                     <div class="card card-success">
                         <div
-                            class="card-header card-header-gradient card-header-gradient-success d-flex justify-content-between align-items-center"
-                        >
+                            class="card-header card-header-gradient card-header-gradient-success d-flex justify-content-between align-items-center">
                             <div>
                                 <i class="bi bi-calendar-week-fill me-2"></i>
                                 <span class="fw-semibold">Evolución de Tickets (Mes Actual)</span>
                             </div>
                             <div>
-                                <button
-                                    class="btn btn-sm btn-outline-light rounded-pill me-2"
-                                >
+                                <button class="btn btn-sm btn-outline-light rounded-pill me-2">
                                     <i class="bi bi-download me-1"></i> Exportar
                                 </button>
-                                <button
-                                    class="btn btn-sm btn-outline-light rounded-pill"
-                                    data-bs-toggle="tooltip"
-                                    title="Tickets creados por día en el mes actual"
-                                >
+                                <button class="btn btn-sm btn-outline-light rounded-pill" data-bs-toggle="tooltip"
+                                    title="Tickets creados por día en el mes actual">
                                     <i class="bi bi-info-circle"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="card-body">
-                            <div
-                                class="chart-container position-relative"
-                                style="height: 350px;"
-                            >
+                            <div class="chart-container position-relative" style="height: 350px;">
                                 <canvas id="monthlyChart"></canvas>
-                                <div
-                                    class="no-data-message text-center text-muted position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center"
-                                    style="display: none; font-weight: 600; font-size: 1.2rem; gap: 0.5rem;"
-                                >
+                                <div class="no-data-message text-center text-muted position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center"
+                                    style="display: none; font-weight: 600; font-size: 1.2rem; gap: 0.5rem;">
                                     <i class="bi bi-info-circle" style="font-size: 2.5rem; color: #6c757d;"></i>
                                     No hay datos para mostrar.
                                 </div>
@@ -207,30 +173,21 @@ $ticketsAbiertos = $stmt->fetchColumn();
                 <div class="col-lg-12">
                     <div class="card card-warning">
                         <div
-                            class="card-header card-header-gradient card-header-gradient-warning d-flex justify-content-between align-items-center"
-                        >
+                            class="card-header card-header-gradient card-header-gradient-warning d-flex justify-content-between align-items-center">
                             <div>
                                 <i class="bi bi-building-fill me-2"></i>
                                 <span class="fw-semibold">Áreas con más Tickets</span>
                             </div>
-                            <button
-                                class="btn btn-sm btn-outline-dark rounded-pill"
-                                data-bs-toggle="tooltip"
-                                title="Distribución de tickets por área/departamento"
-                            >
+                            <button class="btn btn-sm btn-outline-dark rounded-pill" data-bs-toggle="tooltip"
+                                title="Distribución de tickets por área/departamento">
                                 <i class="bi bi-info-circle"></i>
                             </button>
                         </div>
                         <div class="card-body">
-                            <div
-                                class="chart-container position-relative"
-                                style="min-height: 200px;"
-                            >
+                            <div class="chart-container position-relative" style="min-height: 200px;">
                                 <canvas id="areasChart"></canvas>
-                                <div
-                                    class="no-data-message text-center text-muted position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center"
-                                    style="display: none; font-weight: 600; font-size: 1.2rem; gap: 0.5rem;"
-                                >
+                                <div class="no-data-message text-center text-muted position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center"
+                                    style="display: none; font-weight: 600; font-size: 1.2rem; gap: 0.5rem;">
                                     <i class="bi bi-info-circle" style="font-size: 2.5rem; color: #6c757d;"></i>
                                     No hay datos para mostrar.
                                 </div>
@@ -260,10 +217,18 @@ $ticketsAbiertos = $stmt->fetchColumn();
                 .catch((err) => console.error(err));
         }
 
-        // Obtener datos de resumen
-        fetch("data/tickets-data.php")
+        // Obtener datos de resumen - CORREGIDA LA RUTA
+        fetch("tickets-data.php")
             .then((res) => res.json())
             .then((data) => {
+                console.log("Datos recibidos:", data); // Para depuración
+                
+                // Verificar si hay error
+                if (data.error) {
+                    console.error("Error en datos:", data.message);
+                    return;
+                }
+                
                 document.getElementById("openTicketsCount").textContent =
                     data.openTickets || "0";
                 document.getElementById("closedTicketsCount").textContent =
@@ -271,20 +236,28 @@ $ticketsAbiertos = $stmt->fetchColumn();
                 document.getElementById("activeUsersCount").textContent =
                     data.activeUsers || "0";
             })
-            .catch((err) => console.error(err));
+            .catch((err) => {
+                console.error("Error fetching data:", err);
+                // Establecer valores por defecto en caso de error
+                document.getElementById("openTicketsCount").textContent = "0";
+                document.getElementById("closedTicketsCount").textContent = "0";
+                document.getElementById("activeUsersCount").textContent = "0";
+            });
+
 
         // Helper para mostrar/ocultar mensaje y canvas según datos
         function toggleNoDataMessage(container, data) {
             const noDataMsg = container.querySelector(".no-data-message");
             const canvas = container.querySelector("canvas");
-            if (
-                !data ||
-                data.length === 0 ||
-                data.every((d) => {
-                    // Buscar cualquier propiedad con valor numérico para validar
-                    return Object.values(d).every((v) => Number(v) === 0);
-                })
-            ) {
+            
+            // Verificar si no hay datos o todos los valores son cero
+            if (!data || data.length === 0 || data.every(item => {
+                // Verificar si todas las propiedades numéricas son cero
+                return Object.values(item).every(value => {
+                    const num = Number(value);
+                    return !isNaN(num) && num === 0;
+                });
+            })) {
                 noDataMsg.style.display = "flex";
                 canvas.style.display = "none";
                 return false;
@@ -345,7 +318,7 @@ $ticketsAbiertos = $stmt->fetchColumn();
             new Chart(document.getElementById("problemsChart"), {
                 type: "bar",
                 data: {
-                    labels: data.map((d) => d.problem_type),
+                    labels: data.map((d) => d.subject),
                     datasets: [
                         {
                             label: "Cantidad",
@@ -477,4 +450,5 @@ $ticketsAbiertos = $stmt->fetchColumn();
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

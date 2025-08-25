@@ -140,7 +140,7 @@ $tickets_cerrados_hoy = $stmt->fetchAll(PDO::FETCH_ASSOC);
                       <a href="manage-tickets.php?id=<?= $ticket['id'] ?>" class="btn btn-sm btn-primary">
                         <i class="fas fa-reply"></i> Responder
                       </a>
-                      <a href="chat-tech-admin.php?id=<?= $ticket['id'] ?>" class="btn btn-sm btn-success">
+                      <a href="chat-tech-admin.php?ticket_id=<?= $ticket['id'] ?>" class="btn btn-sm btn-success">
                         <i class="fas fa-comments"></i> Aprobación
                       </a>
                     </td>

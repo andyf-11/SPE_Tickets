@@ -2,8 +2,8 @@
 session_start();
 require_once("checklogin.php");
 check_login("usuario");
-require("dbconnection.php");
-require_once __DIR__ . "/assets/config/mailer_config.php"; // ajusta la ruta si es necesario
+require("../dbconnection.php");
+require_once(__DIR__ . "/../assets/config/mailer_config.php");
 
 $email = $_SESSION['login'];
 

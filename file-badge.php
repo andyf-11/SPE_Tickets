@@ -1,9 +1,7 @@
 <?php
-
-function mostrarArchivoBadge($archivo) {
+function mostrarArchivoBadge($archivo, $ticket_id) {
     if (empty($archivo)) return;
 
-    $fileUrl = 'uploads/' . $archivo;
     $fileName = htmlspecialchars($archivo);
 
     // Determinar tipo de archivo por extensión
@@ -25,7 +23,9 @@ function mostrarArchivoBadge($archivo) {
         $icon = 'fa-file-image';
     }
 
-    echo "<a href='{$fileUrl}' download class='badge-archivo {$class}' title='{$fileName}'>
+    echo "<a href='/SPE_Soporte_Tickets/download.php?ticket_id={$ticket_id}' 
+             class='badge-archivo {$class}' 
+             title='{$fileName}'>
             <i class='fas {$icon}'></i> {$fileName}
           </a>";
 }

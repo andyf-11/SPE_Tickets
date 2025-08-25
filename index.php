@@ -26,6 +26,39 @@ $isLoggedIn = isset($_SESSION['user_id']);
       display: flex;
       align-items: center;
     }
+    
+    /* Mejoras específicas para los botones del navbar */
+    .navbar .btn-outline-light {
+      border-width: 2px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      /* Cambiamos el color de la letra a azul oscuro */
+      color: #0d6efd !important;
+      background-color: white;
+    }
+    
+    .navbar .btn-outline-light:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      /* Color de letra al hacer hover */
+      color: black !important;
+    }
+    
+    .navbar .btn-primary {
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .navbar .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    }
+    
+    /* Separación entre botones */
+    .navbar .btn {
+      margin-left: 0.5rem;
+    }
    </style>
 </head>
 <body>
@@ -40,8 +73,12 @@ $isLoggedIn = isset($_SESSION['user_id']);
       <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ms-auto">
           <?php if (!$isLoggedIn): ?>
-            <li class="nav-item"><a class="nav-link" href="registration.php">Regístrate</a></li>
-            <li class="nav-item"><a class="nav-link" href="login1.php">Acceder</a></li>
+            <li class="nav-item">
+              <a class="nav-link btn btn-outline-light" href="registration.php">Regístrate</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link btn btn-primary text-white" href="login1.php">Acceder</a>
+            </li>
           <?php else: ?>
             <li class="nav-item"><a class="nav-link" href="login1.php">Ir al Panel</a></li>
             <li class="nav-item"><a class="nav-link" href="logout.php">Cerrar Sesión</a></li>

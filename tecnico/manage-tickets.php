@@ -2,8 +2,8 @@
 session_start();
 require_once("dbconnection.php");
 require("checklogin.php");
-require_once '../assets/data/notifications_helper.php'; // ✅ Importamos el helper de notificaciones
-require_once '../file-badge.php'; // ✅ Importamos el helper de archivos adjuntos
+require_once '../assets/data/notifications_helper.php'; 
+require_once '../file-badge.php'; 
 check_login("tecnico");
 
 $tecnico_id = $_SESSION['user_id'] ?? 0;
@@ -74,7 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="../styles/tickets/manage-tickets.css" rel="stylesheet">
-  <link href="../styles/file-bagde.css" rel="stylesheet">
+  <link href="../styles/file-badge.css" rel="stylesheet">
 </head>
 
 <body>
@@ -121,7 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
       $stmt->execute([':tecnico_id' => $tecnico_id]);
 
       while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $ticketId = htmlspecialchars($row['ticket_id']);
+        $ticketId = htmlspecialchars($row['id']);
         $subject = htmlspecialchars($row['subject']);
         $postingDate = htmlspecialchars($row['posting_date']);
         $status = htmlspecialchars($row['status']);
@@ -230,7 +230,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
                   <!-- Mostrar archivo adjunto del usuario -->
                   <?php if (!empty($row['archivo'])): ?>
                     <div class="mt-3">
-                      <?php mostrarArchivoBadge($row['archivo']); ?>
+                      <?php mostrarArchivoBadge($row['archivo'], $row['id']); ?>
                     </div>
                   <?php endif; ?>
                 </div>

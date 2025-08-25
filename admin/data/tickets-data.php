@@ -7,31 +7,26 @@ check_login("admin");
 header('Content-Type: application/json');
 
 try {
-    //Tickets abiertos (TODOS)
+    // Tickets Abiertos
     $stmt = $pdo->query("SELECT COUNT(*) FROM ticket WHERE status = 'Abierto'");
     $ticketsAbiertos = $stmt->fetchColumn();
 
-    //Tickets Resueltos en el mes
-    $stmt = $pdo->query("SELECT COUNT(*) FROM ticket WHERE status = 'Cerrado'
-AND fecha_cierre >= DATE_SUB(NOW(), INTERVAL 1 MONTH)");
-    $stmt->execute();
+    // Tickets Cerrados en el último mes
+    $stmt = $pdo->query("SELECT COUNT(*) FROM ticket WHERE status = 'Cerrado' AND fecha_cierre >= DATE_SUB(NOW(), INTERVAL 1 MONTH)");
     $ticketsCerrados = $stmt->fetchColumn();
 
-    //Usuarios activos con tickets en el mes
-    $stmt = $pdo->prepare("SELECT COUNT(DISTINCT user_id) FROM ticket
-WHERE posting_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH)");
-    $stmt->execute();
+    // Usuarios activos con tickets en el último mes
+    $stmt = $pdo->query("SELECT COUNT(DISTINCT email_id) FROM ticket WHERE posting_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH)");
     $usuariosAct = $stmt->fetchColumn();
 
     echo json_encode([
-        "ticketsAbiertos" => $icketsAbiertos ?: 0,
-        "ticketsCerrados" => $ticketsCerrados ?: 0,
-        "usuariosAct" => $usuariosAct ?: 0,
+        "openTickets" => (int)$ticketsAbiertos ?: 0,
+        "closedTickets" => (int)$ticketsCerrados ?: 0,
+        "activeUsers" => (int)$usuariosAct ?: 0
     ]);
-} catch (Exception $e){
+} catch (Exception $e) {
     echo json_encode([
         "error" => true,
         "message" => $e->getMessage()
     ]);
-
 }

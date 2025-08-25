@@ -1,8 +1,8 @@
 <?php
 session_start();
-require_once("dbconnection.php");
+require_once("../dbconnection.php");
 require("checklogin.php");
-require_once 'assets/data/notifications_helper.php'; // Importamos el helper
+require_once '../assets/data/notifications_helper.php'; // Importamos el helper
 check_login("usuario");
 
 $page = 'create-ticket';

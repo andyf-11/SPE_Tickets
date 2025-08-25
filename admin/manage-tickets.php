@@ -229,7 +229,7 @@ if (isset($_POST['update'])) {
                   <!--Mostrar archivo adjunto -->
                   <?php if (!empty($row['archivo'])): ?>
                     <div class="mt-3">
-                      <?php mostrarArchivoBadge($row['archivo']); ?>
+                      <?php mostrarArchivoBadge($row['archivo'], $row['ticket_id']); ?>
                     </div>
                   <?php endif; ?>
 

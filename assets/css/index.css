@@ -1,15 +1,36 @@
+.masthead-content {
+  background-color: rgba(0, 0, 0, 0.6); /* Aumenté la opacidad para mejor contraste */
+  padding: 3rem; /* Más padding para mejor presencia */
+  border-radius: 15px;
+  backdrop-filter: blur(5px); /* Efecto de vidrio esmerilado moderno */
+}
+
+.masthead-heading {
+  font-size: 2.5rem;
+}
+
+.text-shadow {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+@media (min-width: 768px) {
+  .masthead-heading {
+    font-size: 3.5rem;
+  }
+  
   .masthead-content {
-      background-color: rgba(0, 0, 0, 0.5); /* semi-transparente para contraste */
-      padding: 2rem;
-      border-radius: 15px;
-    }
+    padding: 4rem;
+  }
+}
 
-    .masthead-heading {
-      font-size: 2.5rem;
-    }
-
-    @media (min-width: 768px) {
-      .masthead-heading {
-        font-size: 3.5rem;
-      }
-    }
+@media (max-width: 576px) {
+  .masthead-content .btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  .masthead-content .btn.ms-2 {
+    margin-left: 0 !important;
+  }
+}

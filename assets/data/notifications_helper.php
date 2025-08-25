@@ -1,7 +1,8 @@
 <?php
 // notifications_helper.php
 require_once 'send-notifications.php';
-require_once 'dbconnection.php';
+require_once(__DIR__ . "/../../dbconnection.php");
+
 
 /**
  * Notifica al admin y supervisor cuando se crea un ticket.

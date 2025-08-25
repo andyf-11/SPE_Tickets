@@ -221,6 +221,14 @@ CREATE TABLE `ticket` (
 
 ALTER TABLE `ticket` ADD COLUMN `archivo` VARCHAR(255) NULL AFTER `edificio_id`;
 
+--- Estos comando se utilizaron desde la interfaz mysql de phpmyadmin
+ALTER TABLE `ticket` ADD COLUMN `area_id` INT(11);
+ALTER TABLE `ticket`
+ADD CONSTRAINT `fk_ticket_area`
+FOREIGN KEY (`area_id`) REFERENCES `areas`(id)
+ON DELETE SET NULL
+ON UPDATE CASCADE;
+-----------------------------------------------------------------------
 INSERT INTO `ticket` VALUES(13, 6, 'pcliente@cweb.com', 'Fallo con el Servidor IDPROD 26', 'Fallo a Nivel de Servidor', 'importante', 'Es necesario reiniciar la máquina de estados', 'Cerrado', NULL, NULL, 'Se realiza el proceso solicitado a satisfacción.', '2022-11-29 06:00:00', '2025-06-16 01:09:25', NULL, NULL, NULL, NULL);
 INSERT INTO `ticket` VALUES(14, 7, 'pcliente@cweb.com', 'Fallo con el Servidor IDPROD 26', 'Fallo a Nivel de Servidor', 'non-urgent', 'Es necesario reiniciar la máquina de estados', 'Cerrado', NULL, NULL, 'Se realiza el proceso solicitado a satisfacción.', '2022-11-29 06:00:00', '2025-06-16 01:09:25', NULL, NULL, NULL, NULL);
 INSERT INTO `ticket` VALUES(15, 1, 'jcliente@cweb.com', 'Fallo con el Servidor IDPROD 26', 'Fallo a Nivel de Servidor', 'Importante', 'Es necesario reiniciar la máquina de estados', 'Cerrado', NULL, NULL, 'Se realiza el proceso solicitado a satisfacción.', '2023-01-11 06:00:00', '2025-06-16 01:09:25', NULL, NULL, NULL, NULL);
@@ -246,15 +254,6 @@ INSERT INTO `ticket` VALUES(50, 13, 'elis33@spe.gob.hn', 'Notificaciones', NULL,
 INSERT INTO `ticket` VALUES(51, 14, 'elis33@spe.gob.hn', 'Prueba de mensajes en tiempo real', NULL, 'Importante', 'este ticket es para probar los chats entre técnico->usuario y técnico->admin', 'Cerrado', NULL, NULL, '\n[2025-07-17 05:17] Admin: todo bien con los chats, funcionan correctamente\r\n', '2025-07-02 03:56:55', '2025-07-17 03:17:07', 16, NULL, NULL, NULL);
 INSERT INTO `ticket` VALUES(52, 15, 'elis33@spe.gob.hn', 'Prueba de mensajes en tiempo real', NULL, 'Importante', 'prueba mensajes y asignación de edificio', 'Cerrado', NULL, '2025-07-03 11:52:12', 'chats  funcionando correctamente al igual que la asignación de edificios', '2025-07-02 04:31:39', '2025-07-03 17:52:12', 16, NULL, NULL, 2);
 
-CREATE TABLE `ticket_images` (
-  `id` int(11) NOT NULL,
-  `ticket_id` int(11) DEFAULT NULL,
-  `og_name` varchar(255) DEFAULT NULL,
-  `route_archivo` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-INSERT INTO `ticket_images` VALUES(1, 15, 'Captura de pantalla 2025-05-12 100107.png', 'uploads/1747672669_Captura de pantalla 2025-05-12 100107.png');
-INSERT INTO `ticket_images` VALUES(2, 19, 'Captura de pantalla 2025-05-08 094002.png', 'uploads/682b5ffbba43e_Captura de pantalla 2025-05-08 094002.png');
 
 CREATE TABLE `user` (
   `id` int(11) NOT NULL,

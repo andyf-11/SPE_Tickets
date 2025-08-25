@@ -1,8 +1,8 @@
 <?php
 session_start();
-require("dbconnection.php");
+require("../dbconnection.php");
 require("checklogin.php");
-require_once 'file-badge.php';
+require_once '../file-badge.php';
 check_login("usuario");
 
 $page = 'view-tickets';
@@ -155,7 +155,7 @@ $page = 'view-tickets';
                   <div class="accordion-body pt-3">
                     <!-- Contenido del ticket -->
                     <div class="d-flex mb-3">
-                      <img src="assets/img/user.png" alt="Usuario" class="user-avatar rounded-circle me-3">
+                      <img src="../assets/img/user.png" alt="Usuario" class="user-avatar rounded-circle me-3">
                       <div class="flex-grow-1">
                         <div class="d-flex justify-content-between mb-2">
                           <h6 class="mb-0 fw-bold"><?= $_SESSION['user_name'] ?? 'Usuario' ?></h6>
@@ -166,55 +166,56 @@ $page = 'view-tickets';
                         </div>
                         <?php if (!empty($row['archivo'])): ?>
                           <div class="mt-3">
-                            <?php mostrarArchivoBadge($row['archivo']); ?>
+                            <?php mostrarArchivoBadge($row['archivo'], $row['ticket_id']); ?>
                           </div>
                         <?php endif; ?>
                       </div>
                     </div>
-
-                    <!-- Respuesta del técnico -->
-                    <?php if (!empty($row['tech_remark'])): ?>
-                      <div class="response-card">
-                        <div class="d-flex">
-                          <img src="assets/img/Logo-Gobierno_small.png" alt="Técnico" class="user-avatar rounded-circle me-3">
-                          <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between mb-2">
-                              <h6 class="response-header mb-0">
-                                <i class="fas fa-tools me-1"></i> Respuesta del técnico
-                              </h6>
-                              <small class="text-muted"><?= date('d/m/Y H:i', strtotime($row['tech_remark_date'])) ?></small>
-                            </div>
-                            <div class="response-text">
-                              <?= nl2br(htmlspecialchars($row['tech_remark'])) ?>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    <?php endif; ?>
-
-                    <!-- Respuesta administrativa -->
-                    <?php if (!empty($row['admin_remark'])): ?>
-                      <div class="response-card">
-                        <div class="d-flex">
-                          <img src="assets/img/Logo-Gobierno_small.png" alt="Admin" class="user-avatar rounded-circle me-3">
-                          <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between mb-2">
-                              <h6 class="response-header mb-0">
-                                <i class="fas fa-user-shield me-1"></i> Respuesta administrativa
-                              </h6>
-                              <small class="text-muted"><?= date('d/m/Y H:i', strtotime($row['admin_remark_date'])) ?></small>
-                            </div>
-                            <div class="response-text">
-                              <?= nl2br(htmlspecialchars($row['admin_remark'])) ?>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    <?php endif; ?>
                   </div>
+
+                  <!-- Respuesta del técnico -->
+                  <?php if (!empty($row['tech_remark'])): ?>
+                    <div class="response-card">
+                      <div class="d-flex">
+                        <img src="../assets/img/Logo-Gobierno_small.png" alt="Técnico" class="user-avatar rounded-circle me-3">
+                        <div class="flex-grow-1">
+                          <div class="d-flex justify-content-between mb-2">
+                            <h6 class="response-header mb-0">
+                              <i class="fas fa-tools me-1"></i> Respuesta del técnico
+                            </h6>
+                            <small class="text-muted"><?= date('d/m/Y H:i', strtotime($row['tech_remark_date'])) ?></small>
+                          </div>
+                          <div class="response-text">
+                            <?= nl2br(htmlspecialchars($row['tech_remark'])) ?>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <?php endif; ?>
+
+                  <!-- Respuesta administrativa -->
+                  <?php if (!empty($row['admin_remark'])): ?>
+                    <div class="response-card">
+                      <div class="d-flex">
+                        <img src="../assets/img/Logo-Gobierno_small.png" alt="Admin" class="user-avatar rounded-circle me-3">
+                        <div class="flex-grow-1">
+                          <div class="d-flex justify-content-between mb-2">
+                            <h6 class="response-header mb-0">
+                              <i class="fas fa-user-shield me-1"></i> Respuesta administrativa
+                            </h6>
+                            <small class="text-muted"><?= date('d/m/Y H:i', strtotime($row['admin_remark_date'])) ?></small>
+                          </div>
+                          <div class="response-text">
+                            <?= nl2br(htmlspecialchars($row['admin_remark'])) ?>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <?php endif; ?>
                 </div>
               </div>
-              <?php
+          </div>
+          <?php
             }
             echo '</div>';
           } else {
@@ -237,8 +238,8 @@ $page = 'view-tickets';
               </div>';
         }
         ?>
-      </main>
-    </div>
+    </main>
+  </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
