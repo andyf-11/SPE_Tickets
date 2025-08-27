@@ -3,7 +3,7 @@ session_start();
 require_once("dbconnection.php");
 include("checklogin.php");
 require_once '../assets/data/notifications_helper.php';
-require_once '../file-badge.php'; // ✅ Incluimos file-badge
+require_once '../file-badge.php';
 check_login("supervisor");
 
 // Obtener técnicos disponibles
@@ -112,9 +112,11 @@ if ($filtro !== 'todos') {
                 <div class="col-12">
                     <?php
                     try {
-                        $query = "SELECT t.*, e.name AS edificio_nombre 
+                        // Consultar tickets con el nombre del usuario
+                        $query = "SELECT t.*, e.name AS edificio_nombre, u.name AS usuario_nombre
                               FROM ticket t 
                               LEFT JOIN edificios e ON t.edificio_id = e.id
+                              LEFT JOIN user u ON t.email_id = u.email
                               $whereClause 
                               ORDER BY t.id DESC";
                         $stmt = $pdo->prepare($query);
@@ -128,6 +130,7 @@ if ($filtro !== 'todos') {
                             $ticketText = nl2br(htmlspecialchars($row['ticket'], ENT_QUOTES, 'UTF-8'));
                             $edificio = htmlspecialchars($row['edificio_nombre'] ?? 'Sin edificio');
                             $priority = !empty($row['priority']) ? htmlspecialchars($row['priority']) : 'Pendiente de asignación';
+                            $usuarioNombre = htmlspecialchars($row['usuario_nombre'] ?? 'Usuario');
                             ?>
                             <div class="card ticket-card mb-3">
                                 <div class="card-header">
@@ -186,7 +189,7 @@ if ($filtro !== 'todos') {
                                         <div class="d-flex align-items-start mb-3">
                                             <img src="../assets/img/user.png" alt="Usuario"
                                                 class="user-avatar me-3 rounded-circle" />
-                                            <div class="ticket-text"><?= $ticketText; ?></div>
+                                            <div class="ticket-text"><strong>Mensaje de <?= $usuarioNombre ?>:</strong><br><?= $ticketText; ?></div>
 
                                         </div>
 

@@ -2,8 +2,9 @@
 session_start();
 require_once("dbconnection.php");
 require("checklogin.php");
-require_once '../assets/data/notifications_helper.php'; 
-require_once '../file-badge.php'; 
+require_once '../assets/data/notifications_helper.php';
+require_once '../assets/config/mailer_config.php';
+require_once '../file-badge.php';
 check_login("tecnico");
 
 $tecnico_id = $_SESSION['user_id'] ?? 0;
@@ -42,10 +43,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
         $id_usuario = $usuario['id'] ?? null;
 
-        // 🔔 Notificar al usuario, supervisor y admin
+        // 🔔 Notificar al usuario
         if ($id_usuario) {
-          notificarRespuestaTicket($ticketId, $id_usuario);
+          error_log("Intentando notificar al usuario $id_usuario para ticket $ticketId");
+          $result = notificarRespuestaTicket($ticketId, $id_usuario);
+          error_log("Resultado de notificación: " . ($result ? "Éxito ✅" : "Fallo ❌"));
         }
+
 
         $pdo->commit();
         $mensaje_exito = "Respuesta enviada. El ticket se marcó como CERRADO.";
@@ -78,12 +82,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
 </head>
 
 <body>
-  <!-- Header fijo -->
   <?php include("header.php"); ?>
   <?php $page = 'manage-tickets'; ?>
   <?php include("leftbar.php"); ?>
 
-  <!-- Contenido -->
   <main class="main-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <nav aria-label="breadcrumb">
@@ -111,9 +113,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
     <?php
     try {
       $stmt = $pdo->prepare("
-        SELECT t.*, e.name AS edificio_nombre
+        SELECT t.*, e.name AS edificio_nombre, u.name AS usuario_nombre
         FROM ticket t
         LEFT JOIN edificios e ON t.edificio_id = e.id
+        LEFT JOIN user u ON t.email_id = u.email
         WHERE t.assigned_to = :tecnico_id 
           AND t.status IN ('En Proceso', 'Cerrado') 
         ORDER BY t.id DESC
@@ -128,12 +131,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
         $ticketText = htmlspecialchars($row['ticket']);
         $adminRemark = htmlspecialchars($row['admin_remark']);
         $adminRemarkDate = htmlspecialchars($row['admin_remark_date']);
+        $usuarioNombre = htmlspecialchars($row['usuario_nombre'] ?? 'Usuario');
         $id = (int) $row['id'];
 
-        // Obtener la prioridad asignada por el supervisor
         $priority = !empty($row['priority']) ? htmlspecialchars($row['priority']) : 'Pendiente de asignación';
 
-        // Estilos para la prioridad
         $priorityBadgeClass = 'bg-secondary';
         switch ($priority) {
           case 'Urgente-(Problema Funcional)':
@@ -148,12 +150,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
           case 'Pregunta':
             $priorityBadgeClass = 'bg-light text-dark';
             break;
-          case 'Pendiente de asignación':
-            $priorityBadgeClass = 'bg-secondary';
-            break;
         }
 
-        // 🔎 Buscar si hay notificación con contexto de supervisor para este ticket
         $stmtNotif = $pdo->prepare("SELECT message 
                                     FROM notifications 
                                     WHERE user_id = :uid 
@@ -214,7 +212,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
 
           <div class="collapse" id="ticketDetails<?= $id ?>">
             <div class="card-body">
-              <!-- 🔹 Mostrar modal con contexto del supervisor si existe -->
               <?php if ($notif && strpos($notif['message'], 'Contexto:') !== false): ?>
                 <div class="alert alert-info">
                   <i class="fas fa-user-tie me-2"></i><strong>Contexto del Supervisor:</strong><br>
@@ -225,9 +222,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
               <div class="d-flex align-items-start mb-4">
                 <img src="../assets/img/user.png" alt="Usuario" class="user-avatar me-3 rounded-circle" />
                 <div>
-                  <div class="ticket-text mb-3"><?= nl2br($ticketText) ?></div>
+                  <div class="ticket-text mb-3"><strong>Mensaje de
+                      <?= $usuarioNombre ?>:</strong><br><?= nl2br($ticketText) ?></div>
 
-                  <!-- Mostrar archivo adjunto del usuario -->
                   <?php if (!empty($row['archivo'])): ?>
                     <div class="mt-3">
                       <?php mostrarArchivoBadge($row['archivo'], $row['id']); ?>

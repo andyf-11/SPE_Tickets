@@ -97,11 +97,6 @@ $user_id = $_SESSION['user_id'] ?? 0;
                         <div class="card-body">
                             <div class="chart-container position-relative" style="min-height: 200px;">
                                 <canvas id="priorityChart"></canvas>
-                                <div class="no-data-message text-center text-muted position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center"
-                                    style="display: none; font-weight: 600; font-size: 1.2rem; gap: 0.5rem;">
-                                    <i class="bi bi-info-circle" style="font-size: 2.5rem; color: #6c757d;"></i>
-                                    No hay datos para mostrar.
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -123,11 +118,6 @@ $user_id = $_SESSION['user_id'] ?? 0;
                         <div class="card-body">
                             <div class="chart-container position-relative" style="min-height: 200px;">
                                 <canvas id="problemsChart"></canvas>
-                                <div class="no-data-message text-center text-muted position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center"
-                                    style="display: none; font-weight: 600; font-size: 1.2rem; gap: 0.5rem;">
-                                    <i class="bi bi-info-circle" style="font-size: 2.5rem; color: #6c757d;"></i>
-                                    No hay datos para mostrar.
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -157,11 +147,6 @@ $user_id = $_SESSION['user_id'] ?? 0;
                         <div class="card-body">
                             <div class="chart-container position-relative" style="height: 350px;">
                                 <canvas id="monthlyChart"></canvas>
-                                <div class="no-data-message text-center text-muted position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center"
-                                    style="display: none; font-weight: 600; font-size: 1.2rem; gap: 0.5rem;">
-                                    <i class="bi bi-info-circle" style="font-size: 2.5rem; color: #6c757d;"></i>
-                                    No hay datos para mostrar.
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -186,11 +171,6 @@ $user_id = $_SESSION['user_id'] ?? 0;
                         <div class="card-body">
                             <div class="chart-container position-relative" style="min-height: 200px;">
                                 <canvas id="areasChart"></canvas>
-                                <div class="no-data-message text-center text-muted position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center"
-                                    style="display: none; font-weight: 600; font-size: 1.2rem; gap: 0.5rem;">
-                                    <i class="bi bi-info-circle" style="font-size: 2.5rem; color: #6c757d;"></i>
-                                    No hay datos para mostrar.
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -210,87 +190,35 @@ $user_id = $_SESSION['user_id'] ?? 0;
             });
         });
 
+        // Helper para obtener datos
         function fetchData(type, callback) {
             fetch(`charts_data.php?type=${type}`)
-                .then((res) => res.json())
-                .then((data) => callback(data))
-                .catch((err) => console.error(err));
+                .then(res => res.json())
+                .then(data => callback(data))
+                .catch(err => console.error(err));
         }
 
-        // Obtener datos de resumen - CORREGIDA LA RUTA
+        // Datos resumen
         fetch("tickets-data.php")
-            .then((res) => res.json())
-            .then((data) => {
-                console.log("Datos recibidos:", data); // Para depuración
-                
-                // Verificar si hay error
-                if (data.error) {
-                    console.error("Error en datos:", data.message);
-                    return;
-                }
-                
-                document.getElementById("openTicketsCount").textContent =
-                    data.openTickets || "0";
-                document.getElementById("closedTicketsCount").textContent =
-                    data.closedTickets || "0";
-                document.getElementById("activeUsersCount").textContent =
-                    data.activeUsers || "0";
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("openTicketsCount").textContent = data.openTickets || "0";
+                document.getElementById("closedTicketsCount").textContent = data.closedTickets || "0";
+                document.getElementById("activeUsersCount").textContent = data.activeUsers || "0";
             })
-            .catch((err) => {
-                console.error("Error fetching data:", err);
-                // Establecer valores por defecto en caso de error
-                document.getElementById("openTicketsCount").textContent = "0";
-                document.getElementById("closedTicketsCount").textContent = "0";
-                document.getElementById("activeUsersCount").textContent = "0";
-            });
+            .catch(err => console.error(err));
 
-
-        // Helper para mostrar/ocultar mensaje y canvas según datos
-        function toggleNoDataMessage(container, data) {
-            const noDataMsg = container.querySelector(".no-data-message");
-            const canvas = container.querySelector("canvas");
-            
-            // Verificar si no hay datos o todos los valores son cero
-            if (!data || data.length === 0 || data.every(item => {
-                // Verificar si todas las propiedades numéricas son cero
-                return Object.values(item).every(value => {
-                    const num = Number(value);
-                    return !isNaN(num) && num === 0;
-                });
-            })) {
-                noDataMsg.style.display = "flex";
-                canvas.style.display = "none";
-                return false;
-            } else {
-                noDataMsg.style.display = "none";
-                canvas.style.display = "block";
-                return true;
-            }
-        }
-
-        // Chart: Prioridad
+        // Gráficos
         fetchData("priority", (data) => {
-            const container = document.querySelector("#priorityChart").parentElement;
-            if (!toggleNoDataMessage(container, data)) return;
-
             new Chart(document.getElementById("priorityChart"), {
                 type: "pie",
                 data: {
-                    labels: data.map((d) => d.priority),
-                    datasets: [
-                        {
-                            data: data.map((d) => d.total),
-                            backgroundColor: [
-                                "#FF6384",
-                                "#36A2EB",
-                                "#FFCE56",
-                                "#4BC0C0",
-                                "#9966FF",
-                                "#FF9F40",
-                            ],
-                            borderWidth: 0,
-                        },
-                    ],
+                    labels: data.map(d => d.priority),
+                    datasets: [{
+                        data: data.map(d => d.total),
+                        backgroundColor: ["#FF6384","#36A2EB","#FFCE56","#4BC0C0","#9966FF","#FF9F40"],
+                        borderWidth: 0
+                    }]
                 },
                 options: {
                     responsive: true,
@@ -298,136 +226,75 @@ $user_id = $_SESSION['user_id'] ?? 0;
                     plugins: {
                         legend: {
                             position: "right",
-                            labels: {
-                                padding: 20,
-                                usePointStyle: true,
-                                pointStyle: "circle",
-                            },
-                        },
+                            labels: { padding: 20, usePointStyle: true, pointStyle: "circle" }
+                        }
                     },
-                    cutout: "60%",
-                },
+                    cutout: "60%"
+                }
             });
         });
 
-        // Chart: Problemas
         fetchData("problems", (data) => {
-            const container = document.querySelector("#problemsChart").parentElement;
-            if (!toggleNoDataMessage(container, data)) return;
-
             new Chart(document.getElementById("problemsChart"), {
                 type: "bar",
                 data: {
-                    labels: data.map((d) => d.subject),
-                    datasets: [
-                        {
-                            label: "Cantidad",
-                            data: data.map((d) => d.total),
-                            backgroundColor: "#FF5733",
-                            borderRadius: 6,
-                            borderWidth: 0,
-                        },
-                    ],
+                    labels: data.map(d => d.subject),
+                    datasets: [{ label: "Cantidad", data: data.map(d => d.total), backgroundColor: "#FF5733", borderRadius: 6, borderWidth: 0 }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                drawBorder: false,
-                            },
-                        },
-                        x: {
-                            grid: {
-                                display: false,
-                            },
-                        },
+                        y: { beginAtZero: true, grid: { drawBorder: false } },
+                        x: { grid: { display: false } }
                     },
-                    plugins: {
-                        legend: {
-                            display: false,
-                        },
-                    },
-                },
+                    plugins: { legend: { display: false } }
+                }
             });
         });
 
-        // Chart: Conteo mensual
         fetchData("monthly_count", (data) => {
-            const container = document.querySelector("#monthlyChart").parentElement;
-            if (!toggleNoDataMessage(container, data)) return;
-
             new Chart(document.getElementById("monthlyChart"), {
                 type: "line",
                 data: {
-                    labels: data.map((d) => d.fecha),
-                    datasets: [
-                        {
-                            label: "Tickets por Día",
-                            data: data.map((d) => d.total),
-                            borderColor: "#28A745",
-                            backgroundColor: "rgba(40, 167, 69, 0.1)",
-                            borderWidth: 3,
-                            tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: "#fff",
-                            pointBorderColor: "#28A745",
-                            pointBorderWidth: 2,
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                        },
-                    ],
+                    labels: data.map(d => d.fecha),
+                    datasets: [{
+                        label: "Tickets por Día",
+                        data: data.map(d => d.total),
+                        borderColor: "#28A745",
+                        backgroundColor: "rgba(40, 167, 69, 0.1)",
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: "#fff",
+                        pointBorderColor: "#28A745",
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                drawBorder: false,
-                            },
-                        },
-                        x: {
-                            grid: {
-                                display: false,
-                            },
-                        },
+                        y: { beginAtZero: true, grid: { drawBorder: false } },
+                        x: { grid: { display: false } }
                     },
-                    plugins: {
-                        legend: {
-                            display: false,
-                        },
-                    },
-                },
+                    plugins: { legend: { display: false } }
+                }
             });
         });
 
-        // Chart: Áreas
         fetchData("areas", (data) => {
-            const container = document.querySelector("#areasChart").parentElement;
-            if (!toggleNoDataMessage(container, data)) return;
-
             new Chart(document.getElementById("areasChart"), {
                 type: "doughnut",
                 data: {
-                    labels: data.map((d) => d.area),
-                    datasets: [
-                        {
-                            data: data.map((d) => d.total),
-                            backgroundColor: [
-                                "#FFC107",
-                                "#17A2B8",
-                                "#6F42C1",
-                                "#FD7E14",
-                                "#20C997",
-                                "#DC3545",
-                            ],
-                            borderWidth: 0,
-                        },
-                    ],
+                    labels: data.map(d => d.area),
+                    datasets: [{
+                        data: data.map(d => d.total),
+                        backgroundColor: ["#FFC107","#17A2B8","#6F42C1","#FD7E14","#20C997","#DC3545"],
+                        borderWidth: 0
+                    }]
                 },
                 options: {
                     responsive: true,
@@ -435,15 +302,11 @@ $user_id = $_SESSION['user_id'] ?? 0;
                     plugins: {
                         legend: {
                             position: "right",
-                            labels: {
-                                padding: 20,
-                                usePointStyle: true,
-                                pointStyle: "circle",
-                            },
-                        },
+                            labels: { padding: 20, usePointStyle: true, pointStyle: "circle" }
+                        }
                     },
-                    cutout: "60%",
-                },
+                    cutout: "60%"
+                }
             });
         });
     </script>

@@ -161,6 +161,35 @@
      margin-bottom: 2rem;
  }
 
+ .no-data-message {
+     display: none;
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     font-weight: 600;
+     font-size: 1.2rem;
+     gap: 0.5rem;
+     flex-direction: column;
+     align-items: center;
+     z-index: 10;
+ }
+
+ .no-data-message i {
+     font-size: 2.5rem;
+     color: #6c757d;
+ }
+
+ .chart-container {
+     position: relative;
+     min-height: 200px;
+ }
+
+ .chart-container canvas {
+     width: 100% !important;
+     height: 100% !important;
+ }
+
  @media (max-width: 768px) {
      .chart-container {
          height: 250px;

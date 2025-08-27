@@ -129,3 +129,74 @@ function sendPasswordChangedNotification($toEmail, $toName) {
         return false;
     }
 }
+
+function sendRoleNotification($toEmail, $toName, $role, $subject, $message) {
+    global $mail_host, $mail_port, $mail_username, $mail_password, $mail_encryption, $mail_from, $mail_from_name;
+
+    $mail = new PHPMailer(true);
+
+    try {
+        $mail->isSMTP();
+        $mail->Host = $mail_host;
+        $mail->SMTPAuth = true;
+        $mail->Username = $mail_username;
+        $mail->Password = $mail_password;
+        $mail->SMTPSecure = $mail_encryption;
+        $mail->Port = $mail_port;
+
+        $mail->setFrom($mail_from, $mail_from_name);
+        $mail->addAddress($toEmail, $toName);
+
+        $mail->isHTML(true);
+
+        // Personalización según rol
+        switch ($role) {
+            case 'admin':
+                $mail->Subject = "🔔 [Admin] $subject";
+                $mail->Body = "
+                    <h3>Hola $toName,</h3>
+                    <p>$message</p>
+                    <p><b>Rol:</b> Administrador</p>
+                ";
+                break;
+
+            case 'supervisor':
+                $mail->Subject = "📊 [Supervisor] $subject";
+                $mail->Body = "
+                    <h3>Hola $toName,</h3>
+                    <p>$message</p>
+                    <p><b>Rol:</b> Supervisor</p>
+                ";
+                break;
+
+            case 'tecnico':
+                $mail->Subject = "🛠 [Técnico] $subject";
+                $mail->Body = "
+                    <h3>Hola $toName,</h3>
+                    <p>$message</p>
+                    <p><b>Rol:</b> Técnico</p>
+                ";
+                break;
+
+            case 'usuario':
+                $mail->Subject = "📌 [Usuario] $subject";
+                $mail->Body = "
+                    <h3>Hola $toName,</h3>
+                    <p>$message</p>
+                    <p><b>Rol:</b> Usuario</p>
+                ";
+                break;
+
+            default:
+                $mail->Subject = $subject;
+                $mail->Body = $message;
+        }
+
+        $mail->send();
+        return true;
+
+    } catch (Exception $e) {
+        error_log("Error al enviar notificación de $role: " . $mail->ErrorInfo);
+        return false;
+    }
+}

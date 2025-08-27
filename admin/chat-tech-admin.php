@@ -39,7 +39,7 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="../styles/tickets/chat-tech-admin_(admin).css" rel="stylesheet">
+    <link href="../styles/admin/chat-tech-admin-admin.css?v=1" rel="stylesheet">
 </head>
 
 <body class="bg-light">

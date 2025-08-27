@@ -1,66 +1,154 @@
-:root {
-    --primary-color: #04b3c3;
-    --secondary-color: #6c757d;
-}
+    /* Mejoras visuales */
+    .ticket-card {
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
 
-.ticket-card {
-    border-radius: 10px;
-    border: none;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    margin-bottom: 1.5rem;
-}
+    .ticket-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
 
-.ticket-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
+    .accordion-button {
+        padding: 1.25rem 1.5rem;
+        background-color: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+    }
 
-.accordion-button:not(.collapsed) {
-    background-color: rgba(98, 64, 212, 0.05);
-    color: var(--primary-color);
-}
+    .accordion-button:not(.collapsed) {
+        background-color: #f8f9ff;
+        color: #0d6efd;
+        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+    }
 
-.accordion-button:focus {
-    box-shadow: none;
-    border-color: rgba(98, 64, 212, 0.25);
-}
-
-.status-badge {
-    min-width: 90px;
-    font-weight: 500;
-}
-
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-}
-
-.response-card {
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-top: 1rem;
-}
-
-.response-header {
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.breadcrumb {
-    background-color: transparent;
-    padding: 0.5rem 0;
-}
-
-@media (max-width: 768px) {
     .ticket-header {
-        flex-direction: column;
-        align-items: flex-start !important;
+        align-items: center;
+    }
+
+    .ticket-subject {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.1rem;
     }
 
     .ticket-meta {
-        margin-top: 0.5rem;
+        gap: 0.75rem;
     }
-}
+
+    .badge {
+        font-weight: 500;
+        padding: 0.5em 0.8em;
+    }
+
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .ticket-content {
+        background: linear-gradient(to bottom, #f8f9fa, #f0f4f8);
+        border-radius: 10px;
+        border-left: 4px solid #0d6efd;
+        padding: 1.25rem;
+    }
+
+    .response-card {
+        background: linear-gradient(to right, #f8f9ff, #ffffff);
+        border-radius: 10px;
+        border-left: 4px solid #04b3c3;
+        padding: 1.25rem;
+        margin-top: 1.25rem;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    .response-header {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .response-text {
+        color: #495057;
+        line-height: 1.6;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+
+    .bg-primary {
+        background-color: #0d6efd !important;
+    }
+
+    .bg-warning {
+        background-color: #ffc107 !important;
+    }
+
+    .bg-success {
+        background-color: #198754 !important;
+    }
+
+    .bg-secondary {
+        background-color: #6c757d !important;
+    }
+
+    .bg-info {
+        background-color: #0dcaf0 !important;
+    }
+
+    .bg-dark {
+        background-color: #2c3e50 !important;
+    }
+
+    .breadcrumb-item a {
+        color: #0d6efd;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .breadcrumb-item a:hover {
+        color: #0a58ca;
+    }
+
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        opacity: 0.3;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 767px) {
+        #leftbar {
+            position: relative;
+            top: 0;
+            width: 100%;
+            height: auto;
+        }
+
+        main.main-content {
+            margin-left: 0;
+            padding: 1rem;
+        }
+
+        .ticket-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 0.75rem;
+        }
+
+        .ticket-meta {
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .accordion-button {
+            padding: 1rem;
+        }
+    }
