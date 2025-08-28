@@ -39,8 +39,8 @@ $unreadNotifications = $stmt->fetchColumn();
       </a>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="user-options">
         <li>
-          <a class="dropdown-item d-flex justify-content-between align-items-center"
-            href="../assets/data/notifications.php">
+          <a class="dropdown-item d-flex justify-content-between align-items-center" href="https://mail.google.com/"
+            target="_blank">
             <span><i class="fa fa-bell"></i>&nbsp;&nbsp;Notificaciones</span>
             <span id="noti-count" class="badge bg-danger ms-2 <?= $unreadNotifications > 0 ? '' : 'd-none' ?>">
               <?= $unreadNotifications ?>

@@ -109,13 +109,13 @@
         </li>
         <li class="nav-item">
           <a href="change-password.php"
-            class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= ($page == 'chat-list') ? 'active bg-primary text-white shadow-sm' : 'text-dark hover-bg-light'; ?>">
+            class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= ($page == 'change-password') ? 'active bg-primary text-white shadow-sm' : 'text-dark hover-bg-light'; ?>">
             <div
               class="icon-wrapper <?= ($page == 'change-password') ? 'bg-white text-primary' : 'bg-primary bg-opacity-10 text-primary'; ?> rounded-2 p-2 me-3">
               <i class="fas fa-lock fs-6"></i>
             </div>
             <span class="flex-grow-1">Cambiar Contraseña</span>
-            <?php if ($page == 'chat-list'): ?>
+            <?php if ($page == 'change-password'): ?>
               <i class="fas fa-chevron-right fa-xs ms-2"></i>
             <?php endif; ?>
           </a>
@@ -168,14 +168,33 @@
     transition: all 0.3s ease;
   }
 
+  /* Correcciones para el responsive */
   .offcanvas-md {
     position: fixed;
     height: 100vh;
     top: 0;
     left: 0;
-    z-index: 1040;
+    z-index: 1045; /* Aumentado para evitar superposición */
   }
 
+  /* Mejoras para el backdrop */
+  .offcanvas-backdrop {
+    z-index: 1040; /* Aseguramos que esté detrás del sidebar */
+  }
+
+  /* Corrección para dispositivos móviles */
+  @media (max-width: 767.98px) {
+    .offcanvas-md {
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .offcanvas-md:not(.show) {
+      transform: translateX(-100%) !important;
+      visibility: hidden;
+    }
+  }
+
+  /* Estilos para escritorio */
   @media (min-width: 768px) {
     .offcanvas-md {
       position: sticky;
@@ -183,10 +202,26 @@
       visibility: visible !important;
       height: calc(100vh - 43px);
       top: 43px;
+      z-index: 1020; /* Valor adecuado para escritorio */
     }
 
     .offcanvas-backdrop {
       display: none !important;
     }
+    
+    /* Aseguramos que el contenido principal no se vea afectado */
+    main.content {
+      margin-left: 250px;
+      width: calc(100% - 250px);
+    }
+  }
+
+  /* Botón de menú mejorado para móviles */
+  .btn.btn-primary.d-md-none {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1030;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
   }
 </style>

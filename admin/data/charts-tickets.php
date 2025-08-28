@@ -135,9 +135,6 @@ $user_id = $_SESSION['user_id'] ?? 0;
                                 <span class="fw-semibold">Evolución de Tickets (Mes Actual)</span>
                             </div>
                             <div>
-                                <button class="btn btn-sm btn-outline-light rounded-pill me-2">
-                                    <i class="bi bi-download me-1"></i> Exportar
-                                </button>
                                 <button class="btn btn-sm btn-outline-light rounded-pill" data-bs-toggle="tooltip"
                                     title="Tickets creados por día en el mes actual">
                                     <i class="bi bi-info-circle"></i>

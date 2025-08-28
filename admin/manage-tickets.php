@@ -186,7 +186,7 @@ if (isset($_POST['update'])) {
 
                   $priorityBadgeClass = 'secondary';
                   switch ($priority) {
-                      case 'Urgente-(Problema Funcional)': $priorityBadgeClass = 'danger'; break;
+                      case 'Urgente': $priorityBadgeClass = 'danger'; break;
                       case 'Importante': $priorityBadgeClass = 'warning text-dark'; break;
                       case 'No-Urgente': $priorityBadgeClass = 'info'; break;
                       case 'Pregunta': $priorityBadgeClass = 'light text-dark'; break;

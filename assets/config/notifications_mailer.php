@@ -35,8 +35,41 @@ function notifyUser($pdo, $user_id, $role, $subject, $message) {
 }
 
 function notificarRespuestaTicket($ticketId, $idUsuario) {
+    global $pdo;
+
     $titulo = "Nueva respuesta en ticket #$ticketId";
     $mensaje = "Tu ticket <strong>#$ticketId</strong> ha recibido una nueva respuesta. Ingresa al sistema para revisarla.";
+    $link = "/usuario/ver_ticket.php?id=" . $ticketId;
 
-    notifyUser($GLOBALS['pdo'], $idUsuario, 'usuario', $titulo, $mensaje);
+    // 1️⃣ Guardar notificación en DB
+    $stmt = $pdo->prepare("
+        INSERT INTO notifications (user_id, type, message, link, is_read, created_at)
+        VALUES (:user_id, :type, :message, :link, 0, NOW())
+    ");
+    $stmt->execute([
+        ':user_id' => $idUsuario,
+        ':type' => 'respuesta_ticket',
+        ':message' => $mensaje,
+        ':link' => $link
+    ]);
+
+    // 2️⃣ Enviar correo
+    notifyUser($pdo, $idUsuario, 'usuario', $titulo, $mensaje);
+
+    // 3️⃣ Emitir notificación por WebSocket a tu endpoint Node.js
+    $data = [
+        'mensaje' => strip_tags($mensaje), // mejor enviar sin HTML
+        'role' => 'usuario',               // opcional, según tu server.js
+        'usuarioId' => $idUsuario
+    ];
+
+    $ch = curl_init("http://localhost:3000/notificar");
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    // $response contiene { success: true } si todo salió bien
 }

@@ -154,7 +154,7 @@ if ($filtro !== 'todos') {
 
                                                 $priorityBadgeClass = 'secondary';
                                                 switch ($priority) {
-                                                    case 'Urgente-(Problema Funcional)':
+                                                    case 'Urgente':
                                                         $priorityBadgeClass = 'danger';
                                                         break;
                                                     case 'Importante':
