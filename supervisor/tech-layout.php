@@ -127,7 +127,7 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </ol>
           </nav>
         </div>
-      
+
       </div>
 
       <div class="card shadow-sm border-0">
@@ -170,15 +170,14 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td class="text-end pe-4">
                       <div class="d-flex gap-2 justify-content-end">
                         <button class="btn btn-sm btn-action btn-outline-primary rounded-circle" data-bs-toggle="modal"
-                          data-bs-target="#modal-tech" data-id="<?= $tecnico_id ?>">
+                          data-bs-target="#modal-tech" data-id="<?= $tecnico['id'] ?>">
                           <i class="fas fa-eye fa-xs"></i>
                         </button>
-                        <button class="btn btn-sm btn-action btn-outline-secondary rounded-circle">
+                        <a href="tech-data/edit-user.php?id=<?= $tecnico['id'] ?>"
+                          class="btn btn-sm btn-action btn-outline-secondary rounded-circle">
                           <i class="fas fa-edit fa-xs"></i>
-                        </button>
-                        <button class="btn btn-sm btn-action btn-outline-danger rounded-circle">
-                          <i class="fas fa-trash-alt fa-xs"></i>
-                        </button>
+                        </a>
+
                       </div>
                     </td>
                   </tr>
@@ -197,32 +196,32 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <script>
     var modalTecnico = document.getElementById('modal-tech');
 
-modalTecnico.addEventListener('show.bs.modal', function (event) {
-  var button = event.relatedTarget; // botón que abrió el modal
-  var tecnicoId = button.getAttribute('data-id');
+    modalTecnico.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget; // botón que abrió el modal
+      var tecnicoId = button.getAttribute('data-id');
 
-  fetch('/supervisor/tech-data/get_tecnico_info.php?id=' + tecnicoId)
-    .then(res => res.json())
-    .then(data => {
-      if(data.error){
-        // Opcional: muestra mensaje o limpia campos
-        modalTecnico.querySelector('#nombreTecnico').textContent = 'No disponible';
-        modalTecnico.querySelector('#emailTecnico').textContent = '-';
-        modalTecnico.querySelector('#telefonoTecnico').textContent = '-';
-        modalTecnico.querySelector('#edificioTecnico').textContent = '-';
-        return;
-      }
-      modalTecnico.querySelector('#nombreTecnico').textContent = data.name || '-';
-      modalTecnico.querySelector('#emailTecnico').textContent = data.email || '-';
-      modalTecnico.querySelector('#telefonoTecnico').textContent = data.mobile || '-';
-      modalTecnico.querySelector('#edificioTecnico').textContent = data.edificio_id || '-';
-    })
-    .catch(err => {
-      console.error('Error al cargar técnico:', err);
+      fetch('tech-data/get-tech-info.php?id=' + tecnicoId)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            // Opcional: muestra mensaje o limpia campos
+            modalTecnico.querySelector('#nombreTecnico').textContent = 'No disponible';
+            modalTecnico.querySelector('#emailTecnico').textContent = '-';
+            modalTecnico.querySelector('#telefonoTecnico').textContent = '-';
+            modalTecnico.querySelector('#edificioTecnico').textContent = '-';
+            return;
+          }
+          modalTecnico.querySelector('#nombreTecnico').textContent = data.name || '-';
+          modalTecnico.querySelector('#emailTecnico').textContent = data.email || '-';
+          modalTecnico.querySelector('#telefonoTecnico').textContent = data.mobile || '-';
+          modalTecnico.querySelector('#edificioTecnico').textContent = data.edificio_id || '-';
+        })
+        .catch(err => {
+          console.error('Error al cargar técnico:', err);
+        });
     });
-});
 
-</script>
+  </script>
 
 </body>
 

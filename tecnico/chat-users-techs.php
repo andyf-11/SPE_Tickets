@@ -37,95 +37,11 @@ $chatAbierto = ($chat['status_chat'] === 'abierto');
   <title>Chat Técnico - Usuario</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <style>
-    body {
-      background: #BE93C5;
-      /* fallback for old browsers */
-      background: -webkit-linear-gradient(to left, #7BC6CC, #BE93C5);
-      /* Chrome 10-25, Safari 5.1-6 */
-      background: linear-gradient(to left, #7BC6CC, #BE93C5);
-      /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
-    }
-
-    .chat-container {
-      max-width: 800px;
-      margin: 0 auto;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .chat-header {
-      background-color: #4e73df;
-      color: white;
-      border-top-left-radius: 10px;
-      border-top-right-radius: 10px;
-      padding: 15px 20px;
-    }
-
-    .chat-messages {
-      height: 400px;
-      overflow-y: auto;
-      background-color: #f8f9fc;
-      padding: 20px;
-    }
-
-    .message {
-      margin-bottom: 15px;
-      max-width: 80%;
-      padding: 10px 15px;
-      border-radius: 15px;
-      position: relative;
-    }
-
-    .message-user {
-      background-color: #e3f2fd;
-      margin-left: auto;
-      border-bottom-right-radius: 5px;
-    }
-
-    .message-tech {
-      background-color: #ffffff;
-      border: 1px solid #e0e0e0;
-      border-bottom-left-radius: 5px;
-    }
-
-    .message-time {
-      font-size: 0.75rem;
-      color: #6c757d;
-      margin-top: 5px;
-      display: block;
-    }
-
-    .message-sender {
-      font-weight: 600;
-      margin-bottom: 5px;
-      color: #4e73df;
-    }
-
-    .chat-input {
-      border-top: 1px solid #e0e0e0;
-      padding: 15px;
-      background-color: #ffffff;
-      border-bottom-left-radius: 10px;
-      border-bottom-right-radius: 10px;
-    }
-
-    .btn-send {
-      background-color: #4e73df;
-      border: none;
-    }
-
-    .btn-send:hover {
-      background-color: #3a5bbf;
-    }
-
-    .status-badge {
-      font-size: 0.9rem;
-      padding: 5px 10px;
-    }
-  </style>
+  <link href="../styles/tecnico/chat-users-techs.css" rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -203,7 +119,7 @@ $chatAbierto = ($chat['status_chat'] === 'abierto');
       // ⚠️ CORRECTO para técnico:
       const fixedTipoChat = "usuario"; // así lo interpreta el server.js, no poner 'tecnico'
 
-      socket.emit('joinRoom', chatId);
+      socket.emit('joinRoom', 'chat_${chatId}');
 
       socket.on("newMessage", (data) => {
         if (data.chat_id != chatId || data.tipo_chat !== fixedTipoChat) return;

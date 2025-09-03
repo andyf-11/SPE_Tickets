@@ -32,65 +32,86 @@ $mensajes = $stmt->fetchAll();
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat con Técnico</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
+  <link href="../styles/usuario/chat-users-techs.css" rel="stylesheet">
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <style>
-    #chat-messages {
-      height: 400px;
-      overflow-y: auto;
-      background-color: #f8f9fa;
-      border: 1px solid #ddd;
-      padding: 10px;
-      border-radius: 5px;
-    }
-
-    .mensaje-tecnico {
-      text-align: right;
-      color: #0d6efd;
-    }
-
-    .mensaje-usuario {
-      text-align: left;
-      color: #212529;
-    }
-  </style>
 </head>
 
 <body class="bg-light">
   <div class="container py-4">
-    <div class="card shadow-sm">
-      <div class="card-header bg-primary text-white">
-        Chat con el Técnico: <?= htmlspecialchars($tecnico['name']); ?>
-      </div>
-      <div class="card-body">
-        <div id="chat-messages">
-          <?php if ($mensajes): ?>
-            <?php foreach ($mensajes as $msg): ?>
-              <div class="<?= $msg['sender'] === 'usuario' ? 'mensaje-usuario' : 'mensaje-tecnico'; ?> mb-2">
-                <strong><?= htmlspecialchars(ucfirst($msg['sender'])) ?>:</strong>
-                <div><?= nl2br(htmlspecialchars($msg['message'])) ?></div>
-                <small class="text-muted"><?= $msg['timestamp'] ?></small>
-              </div>
-            <?php endforeach; ?>
-          <?php else: ?>
-            <p class="text-muted">No hay mensajes aún.</p>
-          <?php endif; ?>
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-xl-8">
+        <div class="d-flex align-items-center mb-4">
+          <a href="chat-list-tech.php" class="btn btn-primary back-btn me-3">
+            <i class="bi bi-arrow-left"></i>
+          </a>
+          <h4 class="mb-0" style="color: white;">Chat con técnico</h4>
         </div>
 
-        <?php if ($chat['status_chat'] === 'abierto'): ?>
-          <form id="formMensaje" class="mt-3">
-            <div class="input-group">
-              <input type="text" id="mensajeInput" class="form-control" placeholder="Escribe tu mensaje..." required
-                autocomplete="off">
-              <button type="submit" class="btn btn-primary">Enviar</button>
+        <div class="chat-container bg-white">
+          <div class="chat-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <div class="bg-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                style="width: 40px; height: 40px;">
+                <i class="bi bi-person-fill-gear text-primary"></i>
+              </div>
+              <div>
+                <h5 class="mb-0"><?= htmlspecialchars($tecnico['name']); ?></h5>
+                <small class="opacity-75">Técnico de soporte</small>
+              </div>
             </div>
-          </form>
-        <?php else: ?>
-          <div class="alert alert-secondary mt-3">Este chat está cerrado.</div>
-        <?php endif; ?>
+            <span class="status-badge badge bg-<?= $chat['status_chat'] === 'abierto' ? 'success' : 'secondary'; ?>">
+              <?= ucfirst($chat['status_chat']); ?>
+            </span>
+          </div>
 
-        <a href="chat-list-tech.php" class="btn btn-secondary mt-3">Volver a Chats</a>
+          <div class="chat-messages" id="chat-messages">
+            <?php if ($mensajes): ?>
+              <?php foreach ($mensajes as $msg): ?>
+                <div
+                  class="message d-flex <?= $msg['sender'] === 'usuario' ? 'message-user user-message' : 'message-tech tech-message'; ?>">
+                  <div>
+                    <div class="message-content">
+                      <?= nl2br(htmlspecialchars($msg['message'])) ?>
+                    </div>
+                    <div class="message-time text-end">
+                      <?= date('H:i', strtotime($msg['timestamp'])) ?>
+                    </div>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <div class="text-center text-muted py-5">
+                <i class="bi bi-chat-dots display-4 d-block mb-3"></i>
+                <p>No hay mensajes aún.<br>Inicia la conversación con el técnico.</p>
+              </div>
+            <?php endif; ?>
+          </div>
+
+          <?php if ($chat['status_chat'] === 'abierto'): ?>
+            <div class="chat-input-container">
+              <form id="formMensaje" class="d-flex">
+                <input type="text" id="mensajeInput" class="form-control rounded-end-0"
+                  placeholder="Escribe tu mensaje..." required autocomplete="off">
+                <button type="submit" class="btn btn-primary btn-send">
+                  <i class="bi bi-send-fill"></i>
+                </button>
+              </form>
+            </div>
+          <?php else: ?>
+            <div class="chat-input-container text-center py-4">
+              <div class="alert alert-secondary mb-0">
+                <i class="bi bi-chat-square-text"></i> Este chat está cerrado. No puedes enviar mensajes.
+              </div>
+            </div>
+          <?php endif; ?>
+        </div>
       </div>
     </div>
   </div>
@@ -103,20 +124,42 @@ $mensajes = $stmt->fetchAll();
       const sender = "usuario";
       const chatMessages = document.getElementById("chat-messages");
 
-      socket.emit("joinRoom", chatId);
+      socket.emit("joinRoom", 'chat_${chatId}');
 
       socket.on("newMessage", (data) => {
         if (data.chat_id != chatId || data.tipo_chat !== "usuario") return;
 
-        const div = document.createElement("div");
-        div.classList.add("mb-2");
-        div.classList.add(data.sender === 'usuario' ? 'mensaje-usuario' : 'mensaje-tecnico');
-        div.innerHTML = `
-          <strong>${data.sender.charAt(0).toUpperCase() + data.sender.slice(1)}:</strong>
-          <div>${data.mensaje}</div>
-          <small class="text-muted">${new Date(data.timestamp).toLocaleString()}</small>
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message", "d-flex");
+
+        if (data.sender === 'usuario') {
+          messageDiv.classList.add("message-user", "user-message");
+        } else {
+          messageDiv.classList.add("message-tech", "tech-message");
+        }
+
+        const now = new Date(data.timestamp);
+        const timeString = now.getHours().toString().padStart(2, '0') + ':' +
+          now.getMinutes().toString().padStart(2, '0');
+
+        messageDiv.innerHTML = `
+          <div>
+            <div class="message-content">
+              ${data.mensaje}
+            </div>
+            <div class="message-time text-end">
+              ${timeString}
+            </div>
+          </div>
         `;
-        chatMessages.appendChild(div);
+
+        // Remove empty state if it exists
+        const emptyState = chatMessages.querySelector('.text-center');
+        if (emptyState) {
+          emptyState.remove();
+        }
+
+        chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       });
 
@@ -137,6 +180,9 @@ $mensajes = $stmt->fetchAll();
 
         mensajeInput.value = "";
       });
+
+      // Auto-scroll to bottom on load
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     });
   </script>
 

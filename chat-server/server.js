@@ -132,24 +132,34 @@ io.on('connection', (socket) => {
 // ENDPOINTS EXTERNOS PARA PHP
 // =========================
 app.post('/notificar', (req, res) => {
-  const { mensaje, role, usuarioId } = req.body;
+  const { mensaje, role, usuarioId, link } = req.body;
 
   if (!mensaje) {
     return res.status(400).json({ error: "Mensaje requerido" });
   }
 
+  // Asegurarse de que los valores estén definidos y seguros
+  const payload = {
+    mensaje,
+    role: role || null,
+    usuarioId: usuarioId || null,
+    link: typeof link === 'string' ? link : '#',
+    timestamp: new Date().toISOString()
+  };
+
+  // Emitir según usuario, rol o global
   if (usuarioId) {
+    io.to(`user_${usuarioId}`).emit('receiveNotification', payload);
     console.log(`📣 Emitiendo notificación a user_${usuarioId}: ${mensaje}`);
-    io.to(`user_${usuarioId}`).emit('receiveNotification', { mensaje, role });
   } else if (role) {
+    io.to(`role_${role}`).emit('receiveNotification', payload);
     console.log(`📣 Emitiendo notificación a role_${role}: ${mensaje}`);
-    io.to(`role_${role}`).emit('receiveNotification', { mensaje, role });
   } else {
+    io.emit('receiveNotification', payload);
     console.log(`📣 Emitiendo notificación global: ${mensaje}`);
-    io.emit('receiveNotification', { mensaje });
   }
 
-  res.json({ success: true });
+  res.json({ success: true, payload });
 });
 
 

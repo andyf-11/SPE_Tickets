@@ -11,38 +11,38 @@ $filtro = $_GET['filtro'] ?? 'todos';
 
 // Guardar respuesta del admin sin sobrescribir
 if (isset($_POST['update'])) {
-    $adminremark = trim($_POST['aremark']);
-    $fid = intval($_POST['frm_id']);
+  $adminremark = trim($_POST['aremark']);
+  $fid = intval($_POST['frm_id']);
 
-    if (empty($adminremark)) {
-        $error = "Debes escribir una respuesta antes de enviarla.";
+  if (empty($adminremark)) {
+    $error = "Debes escribir una respuesta antes de enviarla.";
+  } else {
+    $stmt = $pdo->prepare("SELECT admin_remark, email_id FROM ticket WHERE id = :id");
+    $stmt->execute([':id' => $fid]);
+    $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($ticket) {
+      $oldRemark = $ticket['admin_remark'];
+      $newRemark = $oldRemark . "\n[" . date("Y-m-d H:i") . "] Admin: " . $adminremark;
+
+      $stmt = $pdo->prepare("UPDATE ticket SET admin_remark = :remark, status = 'Cerrado' WHERE id = :id");
+      $stmt->execute([':remark' => $newRemark, ':id' => $fid]);
+
+      $stmtUser = $pdo->prepare("SELECT id, name FROM user WHERE email = :email LIMIT 1");
+      $stmtUser->execute([':email' => $ticket['email_id']]);
+      $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
+      if ($user) {
+        notificarRespuestaTicket($fid, $user['id']);
+      }
+
+      $_SESSION['ticket_updated'] = true;
+      header("Location: " . $_SERVER["HTTP_REFERER"]);
+      exit;
     } else {
-        $stmt = $pdo->prepare("SELECT admin_remark, email_id FROM ticket WHERE id = :id");
-        $stmt->execute([':id' => $fid]);
-        $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($ticket) {
-            $oldRemark = $ticket['admin_remark'];
-            $newRemark = $oldRemark . "\n[" . date("Y-m-d H:i") . "] Admin: " . $adminremark;
-
-            $stmt = $pdo->prepare("UPDATE ticket SET admin_remark = :remark, status = 'Cerrado' WHERE id = :id");
-            $stmt->execute([':remark' => $newRemark, ':id' => $fid]);
-
-            $stmtUser = $pdo->prepare("SELECT id, name FROM user WHERE email = :email LIMIT 1");
-            $stmtUser->execute([':email' => $ticket['email_id']]);
-            $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
-
-            if ($user) {
-                notificarRespuestaTicket($fid, $user['id']);
-            }
-
-            $_SESSION['ticket_updated'] = true;
-            header("Location: " . $_SERVER["HTTP_REFERER"]);
-            exit;
-        } else {
-            $error = "No se encontró el ticket.";
-        }
+      $error = "No se encontró el ticket.";
     }
+  }
 }
 ?>
 
@@ -146,8 +146,8 @@ if (isset($_POST['update'])) {
         <div class="accordion" id="ticketsAccordion">
           <?php
           try {
-              if ($filtro !== 'todos') {
-                  $stmt = $pdo->prepare("
+            if ($filtro !== 'todos') {
+              $stmt = $pdo->prepare("
                       SELECT t.*, e.name AS edificio_nombre, u.name AS user_name
                       FROM ticket t
                       LEFT JOIN edificios e ON t.edificio_id = e.id
@@ -155,126 +155,140 @@ if (isset($_POST['update'])) {
                       WHERE e.name = :nombreEdificio
                       ORDER BY t.id DESC
                   ");
-                  $stmt->execute(['nombreEdificio' => $filtro]);
-              } else {
-                  $stmt = $pdo->query("
+              $stmt->execute(['nombreEdificio' => $filtro]);
+            } else {
+              $stmt = $pdo->query("
                       SELECT t.*, e.name AS edificio_nombre, u.name AS user_name
                       FROM ticket t
                       LEFT JOIN edificios e ON t.edificio_id = e.id
                       LEFT JOIN user u ON t.email_id = u.email
                       ORDER BY t.id DESC
                   ");
+            }
+
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+              $id = $row['id'];
+              $estado = strtolower($row['status']);
+              $badgeClass = 'status-open';
+              $estadoTexto = 'Abierto';
+              if ($estado === 'en proceso') {
+                $badgeClass = 'status-progress';
+                $estadoTexto = 'En Proceso';
+              } elseif ($estado === 'cerrado') {
+                $badgeClass = 'status-closed';
+                $estadoTexto = 'Cerrado';
               }
 
-              while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                  $id = $row['id'];
-                  $estado = strtolower($row['status']);
-                  $badgeClass = 'status-open';
-                  $estadoTexto = 'Abierto';
-                  if ($estado === 'en proceso') {
-                      $badgeClass = 'status-progress';
-                      $estadoTexto = 'En Proceso';
-                  } elseif ($estado === 'cerrado') {
-                      $badgeClass = 'status-closed';
-                      $estadoTexto = 'Cerrado';
-                  }
+              $edificio = htmlspecialchars($row['edificio_nombre'] ?? 'Sin edificio');
+              $fecha = date('d/m/Y H:i', strtotime($row['posting_date']));
+              $priority = !empty($row['priority']) ? htmlspecialchars($row['priority']) : 'Pendiente de asignación';
+              $userName = htmlspecialchars($row['user_name'] ?? 'Usuario');
 
-                  $edificio = htmlspecialchars($row['edificio_nombre'] ?? 'Sin edificio');
-                  $fecha = date('d/m/Y H:i', strtotime($row['posting_date']));
-                  $priority = !empty($row['priority']) ? htmlspecialchars($row['priority']) : 'Pendiente de asignación';
-                  $userName = htmlspecialchars($row['user_name'] ?? 'Usuario');
-
-                  $priorityBadgeClass = 'secondary';
-                  switch ($priority) {
-                      case 'Urgente': $priorityBadgeClass = 'danger'; break;
-                      case 'Importante': $priorityBadgeClass = 'warning text-dark'; break;
-                      case 'No-Urgente': $priorityBadgeClass = 'info'; break;
-                      case 'Pregunta': $priorityBadgeClass = 'light text-dark'; break;
-                  }
-                  ?>
-                  <div class="ticket-card">
-                      <div class="ticket-header accordion-header <?= $estado === 'cerrado' ? 'bg-light' : '' ?>" id="heading<?= $id ?>">
-                          <button class="accordion-button <?= $estado === 'cerrado' ? 'bg-light' : '' ?> collapsed d-flex justify-content-between align-items-center"
-                              type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?= $id ?>" aria-expanded="false" aria-controls="collapse<?= $id ?>">
-                              <div class="d-flex flex-column flex-md-row align-items-md-center w-100">
-                                  <div class="me-md-4 mb-2 mb-md-0">
-                                      <span class="badge building-badge me-2"><?= $edificio ?></span>
-                                      <span class="badge <?= $badgeClass ?>"><?= $estadoTexto ?></span>
-                                      <span class="badge bg-<?= $priorityBadgeClass ?> ticket-status-badge"><i class="fas fa-flag me-1"></i><?= $priority ?></span>
-                                  </div>
-                                  <div class="flex-grow-1">
-                                      <h5 class="mb-1"><?= htmlspecialchars($row['subject']) ?></h5>
-                                      <div class="d-flex flex-wrap text-muted small">
-                                          <span class="me-3"><i class="far fa-id-card me-1"></i>#<?= htmlspecialchars($row['ticket_id']) ?></span>
-                                          <span><i class="far fa-clock me-1"></i> <?= $fecha ?></span>
-                                      </div>
-                                  </div>
-                              </div>
-                          </button>
+              $priorityBadgeClass = 'secondary';
+              switch ($priority) {
+                case 'Urgente':
+                  $priorityBadgeClass = 'danger';
+                  break;
+                case 'Importante':
+                  $priorityBadgeClass = 'warning text-dark';
+                  break;
+                case 'No-Urgente':
+                  $priorityBadgeClass = 'info';
+                  break;
+                case 'Pregunta':
+                  $priorityBadgeClass = 'light text-dark';
+                  break;
+              }
+              ?>
+              <div class="ticket-card">
+                <div class="ticket-header accordion-header <?= $estado === 'cerrado' ? 'bg-light' : '' ?>"
+                  id="heading<?= $id ?>">
+                  <button
+                    class="accordion-button <?= $estado === 'cerrado' ? 'bg-light' : '' ?> collapsed d-flex justify-content-between align-items-center"
+                    type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?= $id ?>" aria-expanded="false"
+                    aria-controls="collapse<?= $id ?>">
+                    <div class="d-flex flex-column flex-md-row align-items-md-center w-100">
+                      <div class="me-md-4 mb-2 mb-md-0">
+                        <span class="badge building-badge me-2"><?= $edificio ?></span>
+                        <span class="badge <?= $badgeClass ?>"><?= $estadoTexto ?></span>
+                        <span class="badge bg-<?= $priorityBadgeClass ?> ticket-status-badge"><i
+                            class="fas fa-flag me-1"></i><?= $priority ?></span>
                       </div>
-
-                      <div id="collapse<?= $id ?>" class="accordion-collapse collapse" aria-labelledby="heading<?= $id ?>" data-bs-parent="#ticketsAccordion">
-                          <div class="ticket-body">
-                              <div class="message-box">
-                                  <div class="d-flex justify-content-between align-items-center mb-2">
-                                      <h6 class="mb-0 fw-bold text-primary">
-                                          <i class="fas fa-user-circle me-2"></i>Mensaje de <?= $userName ?>
-                                      </h6>
-                                  </div>
-                                  <div class="text-muted"><?= nl2br(htmlspecialchars($row['ticket'])) ?></div>
-                              </div>
-
-                              <?php if (!empty($row['archivo'])): ?>
-                                  <div class="mt-3">
-                                      <?php mostrarArchivoBadge($row['archivo'], $row['ticket_id']); ?>
-                                  </div>
-                              <?php endif; ?>
-
-                              <?php if (!empty($row['tech_remark'])): ?>
-                                  <div class="message-box" style="border-left-color: var(--warning-color);">
-                                      <div class="d-flex justify-content-between align-items-center mb-2">
-                                          <h6 class="mb-0 fw-bold text-warning">
-                                              <i class="fas fa-user-cog me-2"></i>Respuesta del técnico
-                                          </h6>
-                                      </div>
-                                      <div class="text-muted"><?= nl2br(htmlspecialchars($row['tech_remark'])) ?></div>
-                                  </div>
-                              <?php endif; ?>
-
-                              <?php if (!empty($row['admin_remark'])): ?>
-                                  <div class="message-box" style="border-left-color: var(--primary-color);">
-                                      <div class="d-flex justify-content-between align-items-center mb-2">
-                                          <h6 class="mb-0 fw-bold text-primary">
-                                              <i class="fas fa-user-shield me-2"></i>Respuesta del administrador
-                                          </h6>
-                                      </div>
-                                      <div class="text-muted"><?= nl2br(htmlspecialchars($row['admin_remark'])) ?></div>
-                                  </div>
-                              <?php endif; ?>
-
-                              <form method="post" class="needs-validation mt-4" novalidate>
-                                  <div class="mb-3">
-                                      <label for="aremark<?= $id ?>" class="form-label fw-bold">
-                                          <i class="fas fa-reply me-1"></i>Agregar respuesta
-                                      </label>
-                                      <textarea class="form-control" id="aremark<?= $id ?>" name="aremark" rows="4"
-                                          placeholder="Escribe tu respuesta aquí..." required></textarea>
-                                      <div class="invalid-feedback">Por favor ingrese un comentario.</div>
-                                  </div>
-                                  <input type="hidden" name="frm_id" value="<?= $id ?>" />
-                                  <div class="d-flex justify-content-end">
-                                      <button type="submit" name="update" class="btn btn-primary px-4">
-                                          <i class="fas fa-paper-plane me-2"></i>Enviar respuesta
-                                      </button>
-                                  </div>
-                              </form>
-                          </div>
+                      <div class="flex-grow-1">
+                        <h5 class="mb-1"><?= htmlspecialchars($row['subject']) ?></h5>
+                        <div class="d-flex flex-wrap text-muted small">
+                          <span class="me-3"><i
+                              class="far fa-id-card me-1"></i>#<?= htmlspecialchars($row['ticket_id']) ?></span>
+                          <span><i class="far fa-clock me-1"></i> <?= $fecha ?></span>
+                        </div>
                       </div>
+                    </div>
+                  </button>
+                </div>
+
+                <div id="collapse<?= $id ?>" class="accordion-collapse collapse" aria-labelledby="heading<?= $id ?>"
+                  data-bs-parent="#ticketsAccordion">
+                  <div class="ticket-body">
+                    <div class="message-box">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0 fw-bold text-primary">
+                          <i class="fas fa-user-circle me-2"></i>Mensaje de <?= $userName ?>
+                        </h6>
+                      </div>
+                      <div class="text-muted"><?= nl2br(htmlspecialchars($row['ticket'])) ?></div>
+                    </div>
+
+                    <?php if (!empty($row['archivo'])): ?>
+                      <div class="mt-3">
+                        <?php mostrarArchivoBadge($row['archivo'], $row['ticket_id']); ?>
+                      </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($row['tech_remark'])): ?>
+                      <div class="message-box" style="border-left-color: var(--warning-color);">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <h6 class="mb-0 fw-bold text-warning">
+                            <i class="fas fa-user-cog me-2"></i>Respuesta del técnico
+                          </h6>
+                        </div>
+                        <div class="text-muted"><?= nl2br(htmlspecialchars($row['tech_remark'])) ?></div>
+                      </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($row['admin_remark'])): ?>
+                      <div class="message-box" style="border-left-color: var(--primary-color);">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <h6 class="mb-0 fw-bold text-primary">
+                            <i class="fas fa-user-shield me-2"></i>Respuesta del administrador
+                          </h6>
+                        </div>
+                        <div class="text-muted"><?= nl2br(htmlspecialchars($row['admin_remark'])) ?></div>
+                      </div>
+                    <?php endif; ?>
+
+                    <form method="post" class="needs-validation mt-4" novalidate>
+                      <div class="mb-3">
+                        <label for="aremark<?= $id ?>" class="form-label fw-bold">
+                          <i class="fas fa-reply me-1"></i>Agregar respuesta
+                        </label>
+                        <textarea class="form-control" id="aremark<?= $id ?>" name="aremark" rows="4"
+                          placeholder="Escribe tu respuesta aquí..." required></textarea>
+                        <div class="invalid-feedback">Por favor ingrese un comentario.</div>
+                      </div>
+                      <input type="hidden" name="frm_id" value="<?= $id ?>" />
+                      <div class="d-flex justify-content-end">
+                        <button type="submit" name="update" class="btn btn-primary px-4">
+                          <i class="fas fa-paper-plane me-2"></i>Enviar respuesta
+                        </button>
+                      </div>
+                    </form>
                   </div>
-              <?php } ?>
-          <?php
+                </div>
+              </div>
+            <?php } ?>
+            <?php
           } catch (PDOException $e) {
-              echo '<div class="alert alert-danger d-flex align-items-center"><i class="fas fa-exclamation-triangle me-2 fs-4"></i> Error al obtener tickets: ' . htmlspecialchars($e->getMessage()) . '</div>';
+            echo '<div class="alert alert-danger d-flex align-items-center"><i class="fas fa-exclamation-triangle me-2 fs-4"></i> Error al obtener tickets: ' . htmlspecialchars($e->getMessage()) . '</div>';
           }
           ?>
         </div>
@@ -285,20 +299,49 @@ if (isset($_POST['update'])) {
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    (() => {
-      'use strict'
-      const forms = document.querySelectorAll('.needs-validation')
-      Array.from(forms).forEach(form => {
-        form.addEventListener('submit', event => {
-          if (!form.checkValidity()) {
-            event.preventDefault()
-            event.stopPropagation()
-          }
-          form.classList.add('was-validated')
-        }, false)
-      })
-    })()
+    const USER_ID = <?php echo json_encode($_SESSION['user_id']); ?>;
+    const USER_ROLE = <?php echo json_encode($_SESSION['user_role']); ?>;
+
+    // Conectar Socket.IO
+    const socket = io("http://localhost:3000");
+
+    // Unirse a salas de notificación por usuario y rol
+    socket.emit("joinNotificationRoom", { userId: USER_ID, role: USER_ROLE });
+
+    // Escuchar nuevas notificaciones
+    socket.on("receiveNotification", (data) => {
+      console.log("Nueva notificación recibida:", data);
+
+      // Actualizar badge de notificaciones
+      const badge = document.getElementById("noti-count");
+      if (badge) {
+        let current = parseInt(badge.innerText || 0);
+        badge.innerText = current + 1;
+        badge.classList.remove("d-none");
+      } else {
+        const newBadge = document.createElement("span");
+        newBadge.id = "noti-count";
+        newBadge.className = "badge bg-danger ms-2";
+        newBadge.innerText = "1";
+
+        // Agregarlo al contenedor del header
+        const headerIcon = document.querySelector("#header-notifications");
+        if (headerIcon) headerIcon.appendChild(newBadge);
+      }
+
+      // Notificación de escritorio
+      if (Notification.permission === "granted") {
+        new Notification("Nueva notificación", { body: data.mensaje });
+      }
+    });
+
+    // Solicitar permiso para notificaciones de escritorio
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
   </script>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script src="/SPE_Soporte_Tickets/usuario/chat-server/notifications.js"></script>
 </body>
 
 </html>

@@ -37,6 +37,16 @@ INSERT INTO `areas` (name) VALUES
 ('Compras'),
 ('Informatica');
 
+INSERT INTO `areas` (name) VALUES
+('Comunicaciones'),
+('Presupuesto'),
+('Poder Popular'), 
+('UPEG'), 
+('Planificación')
+
+INSERT INTO `areas` (name) VALUES
+('Planilla')
+
 CREATE TABLE `chat_user_tech` (
   `id` int(11) NOT NULL,
   `ticket_id` int(11) NOT NULL,
@@ -102,6 +112,8 @@ CREATE TABLE `notifications` (
   `is_read` tinyint(1) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `notifications` ADD COLUMN `role` VARCHAR(50) NULL AFTER user_id;
 
 INSERT INTO `notifications` VALUES(1, 16, NULL, 'nuevo_ticket', 'Se te ha asignado un nuevo ticket (ID interno: 39).', NULL, 0, '2025-06-24 17:05:00');
 INSERT INTO `notifications` VALUES(2, 8, NULL, 'nuevo_ticket', 'El técnico ha respondido al ticket (ID interno: 39).', NULL, 0, '2025-06-24 17:11:37');

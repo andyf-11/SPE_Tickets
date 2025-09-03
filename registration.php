@@ -33,7 +33,7 @@ $email = '';
 $password = '';
 
 // Obtener lista de edificios
-$stmt = $pdo->query("SELECT id, name FROM edificios ORDER BY name");
+$stmt = $pdo->query("SELECT id, name FROM edificios WHERE name != 'General' ORDER BY name");
 $edificios = $stmt->fetchAll();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -45,13 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $edificio_id = $_POST['edificio_id'] ?? null;
 
   // Validar dominio permitido
-  $allowed_domains = ['@spe.gob.hn', '@gmail.com'];
-  $domain_valid = false;
-  foreach ($allowed_domains as $domain) {
-    if (str_ends_with($email, $domain)) {
-      $domain_valid = true;
-      break;
-    }
+  $allowed_domain = '@spe.gob.hn';
+
+  $errors = [];
+
+  // Validar dominio del correo
+  if (!str_ends_with($email, $allowed_domain)) {
+    $errors[] = "El correo debe ser del dominio $allowed_domain";
   }
 
   if (!$domain_valid) {
@@ -320,6 +320,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
 
       return true;
+
+    
     }
 
     <?php if ($success): ?>

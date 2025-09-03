@@ -34,47 +34,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $archivo_nombre = null;
     $max_size = 100 * 1024 * 1024; //100MB
     $allowed_types = [
-        'pdf'=>'application/pdf','doc'=>'application/msword','docx'=>'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'xls'=>'application/vnd.ms-excel','xlsx'=>'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'jpg'=>'image/jpeg','jpeg'=>'image/jpeg','png'=>'image/png','gif'=>'image/gif','txt'=>'text/plain','zip'=>'application/zip'
+        'pdf' => 'application/pdf',
+        'doc' => 'application/msword',
+        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'xls' => 'application/vnd.ms-excel',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'gif' => 'image/gif',
+        'txt' => 'text/plain',
+        'zip' => 'application/zip'
     ];
 
-    if(isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK){
+    if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK) {
         $archivo_tmp = $_FILES['archivo']['tmp_name'];
-        $archivo_name = preg_replace('/[^A-Za-z0-9._-]/','_', $_FILES['archivo']['name']);
+        $archivo_name = preg_replace('/[^A-Za-z0-9._-]/', '_', $_FILES['archivo']['name']);
         $archivo_size = $_FILES['archivo']['size'];
         $archivo_ext = strtolower(pathinfo($archivo_name, PATHINFO_EXTENSION));
 
-        if($archivo_size > $max_size){
+        if ($archivo_size > $max_size) {
             $error = "El archivo es demasiado grande. Máximo permitido: 100MB";
-        } elseif(!array_key_exists($archivo_ext, $allowed_types)){
+        } elseif (!array_key_exists($archivo_ext, $allowed_types)) {
             $error = "Tipo de archivo no permitido.";
         } else {
-            $archivo_nombre = time().'_'.$archivo_name;
-            $archivo_destino = '../uploads/'.$archivo_nombre;
+            $archivo_nombre = time() . '_' . $archivo_name;
+            $archivo_destino = '../uploads/' . $archivo_nombre;
 
-            if(!is_dir('../uploads')) mkdir('../uploads',0777,true);
+            if (!is_dir('../uploads'))
+                mkdir('../uploads', 0777, true);
 
-            if(!move_uploaded_file($archivo_tmp, $archivo_destino)){
+            if (!move_uploaded_file($archivo_tmp, $archivo_destino)) {
                 $error = "Error al guardar el archivo en el servidor.";
             }
         }
     }
 
-    if(!$subject || !$ticket || !$edificio_id){
+    if (!$subject || !$ticket || !$edificio_id) {
         $error = "Por favor completa todos los campos.";
     }
 
-    if(!$error){
+    if (!$error) {
         $stmt = $pdo->prepare("
             INSERT INTO ticket(ticket_id, email_id, subject, ticket, status, posting_date, edificio_id, archivo) 
             VALUES(:tid, :email, :subject, :ticket, :status, :pdate, :edificio_id, :archivo)
         ");
 
-        if($stmt->execute([
-            ':tid'=>$tid, ':email'=>$email, ':subject'=>$subject, ':ticket'=>$ticket,
-            ':status'=>$st, ':pdate'=>$pdate, ':edificio_id'=>$edificio_id, ':archivo'=>$archivo_nombre
-        ])){
+        if (
+            $stmt->execute([
+                ':tid' => $tid,
+                ':email' => $email,
+                ':subject' => $subject,
+                ':ticket' => $ticket,
+                ':status' => $st,
+                ':pdate' => $pdate,
+                ':edificio_id' => $edificio_id,
+                ':archivo' => $archivo_nombre
+            ])
+        ) {
             notificarCreacionTicket($tid); // helper
             $show_success_toast = true;
             $_POST = [];
@@ -87,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -97,12 +115,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="../styles/user.css" rel="stylesheet">
 
     <style>
-        body { font-family:'Poppins'; background: linear-gradient(to left,#0ED2F7,#B2FEFA); overflow-x:hidden;}
-        #leftbar{position:fixed;top:41px;left:0;width:250px;height:calc(100vh - 41px);background:#fff;border-right:1px solid #dee2e6;overflow-y:auto;}
-        main.main-content{margin-left:250px;padding:2rem;min-height:calc(100vh - 56px);}
-        @media(max-width:767px){#leftbar{position:relative;width:100%;height:auto;} main.main-content{margin-left:0;}}
+        body {
+            font-family: 'Poppins';
+            background: linear-gradient(to left, #0ED2F7, #B2FEFA);
+            overflow-x: hidden;
+        }
+
+        #leftbar {
+            position: fixed;
+            top: 41px;
+            left: 0;
+            width: 250px;
+            height: calc(100vh - 41px);
+            background: #fff;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+        }
+
+        main.main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            min-height: calc(100vh - 56px);
+        }
+
+        @media(max-width:767px) {
+            #leftbar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            main.main-content {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
+
 <body>
     <?php include('header.php'); ?>
     <div id="leftbar"><?php include('leftbar.php'); ?></div>
@@ -115,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <p class="text-muted mb-0">Complete todos los campos para registrar un nuevo ticket de soporte</p>
             </div>
 
-            <?php if(!empty($error)): ?>
+            <?php if (!empty($error)): ?>
                 <div class="alert alert-danger d-flex align-items-center">
                     <i class="fas fa-exclamation-circle me-2"></i><?= htmlspecialchars($error) ?>
                 </div>
@@ -126,16 +175,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <h5 class="section-title"><i class="fas fa-info-circle me-2"></i>Información Básica</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="subject" class="form-label fw-semibold">Asunto <span class="text-danger">*</span></label>
+                            <label for="subject" class="form-label fw-semibold">Asunto <span
+                                    class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="subject" name="subject" required
-                            value="<?= isset($_POST['subject']) ? htmlspecialchars($_POST['subject']) : '' ?>" />
+                                value="<?= isset($_POST['subject']) ? htmlspecialchars($_POST['subject']) : '' ?>" />
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="edificio_id" class="form-label fw-semibold">Edificio/Localización <span class="text-danger">*</span></label>
+                            <label for="edificio_id" class="form-label fw-semibold">Edificio/Localización <span
+                                    class="text-danger">*</span></label>
                             <select class="form-select" id="edificio_id" name="edificio_id" required>
-                                <option value="" disabled <?= empty($_POST['edificio_id'])?'selected':'' ?>>Seleccione un edificio</option>
-                                <?php foreach($edificios as $edificio): ?>
-                                    <option value="<?= $edificio['id'] ?>" <?= (isset($_POST['edificio_id']) && $_POST['edificio_id']==$edificio['id'])?'selected':'' ?>>
+                                <option value="" disabled <?= empty($_POST['edificio_id']) ? 'selected' : '' ?>>Seleccione un
+                                    edificio</option>
+                                <?php foreach ($edificios as $edificio): ?>
+                                    <option value="<?= $edificio['id'] ?>" <?= (isset($_POST['edificio_id']) && $_POST['edificio_id'] == $edificio['id']) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($edificio['name']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -147,24 +199,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="mb-4">
                     <h5 class="section-title"><i class="fas fa-align-left me-2"></i>Descripción Detallada</h5>
                     <div class="mb-3">
-                        <label for="description" class="form-label fw-semibold">Descripción <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="description" name="description" rows="5" required><?= isset($_POST['description'])?htmlspecialchars($_POST['description']):'' ?></textarea>
+                        <label for="description" class="form-label fw-semibold">Descripción <span
+                                class="text-danger">*</span></label>
+                        <textarea class="form-control" id="description" name="description" rows="5"
+                            required><?= isset($_POST['description']) ? htmlspecialchars($_POST['description']) : '' ?></textarea>
                     </div>
                 </div>
 
                 <div class="mb-4">
                     <h5 class="section-title"><i class="fas fa-paperclip me-2"></i>Archivos Adjuntos</h5>
                     <input type="file" id="archivo" name="archivo" style="display:none;">
-                    <button type="button" class="btn btn-outline-primary me-3" id="select-file-btn"><i class="fas fa-upload me-2"></i>Seleccionar archivo</button>
+                    <button type="button" class="btn btn-outline-primary me-3" id="select-file-btn"><i
+                            class="fas fa-upload me-2"></i>Seleccionar archivo</button>
                     <span id="file-display" class="text-muted">Ningún archivo seleccionado
-                        <button type="button" id="remove-file" class="btn btn-sm btn-outline-danger ms-2" style="display:none;"><i class="fas fa-times"></i></button>
+                        <button type="button" id="remove-file" class="btn btn-sm btn-outline-danger ms-2"
+                            style="display:none;"><i class="fas fa-times"></i></button>
                     </span>
                     <div class="form-text">Adjunte archivos relevantes</div>
                 </div>
 
                 <div class="d-flex justify-content-between pt-4 mt-3 border-top">
-                    <button type="reset" class="btn btn-outline-secondary"><i class="fas fa-eraser me-1"></i> Limpiar</button>
-                    <button type="submit" class="btn btn-submit text-white"><i class="fas fa-paper-plane me-1"></i> Enviar Ticket</button>
+                    <button type="reset" class="btn btn-outline-secondary"><i class="fas fa-eraser me-1"></i>
+                        Limpiar</button>
+                    <button type="submit" class="btn btn-submit text-white"><i class="fas fa-paper-plane me-1"></i>
+                        Enviar Ticket</button>
                 </div>
             </form>
         </div>
@@ -183,13 +241,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <?php if($show_success_toast): ?>
+    <?php if ($show_success_toast): ?>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const toastElement = document.getElementById('successToast');
-                const toast = new bootstrap.Toast(toastElement,{animation:true,autohide:true,delay:3000});
+                const toast = new bootstrap.Toast(toastElement, { animation: true, autohide: true, delay: 3000 });
                 toast.show();
-                setTimeout(()=>{window.location.href='user_dashboard.php';},3000);
+                setTimeout(() => { window.location.href = 'dashboard.php'; }, 3000);
             });
         </script>
     <?php endif; ?>
@@ -200,20 +258,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const fileDisplay = document.getElementById('file-display');
         const removeBtn = document.getElementById('remove-file');
 
-        selectBtn.addEventListener('click', ()=>archivoInput.click());
-        archivoInput.addEventListener('change', ()=>{
-            if(archivoInput.files.length>0){
+        selectBtn.addEventListener('click', () => archivoInput.click());
+        archivoInput.addEventListener('change', () => {
+            if (archivoInput.files.length > 0) {
                 fileDisplay.childNodes[0].textContent = archivoInput.files[0].name;
-                removeBtn.style.display='inline-block';
-            }else{
-                fileDisplay.childNodes[0].textContent='Ningún archivo seleccionado';
-                removeBtn.style.display='none';
+                removeBtn.style.display = 'inline-block';
+            } else {
+                fileDisplay.childNodes[0].textContent = 'Ningún archivo seleccionado';
+                removeBtn.style.display = 'none';
             }
         });
-        removeBtn.addEventListener('click', ()=>{
-            archivoInput.value='';
-            fileDisplay.childNodes[0].textContent='Ningún archivo seleccionado';
-            removeBtn.style.display='none';
+        removeBtn.addEventListener('click', () => {
+            archivoInput.value = '';
+            fileDisplay.childNodes[0].textContent = 'Ningún archivo seleccionado';
+            removeBtn.style.display = 'none';
         });
     </script>
 
@@ -225,4 +283,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
     <script src="../chat-server/notifications.js"></script>
 </body>
+
 </html>

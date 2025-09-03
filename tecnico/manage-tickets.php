@@ -88,8 +88,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
         <div class="d-flex justify-content-between align-items-center mb-4">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="t_dashboard.php"><i class="fas fa-home me-1"></i> Inicio</a></li>
-                    <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-ticket-alt me-1"></i> Tickets Asignados</li>
+                    <li class="breadcrumb-item"><a href="t_dashboard.php"><i class="fas fa-home me-1"></i> Inicio</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-ticket-alt me-1"></i>
+                        Tickets Asignados</li>
                 </ol>
             </nav>
             <h3 class="mb-0"><i class="fas fa-ticket me-2"></i>Tickets Asignados</h3>
@@ -172,10 +174,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
                             <div>
                                 <h5 class="mb-2"><?= $subject ?></h5>
                                 <div class="d-flex flex-wrap align-items-center gap-2">
-                                    <span class="text-muted small"><i class="far fa-id-card me-1"></i>Ticket #<?= $ticketId ?></span>
-                                    <span class="text-muted small"><i class="far fa-calendar-alt me-1"></i><?= $postingDate ?></span>
-                                    <span class="badge badge-status <?= ($status === 'Cerrado') ? 'badge-cerrado' : 'badge-en-proceso'; ?>">
-                                        <i class="fas fa-<?= ($status === 'Cerrado') ? 'lock' : 'spinner'; ?> me-1"></i><?= $status ?>
+                                    <span class="text-muted small"><i class="far fa-id-card me-1"></i>Ticket
+                                        #<?= $ticketId ?></span>
+                                    <span class="text-muted small"><i
+                                            class="far fa-calendar-alt me-1"></i><?= $postingDate ?></span>
+                                    <span
+                                        class="badge badge-status <?= ($status === 'Cerrado') ? 'badge-cerrado' : 'badge-en-proceso'; ?>">
+                                        <i
+                                            class="fas fa-<?= ($status === 'Cerrado') ? 'lock' : 'spinner'; ?> me-1"></i><?= $status ?>
                                     </span>
                                     <span class="badge <?= $priorityBadgeClass ?>">
                                         <i class="fas fa-flag me-1"></i><?= $priority ?>
@@ -189,9 +195,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
                             </div>
                             <div class="d-flex align-items-center gap-2">
                                 <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse"
-                                  data-bs-target="#ticketDetails<?= $id ?>" aria-expanded="false" aria-controls="ticketDetails<?= $id ?>">
-                                  <i class="fas fa-<?= ($status === 'Cerrado') ? 'eye' : 'edit'; ?> me-1"></i>
-                                  <?= ($status === 'Cerrado') ? 'Ver Detalles' : 'Responder' ?>
+                                    data-bs-target="#ticketDetails<?= $id ?>" aria-expanded="false"
+                                    aria-controls="ticketDetails<?= $id ?>">
+                                    <i class="fas fa-<?= ($status === 'Cerrado') ? 'eye' : 'edit'; ?> me-1"></i>
+                                    <?= ($status === 'Cerrado') ? 'Ver Detalles' : 'Responder' ?>
                                 </button>
 
                                 <?php if ($status === 'Cerrado'): ?>
@@ -219,7 +226,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
                             <div class="d-flex align-items-start mb-4">
                                 <img src="../assets/img/user.png" alt="Usuario" class="user-avatar me-3 rounded-circle" />
                                 <div>
-                                    <div class="ticket-text mb-3"><strong>Mensaje de <?= $usuarioNombre ?>:</strong><br><?= nl2br($ticketText) ?></div>
+                                    <div class="ticket-text mb-3"><strong>Mensaje de
+                                            <?= $usuarioNombre ?>:</strong><br><?= nl2br($ticketText) ?></div>
 
                                     <?php if (!empty($row['archivo'])): ?>
                                         <div class="mt-3">
@@ -237,8 +245,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
                                     </h6>
                                     <div class="alert alert-light border">
                                         <div class="d-flex align-items-start">
-                                            <img src="../assets/img/Logo-Gobierno_small.png" alt="Técnico" class="user-avatar me-3 rounded-circle"
-                                              style="width: 35px; height: 35px;" />
+                                            <img src="../assets/img/Logo-Gobierno_small.png" alt="Técnico"
+                                                class="user-avatar me-3 rounded-circle" style="width: 35px; height: 35px;" />
                                             <div>
                                                 <?= nl2br($adminRemark) ?>
                                                 <div class="text-muted small mt-2">
@@ -255,15 +263,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
                                     </h6>
                                     <div class="mb-3">
                                         <textarea class="form-control" id="aremark<?= $id ?>" name="aremark" rows="5"
-                                          placeholder="Escribe tu respuesta aquí..." required><?= htmlspecialchars($adminRemark) ?></textarea>
+                                            placeholder="Escribe tu respuesta aquí..."
+                                            required><?= htmlspecialchars($adminRemark) ?></textarea>
                                         <div class="invalid-feedback">Por favor ingrese un comentario.</div>
                                     </div>
                                     <input type="hidden" name="frm_id" value="<?= $id ?>" />
                                     <div class="d-flex justify-content-end gap-2">
                                         <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse"
-                                          data-bs-target="#ticketDetails<?= $id ?>">Cancelar</button>
+                                            data-bs-target="#ticketDetails<?= $id ?>">Cancelar</button>
                                         <button type="submit" name="update" class="btn btn-primary">
-                                          <i class="fas fa-paper-plane me-1"></i> Enviar y Cerrar Ticket
+                                            <i class="fas fa-paper-plane me-1"></i> Enviar y Cerrar Ticket
                                         </button>
                                     </div>
                                 </form>
@@ -300,8 +309,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
         })();
     </script>
 
-    <!-- 🔔 Incluimos el sistema de notificaciones en tiempo real -->
-    <?php include('../chat-server/notifications.php'); ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const USER_ID = <?php echo json_encode($_SESSION['user_id']); ?>;
+        const USER_ROLE = <?php echo json_encode($_SESSION['user_role']); ?>;
 
+        // Conectar Socket.IO
+        const socket = io("http://localhost:3000");
+
+        // Unirse a salas de notificación por usuario y rol
+        socket.emit("joinNotificationRoom", { userId: USER_ID, role: USER_ROLE });
+
+        // Escuchar nuevas notificaciones
+        socket.on("receiveNotification", (data) => {
+            console.log("Nueva notificación recibida:", data);
+
+            // Actualizar badge de notificaciones
+            const badge = document.getElementById("noti-count");
+            if (badge) {
+                let current = parseInt(badge.innerText || 0);
+                badge.innerText = current + 1;
+                badge.classList.remove("d-none");
+            } else {
+                const newBadge = document.createElement("span");
+                newBadge.id = "noti-count";
+                newBadge.className = "badge bg-danger ms-2";
+                newBadge.innerText = "1";
+
+                // Agregarlo al contenedor del header
+                const headerIcon = document.querySelector("#header-notifications");
+                if (headerIcon) headerIcon.appendChild(newBadge);
+            }
+
+            // Notificación de escritorio
+            if (Notification.permission === "granted") {
+                new Notification("Nueva notificación", { body: data.mensaje });
+            }
+        });
+
+        // Solicitar permiso para notificaciones de escritorio
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+    </script>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="/SPE_Soporte_Tickets/usuario/chat-server/notifications.js"></script>
 </body>
+
 </html>

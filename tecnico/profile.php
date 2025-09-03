@@ -85,7 +85,7 @@ if (!empty($row['edificio_id'])) {
 
     #leftbar {
       position: fixed;
-      top: 41px;
+      top: 56px;
       left: 0;
       width: 250px;
       height: calc(100vh - 41px);
@@ -157,7 +157,7 @@ if (!empty($row['edificio_id'])) {
           <!-- Tarjeta de perfil -->
           <div class="profile-card mb-4">
             <div class="profile-header d-flex align-items-center">
-              <img src="assets/img/user.png" alt="Avatar" class="profile-avatar rounded-circle me-3">
+              <img src="../assets/img/user.png" alt="Avatar" class="profile-avatar rounded-circle me-3">
               <div>
                 <h3 class="mb-1"><?= htmlspecialchars($row['name']) ?></h3>
                 <p class="mb-0 text-light"><?= htmlspecialchars($row['email']) ?></p>

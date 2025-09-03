@@ -4,7 +4,7 @@ if (session_status() == PHP_SESSION_NONE)
 require_once 'dbconnection.php';
 
 $userId = $_SESSION['user_id'] ?? 0;
-$role = $_SESSION['user_role'] ?? '';
+$userRole = $_SESSION['user_role'] ?? '';
 
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
 $stmt->execute([$userId]);
@@ -43,13 +43,12 @@ $unreadNotifications = $stmt->fetchColumn();
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userOptionsDropdown">
               <li>
                 <a class="dropdown-item d-flex justify-content-between align-items-center"
-                  href="https://mail.google.com/" target="_blank">
+                  href="notifications.php">
                   <span><i class="fa fa-bell"></i>&nbsp;&nbsp;Notificaciones</span>
                   <span id="noti-count" class="badge bg-danger ms-2 <?= $unreadNotifications > 0 ? '' : 'd-none' ?>">
                     <?= $unreadNotifications ?>
                   </span>
                 </a>
-
               </li>
               <li>
                 <hr class="dropdown-divider">
@@ -69,27 +68,21 @@ $unreadNotifications = $stmt->fetchColumn();
 </nav>
 <!-- END HEADER -->
 
-<!-- Script de notificaciones Socket.IO -->
-<script>
-  const userId = <?= json_encode($userId) ?>;
-  const role = <?= json_encode($userRole) ?>;
-</script>
-<script src="../chat-server/notifications.js"></script>
-
-<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<!-- Socket.IO y notificaciones -->
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 <script>
   const USER_ID = <?= json_encode($userId) ?>;
-  const USER_ROLE = <?= json_encode($userRole) ?>;
+  const USER_ROLE = <?= json_encode($role) ?>;
   const socket = io("http://localhost:3000");
 
-  socket.emit("joinRoom", {
-    userId: USER_ID,
-    role: USER_ROLE
-  });
+  // Unirse a salas de notificación por usuario y rol
+  socket.emit("joinNotificationRoom", { userId: USER_ID, role: USER_ROLE });
 
-  socket.on("nuevaNotificacion", (data) => {
+  // Escuchar nuevas notificaciones
+  socket.on("receiveNotification", (data) => {
+    console.log("Nueva notificación recibida:", data);
+
     const badge = document.getElementById("noti-count");
-
     if (badge) {
       let current = parseInt(badge.innerText || 0);
       badge.innerText = current + 1;
@@ -101,7 +94,17 @@ $unreadNotifications = $stmt->fetchColumn();
       newBadge.innerText = "1";
 
       const link = document.querySelector("a[href*='notifications.php']");
-      link.appendChild(newBadge);
+      if (link) link.appendChild(newBadge);
+    }
+
+    // Notificación de escritorio opcional
+    if (Notification.permission === "granted") {
+      new Notification("Nueva notificación", { body: data.mensaje });
     }
   });
+
+  // Solicitar permiso para notificaciones de escritorio
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
 </script>

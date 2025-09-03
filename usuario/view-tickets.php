@@ -157,7 +157,7 @@ $page = 'view-tickets';
                   data-bs-parent="#ticketAccordion">
                   <div class="accordion-body pt-3">
                     <div class="d-flex mb-3">
-                      <img src="/SPE_Soporte_Tickets/assets/img/user.png" alt="Usuario" class="user-avatar rounded-circle me-3 shadow-sm">
+                      <img src="/SPE_Soporte_Tickets/assets/img/user.png" alt="Usuario" class="user-avatar rounded-circle me-3 shadow-sm" style="width: 35px; height: 35px;">
                       <div class="flex-grow-1">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                           <h6 class="mb-0 fw-bold text-dark"><?= $_SESSION['user_name'] ?? 'Usuario' ?></h6>
@@ -177,7 +177,7 @@ $page = 'view-tickets';
                   <?php if (!empty($row['tech_remark'])): ?>
                     <div class="response-card">
                       <div class="d-flex">
-                        <img src="/SPE_Soporte_Tickets/assets/img/Logo-Gobierno_small.png" alt="Técnico" class="user-avatar rounded-circle me-3 shadow-sm">
+                        <img src="/SPE_Soporte_Tickets/assets/img/Logo-Gobierno_small.png" alt="Técnico" class="user-avatar rounded-circle me-3 shadow-sm" style="width: 35px; height: 35px; object-fit: cover;">
                         <div class="flex-grow-1">
                           <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="response-header mb-0">
@@ -243,12 +243,49 @@ $page = 'view-tickets';
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
-    const role = <?php echo json_encode($_SESSION['user_role']); ?>;
-  </script>
+  const USER_ID = <?php echo json_encode($_SESSION['user_id']); ?>;
+  const USER_ROLE = <?php echo json_encode($_SESSION['user_role']); ?>;
+
+  // Conectar Socket.IO
+  const socket = io("http://localhost:3000");
+
+  // Unirse a salas de notificación por usuario y rol
+  socket.emit("joinNotificationRoom", { userId: USER_ID, role: USER_ROLE });
+
+  // Escuchar nuevas notificaciones
+  socket.on("receiveNotification", (data) => {
+    console.log("Nueva notificación recibida:", data);
+
+    // Actualizar badge de notificaciones
+    const badge = document.getElementById("noti-count");
+    if (badge) {
+      let current = parseInt(badge.innerText || 0);
+      badge.innerText = current + 1;
+      badge.classList.remove("d-none");
+    } else {
+      const newBadge = document.createElement("span");
+      newBadge.id = "noti-count";
+      newBadge.className = "badge bg-danger ms-2";
+      newBadge.innerText = "1";
+
+      // Agregarlo al contenedor del header
+      const headerIcon = document.querySelector("#header-notifications");
+      if (headerIcon) headerIcon.appendChild(newBadge);
+    }
+
+    // Notificación de escritorio
+    if (Notification.permission === "granted") {
+      new Notification("Nueva notificación", { body: data.mensaje });
+    }
+  });
+
+  // Solicitar permiso para notificaciones de escritorio
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+</script>
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
   <script src="/SPE_Soporte_Tickets/usuario/chat-server/notifications.js"></script>
-
 </body>
 
 </html>

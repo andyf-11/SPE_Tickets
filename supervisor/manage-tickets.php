@@ -189,7 +189,8 @@ if ($filtro !== 'todos') {
                                         <div class="d-flex align-items-start mb-3">
                                             <img src="../assets/img/user.png" alt="Usuario"
                                                 class="user-avatar me-3 rounded-circle" />
-                                            <div class="ticket-text"><strong>Mensaje de <?= $usuarioNombre ?>:</strong><br><?= $ticketText; ?></div>
+                                            <div class="ticket-text"><strong>Mensaje de
+                                                    <?= $usuarioNombre ?>:</strong><br><?= $ticketText; ?></div>
 
                                         </div>
 
@@ -238,11 +239,49 @@ if ($filtro !== 'todos') {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const userId = <?= json_encode($_SESSION['user_id']); ?>;
-        const role = <?= json_encode($_SESSION['user_role']); ?>;
+        const USER_ID = <?php echo json_encode($_SESSION['user_id']); ?>;
+        const USER_ROLE = <?php echo json_encode($_SESSION['user_role']); ?>;
+
+        // Conectar Socket.IO
+        const socket = io("http://localhost:3000");
+
+        // Unirse a salas de notificación por usuario y rol
+        socket.emit("joinNotificationRoom", { userId: USER_ID, role: USER_ROLE });
+
+        // Escuchar nuevas notificaciones
+        socket.on("receiveNotification", (data) => {
+            console.log("Nueva notificación recibida:", data);
+
+            // Actualizar badge de notificaciones
+            const badge = document.getElementById("noti-count");
+            if (badge) {
+                let current = parseInt(badge.innerText || 0);
+                badge.innerText = current + 1;
+                badge.classList.remove("d-none");
+            } else {
+                const newBadge = document.createElement("span");
+                newBadge.id = "noti-count";
+                newBadge.className = "badge bg-danger ms-2";
+                newBadge.innerText = "1";
+
+                // Agregarlo al contenedor del header
+                const headerIcon = document.querySelector("#header-notifications");
+                if (headerIcon) headerIcon.appendChild(newBadge);
+            }
+
+            // Notificación de escritorio
+            if (Notification.permission === "granted") {
+                new Notification("Nueva notificación", { body: data.mensaje });
+            }
+        });
+
+        // Solicitar permiso para notificaciones de escritorio
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
     </script>
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-    <script src="../chat-server/notifications.js"></script>
+    <script src="/SPE_Soporte_Tickets/usuario/chat-server/notifications.js"></script>
 </body>
 
 </html>

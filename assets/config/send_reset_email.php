@@ -108,9 +108,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         
         .btn-block {
-            display: block;
-            width: 100%;
+            display: inline-block;  /* en lugar de block */
+            width: auto;            /* que se ajuste al contenido */
+            margin: 0 auto;         /* lo centra */
         }
+
         
         @media (max-width: 576px) {
             .card {

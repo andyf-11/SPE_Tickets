@@ -4,7 +4,10 @@ require_once '../dbconnection.php';
 $id =intval($_GET['id'] ?? 0);
 
 if ($id > 0) {
-    $stmt = $pdo->prepare("SELECT name, email, mobile, edificio_id FROM user WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT u.name, u.email, u.mobile, e.name AS edificio
+        FROM user u
+        LEFT JOIN edificios e ON u.edificio_id = e.id
+        WHERE u.id = ?");
     $stmt->execute([$id]);
     $tecnico = $stmt->fetch(PDO::FETCH_ASSOC);
 

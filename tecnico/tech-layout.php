@@ -5,7 +5,13 @@ include("checklogin.php");
 check_login("tecnico");
 
 // Obtener todos los técnicos y cantidad de tickets asignados
-$stmt = $pdo->prepare("SELECT u.id, u.name, u.mobile, u.email, COUNT(t.id) AS tickets_asignados FROM user u LEFT JOIN ticket t ON u.id = t.assigned_to WHERE u.role = 'tecnico' GROUP BY u.id, u.name, u.mobile, u.email");
+$stmt = $pdo->prepare("
+    SELECT u.id, u.name, u.mobile, u.email, COUNT(t.id) AS tickets_asignados
+    FROM user u
+    LEFT JOIN ticket t ON u.id = t.assigned_to
+    WHERE u.role = 'tecnico'
+    GROUP BY u.id, u.name, u.mobile, u.email
+");
 $stmt->execute();
 $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -22,6 +28,21 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="../styles/roles-layouts/tech-layout.css" rel="stylesheet" />
 
+  <style>
+    /* Avatar de inicial */
+    .tech-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #0d6efd;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      font-size: 1rem;
+    }
+  </style>
 </head>
 
 <body>
@@ -70,7 +91,10 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div class="card card-technician mb-3">
             <div class="card-body">
               <div class="d-flex align-items-start gap-3 mb-3">
-                <img src="../assets/img/tech.png" alt="Técnico" class="technician-avatar">
+                <!-- Avatar con inicial -->
+                <div class="tech-avatar">
+                  <?= strtoupper(substr($tecnico['name'], 0, 1)) ?>
+                </div>
                 <div>
                   <h5 class="card-title mb-1"><?= htmlspecialchars($tecnico['name']) ?></h5>
                   <span class="badge bg-primary rounded-pill">
@@ -110,7 +134,10 @@ $tecnicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <tr>
                   <td>
                     <div class="d-flex align-items-center gap-3">
-                      <img src="../assets/img/tech-avatar.png" alt="Técnico" width="40" height="40" class="rounded-circle">
+                      <!-- Avatar con inicial -->
+                      <div class="tech-avatar">
+                        <?= strtoupper(substr($tecnico['name'], 0, 1)) ?>
+                      </div>
                       <span><?= htmlspecialchars($tecnico['name']) ?></span>
                     </div>
                   </td>
