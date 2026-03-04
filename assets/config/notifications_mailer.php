@@ -39,7 +39,7 @@ function notificarRespuestaTicket($ticketId, $idUsuario) {
 
     $titulo = "Nueva respuesta en ticket #$ticketId";
     $mensaje = "Tu ticket <strong>#$ticketId</strong> ha recibido una nueva respuesta. Ingresa al sistema para revisarla.";
-    $link = "/usuario/ver_ticket.php?id=" . $ticketId;
+    $link = "../../usuario/view_ticket.php?id=" . $ticketId;
 
     // 1️⃣ Guardar notificación en DB
     $stmt = $pdo->prepare("

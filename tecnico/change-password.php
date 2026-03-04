@@ -2,12 +2,12 @@
 session_start();
 require_once("checklogin.php");
 check_login("tecnico");
-require("dbconnection.php");
+require("../dbconnection.php");
+require_once(__DIR__ . "/../assets/config/mailer_config.php");
 
 $email = $_SESSION['login'];
-$DIAS_ESPERA = 180; // Ahora deben pasar 180 días entre cambios
 
-$stmt = $pdo->prepare("SELECT password, password_last_changed FROM user WHERE email = ?");
+$stmt = $pdo->prepare("SELECT name, password, password_last_changed FROM user WHERE email = ?");
 $stmt->execute([$email]);
 $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -15,41 +15,29 @@ if (!$userData) {
     $_SESSION['msg1'] = "Usuario no encontrado.";
     $_SESSION['msg_type'] = "danger";
 } else {
-    $puedeCambiar = true;
-    $diasRestantes = 0;
-
-    if ($userData['password_last_changed']) {
-        $fechaUltimoCambio = new DateTime($userData['password_last_changed']);
-        $hoy = new DateTime();
-        $interval = $fechaUltimoCambio->diff($hoy);
-
-        if ($interval->days < $DIAS_ESPERA) {
-            $diasRestantes = $DIAS_ESPERA - $interval->days;
-            $puedeCambiar = false;
-            $_SESSION['msg1'] = "Ya cambiaste tu contraseña. Puedes volver a cambiarla en $diasRestantes días.";
-            $_SESSION['msg_type'] = "warning";
-        }
-    }
-
+    $puedeCambiar = true; // Ya no hay restricción de días
+    
     if (isset($_POST['change'])) {
-        if (!$puedeCambiar) {
-            $_SESSION['msg1'] = "No puedes cambiar la contraseña aún. Espera $diasRestantes días.";
-            $_SESSION['msg_type'] = "warning";
-        } else {
-            $oldpass = $_POST['oldpass'];
-            $newpass = $_POST['newpass'];
+        $oldpass = $_POST['oldpass'];
+        $newpass = $_POST['newpass'];
 
-            if (password_verify($oldpass, $userData['password'])) {
-                $newHashedPass = password_hash($newpass, PASSWORD_DEFAULT);
-                $update = $pdo->prepare("UPDATE user SET password = ?, password_last_changed = NOW() WHERE email = ?");
-                $update->execute([$newHashedPass, $email]);
+        if (password_verify($oldpass, $userData['password'])) {
+            $newHashedPass = password_hash($newpass, PASSWORD_DEFAULT);
+            $update = $pdo->prepare("UPDATE user SET password = ?, password_last_changed = NOW() WHERE email = ?");
+            if ($update->execute([$newHashedPass, $email])) {
+                
+                // Enviar notificación de cambio de contraseña
+                sendPasswordChangedNotification($email, $userData['name']);
 
-                $_SESSION['msg1'] = "Contraseña cambiada correctamente.";
+                $_SESSION['msg1'] = "Contraseña cambiada correctamente. Hemos enviado un correo de confirmación.";
                 $_SESSION['msg_type'] = "success";
             } else {
-                $_SESSION['msg1'] = "La contraseña actual es incorrecta.";
+                $_SESSION['msg1'] = "Error al actualizar la contraseña.";
                 $_SESSION['msg_type'] = "danger";
             }
+        } else {
+            $_SESSION['msg1'] = "La contraseña actual es incorrecta.";
+            $_SESSION['msg_type'] = "danger";
         }
     }
 }

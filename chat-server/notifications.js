@@ -4,6 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    if (window.location.pathname.includes('notifications.php')) {
+        const badge =document.getElememtById("noti-count");
+        if (badge) {
+            badge.innerText = "0";
+            badge.style.display = "none";
+        }
+    }
+
     function mostrarToast(mensaje) {
         const toast = document.createElement('div');
         toast.textContent = mensaje;

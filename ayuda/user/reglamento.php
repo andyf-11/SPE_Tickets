@@ -20,7 +20,7 @@
                 <hr>
                 <div class="text-center">
                     <p class="mb-2">¿Deseas ver el reglamento completo con más detalles?</p>
-                    <a href="tutorial-completo.php" class="btn btn-info" target="_blank">Ver reglamento
+                    <a href="../../assets/Manual_de_Uso.pdf" class="btn btn-info" download>Ver reglamento
                         completo</a>
                 </div>
             </div>

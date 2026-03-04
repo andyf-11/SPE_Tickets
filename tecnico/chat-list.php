@@ -11,17 +11,17 @@ $page = 'chat-list'; // Para el leftbar activo
 $filtro = $_GET['filtro'] ?? 'todos';
 
 switch ($filtro) {
-    case 'hoy':
-        $condicionFecha = "AND DATE(a.apply_date) = CURDATE()";
-        break;
-    case 'semana':
-        $condicionFecha = "AND a.apply_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
-        break;
-    case 'mes':
-        $condicionFecha = "AND a.apply_date >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)";
-        break;
-    default:
-        $condicionFecha = "";
+  case 'hoy':
+    $condicionFecha = "AND DATE(a.apply_date) = CURDATE()";
+    break;
+  case 'semana':
+    $condicionFecha = "AND a.apply_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
+    break;
+  case 'mes':
+    $condicionFecha = "AND a.apply_date >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)";
+    break;
+  default:
+    $condicionFecha = "";
 }
 
 $sql = "
@@ -109,7 +109,8 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="row">
           <?php foreach ($chats as $chat): ?>
             <div class="col-md-6 col-lg-4 mb-4">
-              <a href="chat-tech-admin.php?apply_id=<?= $chat['apply_id'] ?>&ticket_id=<?= $chat['ticket_id'] ?>" class="text-decoration-none">
+              <a href="chat-tech-admin.php?apply_id=<?= $chat['apply_id'] ?>&ticket_id=<?= $chat['ticket_id'] ?>"
+                class="text-decoration-none">
                 <div class="card chat-card <?= $chat['last_sender'] == 'admin' ? 'unread' : '' ?>">
                   <div class="card-header d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">Ticket #<?= htmlspecialchars($chat['ticket_id']) ?></h6>
@@ -149,7 +150,48 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    window.userId = <?= json_encode($_SESSION['user_id'] ?? 0) ?>;
+    window.role = <?= json_encode($_SESSION['user_role'] ?? '') ?>;
+  </script>
+
+  <script>
+    // Unirse a salas de notificación por usuario y rol
+    socket.emit("joinNotificationRoom", { userId: USER_ID, role: USER_ROLE });
+
+    // Escuchar nuevas notificaciones
+    socket.on("receiveNotification", (data) => {
+      console.log("Nueva notificación recibida:", data);
+
+      // Actualizar badge de notificaciones
+      const badge = document.getElementById("noti-count");
+      if (badge) {
+        let current = parseInt(badge.innerText || 0);
+        badge.innerText = current + 1;
+        badge.classList.remove("d-none");
+      } else {
+        const newBadge = document.createElement("span");
+        newBadge.id = "noti-count";
+        newBadge.className = "badge bg-danger ms-2";
+        newBadge.innerText = "1";
+
+        // Agregarlo al contenedor del header
+        const headerIcon = document.querySelector("#header-notifications");
+        if (headerIcon) headerIcon.appendChild(newBadge);
+      }
+
+      // Notificación de escritorio
+      if (Notification.permission === "granted") {
+        new Notification("Nueva notificación", { body: data.mensaje });
+      }
+    });
+
+    // Solicitar permiso para notificaciones de escritorio
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  </script>
+  <script src="../chat-server/notifications.js"></script>
 </body>
 
 </html>
-

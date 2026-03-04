@@ -50,8 +50,9 @@ $mensajes = $stmt3->fetchAll(PDO::FETCH_ASSOC);
     <title>Chat de Aprobación - Ticket #<?= htmlspecialchars($ticket_id) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <link href="../styles/tech.css" rel="stylesheet">
+    <link href="../styles/tecnico/chat-tech-admin.css" rel="stylesheet">
     <style>
         body {
             background: #BE93C5;
@@ -210,7 +211,7 @@ $mensajes = $stmt3->fetchAll(PDO::FETCH_ASSOC);
                 <form id="formMensaje" class="d-flex align-items-center gap-2">
                     <input type="hidden" name="apply_id" value="<?= $apply_id ?>">
                     <input type="hidden" name="ticket_id" value="<?= $ticket_id ?>">
-                    <input type="hidden" name="emisor" value="tecnico">
+                    <input type="hidden" name="sender" value="tecnico">
                     <textarea id="mensajeInput" name="message" class="form-control" placeholder="Escribe tu mensaje..."
                         rows="1" required autocomplete="off"></textarea>
                     <button type="submit" class="btn btn-send text-white">
@@ -221,25 +222,33 @@ $mensajes = $stmt3->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
+     <script>
+        const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+        const role = <?php echo json_encode($_SESSION['user_role']); ?>;
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const socket = io("http://localhost:3000");
-            const applyId = <?= $apply_id ?>;
-            const sender = "tecnico";
-            const tipoChat = "admin"; // para distinguirlo del otro tipo
 
+            const applyId = <?= intval($apply_id) ?>;
+            const sender = "tecnico";
+            const tipoChat = "admin";
+            const chatMessages = document.getElementById("chatMessages");
+
+            //Unirse a la sala de aprobaciones
             socket.emit("joinRoom", `apply_${applyId}`);
 
-            // Escuchar nuevos mensajes
+            //Escuchar nuevos mensajes
             socket.on("newMessage", (data) => {
+                //Filtros de seguridad
                 if (data.tipo_chat !== "admin" || data.chat_id != applyId) return;
 
-                const chatMessages = document.getElementById("chatMessages");
-                const emptyChat = chatMessages.querySelector('.empty-chat');
+                const emptyChat = chatMessages.querySelector('.empy-chat');
                 if (emptyChat) emptyChat.remove();
 
-                const msgDiv = document.createElement("div");
-                msgDiv.classList.add("message", data.sender === 'tecnico' ? 'message-tech' : 'message-admin');
+                const timeString = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit'});
+
                 msgDiv.innerHTML = `
                     <div class="message-sender ${data.sender === 'tecnico' ? 'tech-sender' : 'admin-sender'}">
                         ${data.sender === 'admin' ? '<i class="fas fa-user-shield"></i>' : ''}
@@ -248,48 +257,67 @@ $mensajes = $stmt3->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     <div>${data.mensaje}</div>
                     <small class="message-time">
-                        <i class="far fa-clock me-1"></i>${new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <i class="far fa-clock me-1"></i>${timeString}
                     </small>
                 `;
+
                 chatMessages.appendChild(msgDiv);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             });
 
-            // Enviar mensaje
-            document.getElementById("formMensaje").addEventListener("submit", function (e) {
-                e.preventDefault();
-                const mensajeInput = document.getElementById("mensajeInput");
-                const mensaje = mensajeInput.value.trim();
-                if (!mensaje) return;
+            //Enviar mensaje
+            const formMensaje = document.getElementById("formMensaje");
+            if (formMensaje) {
+                formMensaje.addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    const mensajeInput = document.getElementById("mensajeInput");
+                    const mensaje = mensajeInput.value.trim();
+                    if (!mensaje) return;
 
-                socket.emit("sendMessage", {
-                    chat_id: applyId,
-                    tipo_chat: "admin",
-                    sender: "tecnico",
-                    mensaje: mensaje
+                    const formData = new FormData();
+                    formData.append('chat_id', applyId);
+                    formData.append('sender', 'tecnico');
+                    formData.append('message', mensaje);
+
+                    fetch('send-message.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            socket.emit("sendMessage", {
+                                chat_id: applyId,
+                                tipo_chat: "admin",
+                                sender: "tecnico",
+                                mensaje: mensaje
+                            });
+                            mensajeInput.value = "";
+                            mensajeInput.style.height = 'auto';
+                        } else {
+                            alert("Error al enviar mensaje: " + data.error);
+                        }
+                    });
                 });
+            }
 
-                mensajeInput.value = "";
-                mensajeInput.focus();
-            });
-
-            // Autoajuste del textarea
+            //Autoajuste del textarea
             const textarea = document.getElementById("mensajeInput");
-            textarea.addEventListener('input', function () {
-                this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
-            });
+            if (textarea) {
+                textarea.addEventListener('input', function () {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+            }
 
-            // Scroll al final del chat al cargar
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            // Scroll al final inicial
+            if (chatMessages) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
         });
     </script>
 
-    <script>
-        const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
-        const role = <?php echo json_encode($_SESSION['user_role']); ?>;
-    </script>
-    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+   
     <script src="../chat-server/notifications.js"></script>
 
 </body>

@@ -179,7 +179,51 @@ $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Variables desde PHP
+  const USER_ID = <?= json_encode($_SESSION['userId'] ?? 0) ?>;
+  const USER_ROLE = <?= json_encode($_SESSION['role'] ?? '') ?>;
+
+  // Inicializar conexión con Socket.IO
+  const socket = io('http://localhost:3000');
+
+  // Unirse a salas de notificación por usuario y rol
+  socket.emit("joinNotificationRoom", { userId: USER_ID, role: USER_ROLE });
+
+  // Escuchar nuevas notificaciones
+  socket.on("receiveNotification", (data) => {
+    console.log("Nueva notificación recibida:", data);
+
+    const badge = document.getElementById("noti-count");
+    if (badge) {
+      let current = parseInt(badge.innerText || 0);
+      badge.innerText = current + 1;
+      badge.classList.remove("d-none");
+    } else {
+      const newBadge = document.createElement("span");
+      newBadge.id = "noti-count";
+      newBadge.className = "badge bg-danger ms-2";
+      newBadge.innerText = "1";
+
+      const headerIcon = document.querySelector("#header-notifications");
+      if (headerIcon) headerIcon.appendChild(newBadge);
+    }
+
+    if (Notification.permission === "granted") {
+      new Notification("Nueva notificación", { body: data.mensaje });
+    }
+  });
+
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+</script>
+
+<script src="../chat-server/notifications.js"></script>
+
 </body>
 
 </html>

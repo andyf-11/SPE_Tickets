@@ -59,7 +59,7 @@ $chats = $stmt->fetchAll();
       </button>
     </div>
 
-    <?php if (count($chats) === 0) : ?>
+    <?php if (count($chats) === 0): ?>
       <div class="card py-5 text-center">
         <div class="card-body">
           <i class="fas fa-comment-slash text-muted mb-3" style="font-size: 3rem;"></i>
@@ -67,14 +67,14 @@ $chats = $stmt->fetchAll();
           <p class="text-muted">Cuando tengas chats activos con usuarios, aparecerán aquí.</p>
         </div>
       </div>
-    <?php else : ?>
+    <?php else: ?>
       <div class="row">
         <div class="col-lg-8">
           <h5 class="mb-3 fw-semibold">Tus conversaciones activas</h5>
           <p class="text-muted small">Selecciona un chat para ver los mensajes y responder al usuario.</p>
 
           <div class="chats-list">
-            <?php foreach ($chats as $chat) : ?>
+            <?php foreach ($chats as $chat): ?>
               <a href="chat-users-techs.php?chat_id=<?= $chat['chat_id']; ?>" class="text-decoration-none mb-3 d-block">
                 <div class="chat-card p-3 <?= $chat['status_chat'] === 'abierto' ? 'border-primary border-2' : '' ?>">
                   <div class="d-flex justify-content-between align-items-center">
@@ -84,8 +84,10 @@ $chats = $stmt->fetchAll();
                         <div class="chat-title"><?= htmlspecialchars($chat['user_name']); ?></div>
                         <div class="chat-subject"><?= htmlspecialchars($chat['titulo']); ?></div>
                         <div class="d-flex align-items-center gap-2 chat-meta text-muted small">
-                          <span><i class="far fa-clock me-1"></i><?= date('d/m/Y H:i', strtotime($chat['init_date'])); ?></span>
-                          <span class="badge <?= $chat['status_chat'] === 'abierto' ? 'badge-open' : 'badge-closed' ?> status-badge">
+                          <span><i
+                              class="far fa-clock me-1"></i><?= date('d/m/Y H:i', strtotime($chat['init_date'])); ?></span>
+                          <span
+                            class="badge <?= $chat['status_chat'] === 'abierto' ? 'badge-open' : 'badge-closed' ?> status-badge">
                             <?= $chat['status_chat'] === 'abierto' ? 'Abierto' : 'Cerrado' ?>
                           </span>
                         </div>
@@ -105,8 +107,10 @@ $chats = $stmt->fetchAll();
               <i class="fas fa-info-circle me-2 text-primary"></i>Información
             </div>
             <div class="card-body small">
-              <p><i class="fas fa-circle text-success me-2"></i><strong>Chats Activos:</strong> esperando tu respuesta.</p>
-              <p><i class="fas fa-circle text-secondary me-2"></i><strong>Chats Cerrados:</strong> no se pueden responder.</p>
+              <p><i class="fas fa-circle text-success me-2"></i><strong>Chats Activos:</strong> esperando tu respuesta.
+              </p>
+              <p><i class="fas fa-circle text-secondary me-2"></i><strong>Chats Cerrados:</strong> no se pueden responder.
+              </p>
               <hr />
               <p><i class="fas fa-question-circle me-2"></i>¿Necesitas ayuda? Contacta al administrador.</p>
             </div>
@@ -117,6 +121,48 @@ $chats = $stmt->fetchAll();
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    window.userId = <?= json_encode($_SESSION['user_id'] ?? 0) ?>;
+    window.role = <?= json_encode($_SESSION['user_role'] ?? '') ?>;
+  </script>
+
+  <script>
+    // Unirse a salas de notificación por usuario y rol
+    socket.emit("joinNotificationRoom", { userId: USER_ID, role: USER_ROLE });
+
+    // Escuchar nuevas notificaciones
+    socket.on("receiveNotification", (data) => {
+      console.log("Nueva notificación recibida:", data);
+
+      // Actualizar badge de notificaciones
+      const badge = document.getElementById("noti-count");
+      if (badge) {
+        let current = parseInt(badge.innerText || 0);
+        badge.innerText = current + 1;
+        badge.classList.remove("d-none");
+      } else {
+        const newBadge = document.createElement("span");
+        newBadge.id = "noti-count";
+        newBadge.className = "badge bg-danger ms-2";
+        newBadge.innerText = "1";
+
+        // Agregarlo al contenedor del header
+        const headerIcon = document.querySelector("#header-notifications");
+        if (headerIcon) headerIcon.appendChild(newBadge);
+      }
+
+      // Notificación de escritorio
+      if (Notification.permission === "granted") {
+        new Notification("Nueva notificación", { body: data.mensaje });
+      }
+    });
+
+    // Solicitar permiso para notificaciones de escritorio
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  </script>
+  <script src="../chat-server/notifications.js"></script>
 </body>
 
 </html>

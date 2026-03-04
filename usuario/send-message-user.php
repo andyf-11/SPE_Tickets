@@ -16,8 +16,25 @@ $chat = $stmt->fetch();
 
 if (!$chat) exit("No autorizado o chat cerrado");
 
-$stmt = $pdo->prepare("INSERT INTO messg_user_tech (chat_id, sender, message) VALUES (?, 'usuario', ?)");
-$stmt->execute([$chat_id, $mensaje]);
+try {
+    $pdo->beginTransaction();
 
-echo "ok";
+    // Inserta mensaje en la BD
+    $stmt = $pdo->prepare("INSERT INTO messg_tech_user (chat_id, sender, message, timestamp) VALUES (?, 'usuario', ?, NOW())");
+    $stmt->execute([$chat_id, $mensaje]);
+
+    //Crea notificación para el técnico
+    $msg_noti = "Un usuario te ha enviado un mensaje";
+    $link = "chat-users-techs.php?chat_id=" . $chat_id;
+
+    $stmtNoti = $pdo->prepare("INSERT INTO notifications (user_id, type, message, link, is_read, created_at) VALUES (?, 'nuevo_mensaje', ?, ?, 0, NOW())");
+    $stmtNoti->execute([$chat['tech_id'], $msg_noti, $link]);
+
+    $pdo->commit();
+    echo json_encode(['success' => true, 'tech_id' => $chat['tech_id']]);
+
+} catch (Exception $e) {
+    $pdo->rollBack();
+    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+}
 ?>

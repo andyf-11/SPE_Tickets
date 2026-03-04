@@ -93,6 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ])
         ) {
             notificarCreacionTicket($tid); // helper
+            $enviar_socket_nuevo_ticket = true;
             $show_success_toast = true;
             $_POST = [];
         } else {
@@ -184,7 +185,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="edificio_id" class="form-label fw-semibold">Edificio/Localización <span
                                     class="text-danger">*</span></label>
                             <select class="form-select" id="edificio_id" name="edificio_id" required>
-                                <option value="" disabled <?= empty($_POST['edificio_id']) ? 'selected' : '' ?>>Seleccione un
+                                <option value="" disabled <?= empty($_POST['edificio_id']) ? 'selected' : '' ?>>
+                                    Seleccione un
                                     edificio</option>
                                 <?php foreach ($edificios as $edificio): ?>
                                     <option value="<?= $edificio['id'] ?>" <?= (isset($_POST['edificio_id']) && $_POST['edificio_id'] == $edificio['id']) ? 'selected' : '' ?>>
@@ -280,6 +282,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script>
         const userId = <?= json_encode($_SESSION['user_id']) ?>;
         const role = <?= json_encode($_SESSION['user_role']) ?>;
+
+        <?php if (isset($enviar_socket_nuevo_ticket) && $enviar_socket_nuevo_ticket): ?>
+            fetch("http://localhost:3000/notificar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    // Mensaje detallado para el Admin
+                    mensaje: "Nuevo ticket #<?= $tid ?> creado por <?= $_SESSION['login'] ?>",
+
+                    // IMPORTANTE: Cambiamos a 'admin' o enviamos a ambos si tu server lo permite
+                    tipo_objetivo: "admin",
+
+                    // El link que usará el admin para ver el ticket
+                    link: "manage_tickets.php?id=<?= $tid ?>"
+                })
+            })
+                .then(() => {
+                    // Opcional: También enviar una copia al supervisor
+                    return fetch("http://localhost:3000/notificar", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            mensaje: "Se ha reportado un nuevo ticket #<?= $tid ?>",
+                            tipo_objetivo: "supervisor",
+                            link: "manage-tickets.php?id=<?= $tid ?>"
+                        })
+                    });
+                })
+                .catch(err => console.log("Error socket:", err));
+        <?php endif; ?>
     </script>
     <script src="../chat-server/notifications.js"></script>
 </body>

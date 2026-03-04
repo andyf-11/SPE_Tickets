@@ -124,34 +124,26 @@ $mensajes = $stmt->fetchAll();
       const sender = "usuario";
       const chatMessages = document.getElementById("chat-messages");
 
-      socket.emit("joinRoom", 'chat_${chatId}');
+      socket.emit("joinRoom", `chat_${chatId}`);
 
       socket.on("newMessage", (data) => {
-        if (data.chat_id != chatId || data.tipo_chat !== "usuario") return;
+        if (data.chat_id != chatId) return;
 
         const messageDiv = document.createElement("div");
-        messageDiv.classList.add("message", "d-flex");
-
-        if (data.sender === 'usuario') {
-          messageDiv.classList.add("message-user", "user-message");
-        } else {
-          messageDiv.classList.add("message-tech", "tech-message");
-        }
+        // En la vista usuario, el 'message-user' suele ser el del lado derecho (el propio)
+        messageDiv.classList.add("message", data.sender === 'usuario' ? 'message-user' : 'message-tech');
 
         const now = new Date(data.timestamp);
         const timeString = now.getHours().toString().padStart(2, '0') + ':' +
           now.getMinutes().toString().padStart(2, '0');
 
         messageDiv.innerHTML = `
-          <div>
-            <div class="message-content">
-              ${data.mensaje}
-            </div>
-            <div class="message-time text-end">
-              ${timeString}
-            </div>
-          </div>
-        `;
+    <div class="message-sender">${data.sender === 'usuario' ? 'Tú' : 'Técnico'}</div>
+    <div>${data.mensaje}</div>
+    <small class="message-time">
+        <i class="far fa-clock me-1"></i>${timeString}
+    </small>
+`;
 
         // Remove empty state if it exists
         const emptyState = chatMessages.querySelector('.text-center');
@@ -171,16 +163,42 @@ $mensajes = $stmt->fetchAll();
         const mensaje = mensajeInput.value.trim();
         if (!mensaje) return;
 
-        socket.emit("sendMessage", {
-          chat_id: chatId,
-          tipo_chat: tipoChat,
-          sender: sender,
-          mensaje: mensaje
-        });
+        const formData = new FormData();
+        formData.append('chat_id', chatId);
+        formData.append('message', mensaje);
 
-        mensajeInput.value = "";
+      
+        fetch('send-message-user.php', {
+          method: 'POST',
+          body: formData
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              socket.emit("sendMessage", {
+                chat_id: chatId,
+                tipo_chat: tipoChat,
+                sender: sender,
+                mensaje: mensaje,
+                timestamp: new Date().toISOString()
+              });
+
+              // 3. Disparar el toast
+              fetch("http://localhost:3000/notificar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  mensaje: "Nuevo mensaje de usuario en chat",
+                  usuarioId: data.tech_id, // ID obtenido del PHP
+                  link: `chat-users-techs.php?chat_id=${chatId}`
+                })
+              });
+
+              mensajeInput.value = "";
+              mensajeInput.focus();
+            }
+          });
       });
-
       // Auto-scroll to bottom on load
       chatMessages.scrollTop = chatMessages.scrollHeight;
     });

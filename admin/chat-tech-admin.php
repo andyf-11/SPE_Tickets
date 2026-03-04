@@ -5,6 +5,9 @@ check_login("admin");
 require("dbconnection.php");
 
 $admin_id = $_SESSION['user_id'] ?? null;
+$userId = $adminId;
+
+$userRole = $_SESSION['user_role'] ?? 'admin';
 
 if (!isset($_GET['apply_id']) || !is_numeric($_GET['apply_id'])) {
     die("ID de solicitud no válido.");
@@ -144,7 +147,8 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
                                 </button>
                             </div>
                             <small class="text-muted">Estado:
-                                <span class="badge status-badge 
+                                <span
+                                    class="badge status-badge 
                                     <?= $solicitud['status'] === 'pendiente' ? 'bg-warning text-dark' :
                                         ($solicitud['status'] === 'aprobado' ? 'bg-success' :
                                             ($solicitud['status'] === 'rechazado' ? 'bg-danger' : 'bg-info text-dark')) ?>">
@@ -159,7 +163,13 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
+        const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
+        const role = <?php echo json_encode($_SESSION['user_role']); ?>;
+    </script>
+
+<script>
         // Auto-scroll al final del chat
         function scrollToBottom() {
             const chatContainer = document.getElementById('chatMessages');
@@ -171,66 +181,42 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
         document.addEventListener('DOMContentLoaded', function () {
             scrollToBottom();
 
-            // Botón para scroll al final
             document.getElementById('scrollToBottom')?.addEventListener('click', scrollToBottom);
 
             const socket = io("http://localhost:3000");
             const applyId = <?= $apply_id ?>;
+            // --- NUEVAS VARIABLES DESDE PHP ---
+            const tecnicoId = <?= $solicitud['tech_id'] ?>; 
+            const ticketRealId = <?= $solicitud['ticket_id'] ?>;
+            // ----------------------------------
+            
             const chatMessages = document.getElementById('chatMessages');
             const messageInput = document.getElementById('message');
             const form = document.getElementById('formMensaje');
 
-            // Unirse a la sala del chat
             const room = `apply_${applyId}`;
             socket.emit("joinRoom", room);
-            console.log("✅ Unido a sala:", room);
 
-            // Escuchar nuevos mensajes
             socket.on("newMessage", (data) => {
-                console.log("📥 Mensaje recibido:", data);
-
-                // Validar que sea para esta sala y tipo admin
-                if (data.tipo_chat !== "admin" || parseInt(data.chat_id) !== applyId) {
-                    console.warn("Mensaje no relevante para esta sala");
-                    return;
-                }
+                if (data.tipo_chat !== "admin" || data.chat_id != applyId) return;
 
                 const emptyChat = chatMessages.querySelector('.empty-chat');
                 if (emptyChat) emptyChat.remove();
 
                 const messageDate = new Date(data.timestamp);
-                const currentDate = messageDate.toISOString().split('T')[0];
-
-                // Verificar si necesitamos añadir un divisor de fecha
-                const lastDivider = chatMessages.lastElementChild;
-                const lastMessageDate = lastDivider?.classList?.contains('message-divider') ?
-                    lastDivider.textContent : null;
-
-                if (!lastMessageDate || lastMessageDate !== messageDate.toLocaleDateString()) {
-                    const divider = document.createElement("div");
-                    divider.className = "message-divider text-center text-muted small my-2";
-                    divider.textContent = messageDate.toLocaleDateString();
-                    chatMessages.appendChild(divider);
-                }
-
                 const wrapper = document.createElement("div");
                 wrapper.className = data.sender === 'admin' ? 'align-self-end' : 'align-self-start';
 
                 wrapper.innerHTML = `
                     <div class="d-flex ${data.sender === 'admin' ? 'flex-row-reverse' : 'flex-row'} align-items-end">
-                        ${data.sender !== 'admin' ? `
-                            <div class="avatar avatar-tech">
-                                <i class="fas fa-user-tie"></i>
-                            </div>` : `
-                            <div class="avatar avatar-admin">
-                                <i class="fas fa-user-shield"></i>
-                            </div>`}
+                        <div class="avatar ${data.sender === 'admin' ? 'avatar-admin' : 'avatar-tech'}">
+                            <i class="fas ${data.sender === 'admin' ? 'fa-user-shield' : 'fa-user-tie'}"></i>
+                        </div>
                         <div>
                             <div class="${data.sender === 'admin' ? 'message-admin' : 'message-tech'} p-3">
                                 <div class="message-content">${data.mensaje}</div>
                                 <small class="message-time">
                                     ${messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    <i class="fas fa-check-circle ms-2" style="font-size: 0.7rem;"></i>
                                 </small>
                             </div>
                         </div>
@@ -241,7 +227,6 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
                 scrollToBottom();
             });
 
-            // Envío de mensajes
             if (form) {
                 form.addEventListener("submit", function (e) {
                     e.preventDefault();
@@ -250,32 +235,45 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
                     const action = e.submitter?.dataset.action || "resuelto";
 
-                    socket.emit("sendMessage", {
-                        chat_id: applyId,
-                        tipo_chat: "admin",
-                        sender: "admin",
-                        mensaje: mensaje
-                    });
+                    const formData = new FormData();
+                    formData.append('apply_id', applyId);
+                    formData.append('message', mensaje); // Corregido: antes decía 'message' (variable inexistente)
+                    formData.append('action', action);
 
-                    messageInput.value = "";
-                    messageInput.focus();
-
-                    // Enviar actualización de estado (opcional)
-                    if (["aprobar", "rechazar", "resuelto"].includes(action)) {
-                        fetch("update-status.php", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/x-www-form-urlencoded"
-                            },
-                            body: `apply_id=${applyId}&action=${action}`
-                        }).then(() => {
-                            location.reload();
+                    fetch('send-message.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        // 1. Emitir al chat para que se vea el mensaje
+                        socket.emit("sendMessage", {
+                            chat_id: applyId,
+                            tipo_chat: "admin",
+                            sender: "admin",
+                            mensaje: mensaje,
+                            timestamp: new Date().toISOString()
                         });
-                    }
+
+                        // 2. Disparar notificación visual al técnico (Toast)
+                        fetch("http://localhost:3000/notificar", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                mensaje: `El Administrador respondió a tu ticket (Estado: ${action})`,
+                                usuarioId: tecnicoId, // Corregido: Variable definida arriba
+                                link: `chat-tech-admin.php?ticket_id=${ticketRealId}` // Corregido
+                            })
+                        });
+
+                        messageInput.value = "";
+                        // Redirigir después de un breve momento para dar tiempo al socket
+                        setTimeout(() => {
+                            location.href = 'chat-list-admin.php?success=1';
+                        }, 500);
+                    });
                 });
             }
 
-            // Autoajuste del textarea
             if (messageInput) {
                 messageInput.addEventListener('input', function () {
                     this.style.height = 'auto';
@@ -284,10 +282,7 @@ $mensajes = $stmt2->fetchAll(PDO::FETCH_ASSOC);
             }
         });
     </script>
-    <script>
-        const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
-        const role = <?php echo json_encode($_SESSION['user_role']); ?>;
-    </script>
+
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
     <script src="../chat-server/notifications.js"></script>
 

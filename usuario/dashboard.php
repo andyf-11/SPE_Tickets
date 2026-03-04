@@ -17,7 +17,11 @@ if (empty($user_email)) {
 }
 
 // Tickets de hoy
-$stmt = $pdo->prepare("SELECT id, subject, posting_date FROM ticket WHERE email_id = ? AND DATE(posting_date) = CURDATE() ORDER BY posting_date DESC LIMIT 5");
+$stmt = $pdo->prepare("SELECT id, subject, posting_date 
+                       FROM ticket 
+                       WHERE email_id = ? 
+                       ORDER BY posting_date DESC 
+                       LIMIT 5");
 $stmt->execute([$user_email]);
 $tickets_today = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -179,36 +183,45 @@ $page = 'dashboard'; // para el leftbar
     </div>
 
     <!-- Tickets de hoy -->
-    <div class="card card-stat">
-      <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 fw-bold">Tickets recientes</h5>
-        <a href="view-tickets.php" class="btn btn-sm btn-outline-primary">
-          Ver todos <i class="fas fa-arrow-right ms-1"></i>
-        </a>
-      </div>
-      <div class="card-body p-0">
-        <?php if (count($tickets_today) === 0): ?>
-          <div class="text-center py-4">
-            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-            <p class="text-muted">No hay tickets creados hoy</p>
-          </div>
-        <?php else: ?>
-          <ul class="list-group list-group-flush">
-            <?php foreach ($tickets_today as $ticket): ?>
-              <li class="list-group-item ticket-item d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="mb-1"><?= htmlspecialchars($ticket['subject']) ?></h6>
-                  <small class="text-muted">ID: <?= $ticket['id'] ?></small>
-                </div>
-                <div class="text-end">
-                  <small class="d-block text-muted"><?= date('H:i', strtotime($ticket['posting_date'])) ?></small>
-                  <span class="badge bg-primary">Nuevo</span>
-                </div>
-              </li>
-            <?php endforeach; ?>
-          </ul>
-        <?php endif; ?>
-      </div>
+   <div class="card card-stat">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0 fw-bold">Tickets recientes</h5> 
+    <a href="view-tickets.php" class="btn btn-sm btn-outline-primary">
+      Ver todos <i class="fas fa-arrow-right ms-1"></i>
+    </a>
+  </div>
+  <div class="card-body p-0">
+    <?php if (count($tickets_today) === 0): ?>
+        <div class="text-center py-4">
+          <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+          <p class="text-muted">No hay tickets recientes</p>
+        </div>
+      <?php else: ?>
+        <ul class="list-group list-group-flush">
+          <?php foreach ($tickets_today as $ticket): ?>
+            <li class="list-group-item ticket-item d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">
+                  <?= htmlspecialchars($ticket['subject']) ?>
+                </h6>
+                <small class="text-muted">ID:
+                  <?= $ticket['id'] ?>
+                </small>
+              </div>
+              <div class="text-end">
+                <small class="d-block text-muted">
+                  <?= (date('Y-m-d') == date('Y-m-d', strtotime($ticket['posting_date'])))
+                    ? date('H:i', strtotime($ticket['posting_date']))
+                    : date('d M', strtotime($ticket['posting_date'])); ?>
+                </small>
+                <span class="badge bg-primary">Nuevo</span>
+              </div>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      <?php endif; ?>
+    </div>
+  </div>
     </div>
   </main>
 

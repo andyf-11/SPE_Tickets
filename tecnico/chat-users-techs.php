@@ -37,7 +37,7 @@ $chatAbierto = ($chat['status_chat'] === 'abierto');
   <title>Chat Técnico - Usuario</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-   <link
+  <link
     href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
     rel="stylesheet">
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -109,87 +109,150 @@ $chatAbierto = ($chat['status_chat'] === 'abierto');
     </div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const socket = io("http://localhost:3000");
-      const chatId = <?= $chat_id ?>;
-      const tipoChat = "usuario"; // Esto era el error antes ❌
-      const sender = "<?= $role ?>";
-
-      // ⚠️ CORRECTO para técnico:
-      const fixedTipoChat = "usuario"; // así lo interpreta el server.js, no poner 'tecnico'
-
-      socket.emit('joinRoom', 'chat_${chatId}');
-
-      socket.on("newMessage", (data) => {
-        if (data.chat_id != chatId || data.tipo_chat !== fixedTipoChat) return;
-
-        const chatMessages = document.getElementById("chatMessages");
-        const noMessages = chatMessages.querySelector('.text-center.text-muted');
-        if (noMessages) noMessages.remove();
-
-        const div = document.createElement("div");
-        div.classList.add("message", data.sender === 'tecnico' ? 'message-tech' : 'message-user');
-        div.innerHTML = `
-        <div class="message-sender">${data.sender === 'tecnico' ? 'Tú' : data.sender.charAt(0).toUpperCase() + data.sender.slice(1)}</div>
-        <div>${data.mensaje}</div>
-        <small class="message-time">
-          <i class="far fa-clock me-1"></i>${new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </small>
-      `;
-        chatMessages.appendChild(div);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      });
-
-      const form = document.getElementById("formMensaje");
-      const mensajeInput = document.getElementById("mensajeInput");
-
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
-        const mensaje = mensajeInput.value.trim();
-        if (!mensaje) return;
-
-        socket.emit("sendMessage", {
-          chat_id: chatId,
-          tipo_chat: fixedTipoChat,
-          sender: sender,
-          mensaje: mensaje
-        });
-
-        mensajeInput.value = "";
-        mensajeInput.focus();
-      });
-
-      const btnCerrarChat = document.getElementById('btnCerrarChat');
-      if (btnCerrarChat) {
-        btnCerrarChat.addEventListener('click', function () {
-          if (!confirm("¿Estás seguro de que deseas cerrar este chat? No podrás enviar más mensajes.")) return;
-
-          fetch('close-chat-user.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'chat_id=<?= $chat_id ?>'
-          })
-            .then(response => response.text())
-            .then(data => {
-              alert(data);
-              location.reload();
-            })
-            .catch(() => alert('Error al cerrar el chat.'));
-        });
-      }
-
-      // Auto-scroll to bottom on load
-      const chatMessages = document.getElementById("chatMessages");
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    });
-  </script>
-
-  <script>
+    <script>
     const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
     const role = <?php echo json_encode($_SESSION['user_role']); ?>;
   </script>
-  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Validación de seguridad: Si no hay ID, se detiene el script
+        const chatId = <?= intval($chat_id ?? 0) ?>;
+        if (chatId === 0) {
+            console.warn("⚠️ No se puede iniciar el chat: ID de chat inválido o ausente.");
+            return;
+        }
+
+        const socket = io("http://localhost:3000");
+        const chatMessages = document.getElementById("chatMessages");
+        const tipoChat = "usuario"; 
+        const sender = "tecnico";   
+
+        // Unirse a la sala correcta
+        socket.emit("joinRoom", `chat_${chatId}`);
+
+        // ESCUCHAR mensajes nuevos
+        socket.on("newMessage", (data) => {
+            // Filtro de seguridad por ID de chat
+            if (data.chat_id != chatId) return;
+
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", "d-flex");
+
+            // Lógica de burbujas: Técnico (Tú) a la derecha, Usuario a la izquierda
+            if (data.sender === 'tecnico') {
+                messageDiv.classList.add("message-user", "user-message");
+            } else {
+                messageDiv.classList.add("message-tech", "tech-message");
+            }
+
+            const now = new Date(data.timestamp);
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' +
+                               now.getMinutes().toString().padStart(2, '0');
+
+            messageDiv.innerHTML = `
+                <div>
+                    <div class="message-content">${data.mensaje}</div>
+                    <div class="message-time text-end">${timeString}</div>
+                </div>
+            `;
+
+            // Limpiar mensaje de "No hay mensajes" si existe
+            const emptyState = chatMessages.querySelector('.text-center');
+            if (emptyState) emptyState.remove();
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+
+        // ENVIAR mensajes
+        const form = document.getElementById("formMensaje");
+        const mensajeInput = document.getElementById("mensajeInput");
+
+        if (form) {
+            form.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const mensaje = mensajeInput.value.trim();
+                if (!mensaje) return;
+
+               const formData = new FormData();
+               formData.append('chat_id', chatId);
+               formData.append('sender', sender);
+               formData.append('message', mensaje);
+
+               //Crea registro de la notificación
+               fetch('send-message-tech-user.php', {
+                method: 'POST',
+                body: formData
+               })
+               .then(res => res.json())
+               .then(data => {
+                if (data.success) {
+                  socket.emit("sendMessage", {
+                    chat_id: chatId,
+                    tipo_chat: tipoChat,
+                    sender: sender,
+                    mensaje: mensaje
+                  });
+
+                  //Dispara el toast
+                  fetch("http://localhost:3000/notificar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json"},
+                    body: JSON.stringify({
+                      mensaje: "El técnico te ha enviado un mensaje",
+                      usuarioId: data.destinatario_id,
+                      link: `chat-list-users.php?chat_id=${chatId}`
+                    })
+                  });
+
+                  mensajeInput.value = "";
+                  mensajeInput.focus();
+                }
+               })
+            });
+        }
+
+        // --- LÓGICA DEL BOTÓN CERRAR  ---
+        const btnCerrarChat = document.getElementById("btnCerrarChat");
+        if (btnCerrarChat) {
+            btnCerrarChat.addEventListener("click", () => {
+                if(confirm("¿Estás seguro de cerrar este chat? Se bloquearán los mensajes nuevos.")){
+
+                    const formData = new FormData(); 
+                    formData.append('chat_id', chatId);
+
+                    fetch('close-chat.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json()) 
+                    .then(data => {
+                        if (data.success) {
+                            socket.emit("sendMessage", {
+                                chat_id : chatId,
+                                tipo_chat: "usuario",
+                                sender: "sistema",
+                                mensaje: "CHAT_FINALIZADO"
+                            });
+
+                            alert("Chat finalizado.");
+                            window.location.href = "chat-list-users.php";
+                        } else {
+                            alert("Error al cerrar el chat.");
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            });
+        }
+
+        // Auto-scroll inicial
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+
+    });
+</script>
   <script src="../chat-server/notifications.js"></script>
 
 </body>

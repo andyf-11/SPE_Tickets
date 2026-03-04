@@ -42,7 +42,7 @@ $unreadNotifications = $stmt->fetchColumn();
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userOptionsDropdown">
               <li>
                 <a class="dropdown-item d-flex justify-content-between align-items-center"
-                  href="https://mail.google.com/" target="_blank">
+                  href="../chat-server/notifications.php" target="_blank">
                   <span><i class="fa fa-bell"></i>&nbsp;&nbsp;Notificaciones</span>
                   <span id="noti-count" class="badge bg-danger ms-2 <?= $unreadNotifications > 0 ? '' : 'd-none' ?>">
                     <?= $unreadNotifications ?>
@@ -69,40 +69,40 @@ $unreadNotifications = $stmt->fetchColumn();
 <!-- END HEADER -->
 
 <!-- Script de notificaciones Socket.IO -->
-<script>
-  const userId = <?= json_encode($userId) ?>;
-  const role = <?= json_encode($userRole) ?>;
-</script>
-<script src="../chat-server/notifications.js"></script>
-
-<!-- Socket.io y script para actualizar contador en tiempo real -->
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>
   const USER_ID = <?= json_encode($userId) ?>;
-  const USER_ROLE = <?= json_encode($userRole) ?>;
+  const USER_ROLE = <?= json_encode($role) ?>;
+
   const socket = io("http://localhost:3000");
 
-  socket.emit("joinRoom", {
+  socket.emit("joinNotificationRoom", {
     userId: USER_ID,
     role: USER_ROLE
   });
 
-  socket.on("nuevaNotificacion", (data) => {
+  socket.on("recieveNotificationRoom", (data) => {
     const badge = document.getElementById("noti-count");
-
     if (badge) {
-      let current = parseInt(badge.innerText || 0);
+      let current = parseInt(badge.innerText.trim() || 0);
       badge.innerText = current + 1;
-      badge.classList.remove("d-none");
-    } else {
-      // Si no existe el badge aún (escondido al inicio), lo agregamos
-      const newBadge = document.createElement("span");
-      newBadge.id = "noti-count";
-      newBadge.className = "badge bg-danger ms-2";
-      newBadge.innerText = "1";
+      badge.style.display = "inline-block";
+    }
 
-      const link = document.querySelector("a[href*='notifications.php']");
-      link.appendChild(newBadge);
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        icon: 'info',
+        title: "Actividad del Sistema",
+        text: data.mensaje,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 5000,
+        timeProgressBar: true
+      });
     }
   });
+
 </script>
+
+<script src="../chat-server/notifications.js"></script>

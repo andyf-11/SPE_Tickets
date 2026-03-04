@@ -31,8 +31,9 @@ function enviarNotificacion($mensaje, $roles = [], $usuarioId = null, $tipo = 't
  * Notifica al admin y supervisor cuando se crea un ticket
  */
 function notificarCreacionTicket($ticket_id) {
-    $mensaje = "Se ha creado un nuevo ticket #$ticket_id";
-    enviarNotificacion($mensaje, ['admin', 'supervisor'], null, 'ticket', $ticket_id);
+    $mensaje = "Se ha creado un nuevo ticket #$ticket_id creado por el usuario.";
+    
+enviarNotificacion($mensaje, ['admin', 'supervisor'], null, 'ticket', $ticket_id);
 }
 
 /**
@@ -50,9 +51,13 @@ function notificarAsignacionTicket($ticket_id, $tecnico_id) {
  * Notifica cuando el técnico responde un ticket
  */
 function notificarRespuestaTicket($ticket_id, $id_usuario) {
-    $mensaje = "El ticket #$ticket_id ha sido respondido por el técnico.";
-    enviarNotificacion($mensaje, ['usuario'], $id_usuario, 'ticket', $ticket_id);
-    enviarNotificacion($mensaje, ['supervisor', 'admin'], null, 'ticket', $ticket_id);
+    //Mensaje para el usuario
+    $mensajeUsuario = "El ticket #$ticket_id ha sido respondido por el técnico.";
+    enviarNotificacion($mensajeUsuario, ['usuario'], $id_usuario, 'ticket', $ticket_id);
+
+    //Mensaje para el admin
+    $mensajeAdmin = "El técnico ha respondido al ticket (ID interno: $ticket_id).";
+    enviarNotificacion($mensajeAdmin, ['admin', 'supervisor'], null, 'ticket', $ticket_id);
 }
 
 /**

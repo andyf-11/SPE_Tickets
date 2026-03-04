@@ -51,6 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
 
                 $pdo->commit();
                 $mensaje_exito = "Respuesta enviada. El ticket se marcó como CERRADO.";
+                $enviar_socket_respuesta = true;
             } else {
                 $pdo->rollBack();
                 $error = "No puedes cerrar un ticket que no te pertenece o ya está cerrado.";
@@ -293,67 +294,63 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['frm_id']) && isset($_P
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        (() => {
-            'use strict';
-            const forms = document.querySelectorAll('.needs-validation');
-            Array.from(forms).forEach(form => {
-                form.addEventListener('submit', event => {
-                    if (!form.checkValidity()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            });
-        })();
-    </script>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const USER_ID = <?php echo json_encode($_SESSION['user_id']); ?>;
-        const USER_ROLE = <?php echo json_encode($_SESSION['user_role']); ?>;
+        const userId = <?= json_encode($_SESSION['user_id']); ?>;
+        const role = <?= json_encode($_SESSION['role']); ?>;
 
-        // Conectar Socket.IO
         const socket = io("http://localhost:3000");
 
-        // Unirse a salas de notificación por usuario y rol
-        socket.emit("joinNotificationRoom", { userId: USER_ID, role: USER_ROLE });
+        socket.emit("joinNotificationRoom", { userId: userId, role: role });
+        
+        <?php if (isset($enviar_socket_respuesta) && $enviar_socket_respuesta): ?>
+            fetch("http://localhost:3000/notificar", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    mensaje: "El técnico ha respondido al ticket #<?= $ticketId ?>",
+                    tipo_objetivo: "admin",
+                    link: "manage-tickets.php?id<?= $ticketId ?>"
+                }) 
+            });
 
-        // Escuchar nuevas notificaciones
+            fetch("http://localhost:3000/notificar", {
+                method: "POST",
+                header: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    mensaje: "Tu ticket #<?= $ticketId ?> ha sido respondido y cerrado.",
+                    usuarioId: <?= $id_usuario ?>,
+                    link: "view-ticket.php=id<?= $ticketId ?>"
+                })
+            });
+            <?php endif; ?>
+
         socket.on("receiveNotification", (data) => {
-            console.log("Nueva notificación recibida:", data);
-
-            // Actualizar badge de notificaciones
             const badge = document.getElementById("noti-count");
             if (badge) {
-                let current = parseInt(badge.innerText || 0);
+                let current = parseInt(badge.innerText) || 0;
                 badge.innerText = current + 1;
-                badge.classList.remove("d-none");
-            } else {
-                const newBadge = document.createElement("span");
-                newBadge.id = "noti-count";
-                newBadge.className = "badge bg-danger ms-2";
-                newBadge.innerText = "1";
-
-                // Agregarlo al contenedor del header
-                const headerIcon = document.querySelector("#header-notifications");
-                if (headerIcon) headerIcon.appendChild(newBadge);
+                badge.style.display = "inline-block";
             }
 
-            // Notificación de escritorio
-            if (Notification.permission === "granted") {
-                new Notification("Nueva notificación", { body: data.mensaje });
-            }
+            Swal.fire({
+                icon: 'info',
+                title: 'Nueva Actividad',
+                text: data.mensaje,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
         });
-
-        // Solicitar permiso para notificaciones de escritorio
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
     </script>
-    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-    <script src="/SPE_Soporte_Tickets/usuario/chat-server/notifications.js"></script>
+
 </body>
 
 </html>
