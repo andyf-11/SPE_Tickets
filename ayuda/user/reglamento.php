@@ -20,8 +20,12 @@
                 <hr>
                 <div class="text-center">
                     <p class="mb-2">¿Deseas ver el reglamento completo con más detalles?</p>
-                    <a href="../../assets/Manual_de_Uso.pdf" class="btn btn-info" download>Ver reglamento
-                        completo</a>
+                    <a href="/SPE_Soporte_Tickets/uploads/Manual_de_Uso.pdf"
+                    class="btn-btn-info"
+                    download="Manual_de_Uso.pdf"
+                    target="_blank">
+                    <i class="fas fa-download me-2"></i>Descargar reglamento
+                </a>
                 </div>
             </div>
         </div>
