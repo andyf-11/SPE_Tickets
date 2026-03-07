@@ -39,8 +39,8 @@ enviarNotificacion($mensaje, ['admin', 'supervisor'], null, 'ticket', $ticket_id
 /**
  * Notifica al técnico cuando se le asigna un ticket
  */
-function notificarAsignacionTicket($ticket_id, $tecnico_id) {
-    $mensaje = "Se te ha asignado el ticket #$ticket_id";
+function notificarAsignacionTicket($ticket_id, $tecnico_id, $mensajePersonalizado) {
+    $mensaje = $mensajePersonalizado ?? "Se te ha asignado el ticket #$ticket_id";
     enviarNotificacion($mensaje, ['tecnico'], $tecnico_id, 'ticket', $ticket_id);
 
     // Notificar al admin para control

@@ -45,21 +45,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $edificio_id = $_POST['edificio_id'] ?? null;
 
   // Validar dominio permitido
-  $allowed_domain = '@spe.gob.hn';
+  $allowed_domain = ['@spe.goh.hn', '@gmail.com'];
 
   $errors = [];
 
   // Validar dominio del correo
-  if (!str_ends_with($email, $allowed_domain)) {
-    $errors[] = "El correo debe ser del dominio $allowed_domain";
-  }
-
-  if (!$domain_valid) {
-    $errors[] = "Este correo no es permitido. Solo se permiten los dominios: " . implode(", ", $allowed_domains);
-  }
-
+  // 1. Validar que el formato general del correo sea correcto primero
   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $errors[] = "El correo no es válido.";
+  } else {
+    // 2. Validar si el dominio es permitido
+    $domain_found = false;
+    foreach ($allowed_domain as $domain) {
+      if (str_ends_with($email, $domain)) {
+        $domain_found = true;
+        break;
+      }
+    }
+
+    if (!$domain_found) {
+      $errors[] = "Este correo no es permitido. Solo se permiten: " . implode(", ", $allowed_domain);
+    }
   }
 
   // Validar contraseña segura
@@ -90,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rol = 'usuario';
     $token = bin2hex(random_bytes(32));
 
-    $stmt = $pdo->prepare("INSERT INTO user (name, email, password, mobile, gender, role, edificio_id, is_verified, verification_token) 
+    $stmt = $pdo->prepare("INSERT INTO user (name, email, password, mobile, gender, role, edificio_id, is_verified, verification_token)
     VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)");
     $stmt->execute([$name, $email, $hashedPassword, $phone, $gender, $rol, $edificio_id, $token]);
 
@@ -321,7 +327,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       return true;
 
-    
+
     }
 
     <?php if ($success): ?>

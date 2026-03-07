@@ -177,7 +177,7 @@ function sendRoleNotification($toEmail, $toName, $role, $subject, $message) {
                     <p><b>Rol:</b> Técnico</p>
                 ";
                 break;
-
+ 
             case 'usuario':
                 $mail->Subject = "📌 [Usuario] $subject";
                 $mail->Body = "
@@ -192,6 +192,13 @@ function sendRoleNotification($toEmail, $toName, $role, $subject, $message) {
                 $mail->Body = $message;
         }
 
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
         $mail->send();
         return true;
 

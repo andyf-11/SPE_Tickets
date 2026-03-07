@@ -57,12 +57,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
         $mensaje .= " Contexto: $contexto.";
 
       // Insertar notificación al técnico
-     notificarAsignacionTicket($ticketId, $tecnico);
+     notificarAsignacionTicket($pdo, $tecnico, $mensaje);
 
       $pdo->commit();
 
       $asignación_exitosa = true;
       $id_tecnico_notificar = $tecnico;
+      $mensaje_socket = $mensaje;
 
       $_SESSION['mensaje_exito'] = "Ticket asignado correctamente";
 
@@ -261,7 +262,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$ticketCerrado) {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-          mensaje: "Se te ha asignado el ticket #<?= $ticketId ?>",
+          mensaje: <?= json_encode($mensaje_socket) ?>,
           usuarioId: <?= $id_tecnico_notificar ?>,
           link: "manage_tickets.php?id=<?= $ticketId ?>"
         })

@@ -28,8 +28,18 @@ if (isset($_POST['add_user'])) {
   $password_plain = $_POST['password'];
 
   // Validación de correo
-  if (!str_ends_with($email, '@spe.gob.hn')) {
-    echo "<script>alert('Solo se permiten correos @spe.gob.hn'); window.location.href = 'manage-users.php';</script>";
+  $allowed_domains = ['@spe.gob.hn', '@gmail.com'];
+  $domain_found = false;
+
+  foreach ($allowed_domains as $domain) {
+    if (str_ends_with($email, $domain)) {
+      $domain_found = true;
+      break;
+    }
+  }
+
+  if (!$domain_found) {
+    echo "<script>alert('Solo se permiten correos de dominios autorizados: " . implode(", ", $allowed_domains) . "'); window.location.href = 'manage-users.php';</script>";
     exit;
   }
 
@@ -243,7 +253,7 @@ $areas = $pdo->query("SELECT id, name FROM areas ORDER BY name ASC")->fetchAll(P
             </div>
             <div class="col-md-6">
               <label class="form-label">Correo institucional:</label>
-              <input type="email" name="email" class="form-control" required pattern="^[a-zA-Z0-9._%+-]+@spe\.gob\.hn$"
+              <input type="email" name="email" class="form-control" required pattern="^[a-zA-Z0-9._%+-]+@spe\.gob\.hn|gmail\.com$"
                 title="Debe ser un correo @spe.gob.hn">
             </div>
             <div class="col-md-6">
